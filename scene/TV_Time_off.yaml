@@ -1,0 +1,12 @@
+- name: TV Time
+  entities:
+       light.Living__sofa__rgb:
+           state: on
+           color_name: 'white'
+           brightness: 255
+       light.Living__window__white:
+           state: on
+       light.Living__door__rgb:
+           state: on
+           color_name: 'white'
+           brightness: 255

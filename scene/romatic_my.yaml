@@ -1,0 +1,6 @@
+- name: Romantic - my
+  entities:
+    light.room__my__rgb:
+      state: on
+      color_name: red
+      brightness: 200

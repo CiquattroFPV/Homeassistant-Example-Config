@@ -1,0 +1,6 @@
+  - name: react
+    sidebar_title: Panel Switch
+    sidebar_icon: mdi:settings
+    url_path: todomvc
+    config:
+      title: Panel

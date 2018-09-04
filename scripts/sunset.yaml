@@ -1,0 +1,8 @@
+sequence:
+- event: LOGBOOK_ENTRY
+  event_data:
+    name: EVENT
+    message: "SUNSET"
+- service: notify.homemyassistant_bot
+  data:
+    message: "The sun is setting. Woow Beautiful! {{ states('sensor.date__time') }}"

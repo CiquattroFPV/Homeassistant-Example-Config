@@ -1,0 +1,13 @@
+- name: Lights ON - Living
+  entities:
+    light.Living__sofa__rgb:
+      state: on
+      rgb_color: [255, 255, 255]
+      brightness: 255
+    light.Living__window__white:
+      state: on
+      brightness: 255
+    light.Living__door__rgb:
+      state: on
+      rgb_color: [255, 255, 255]
+      brightness: 255

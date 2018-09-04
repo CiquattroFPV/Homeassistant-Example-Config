@@ -1,0 +1,119 @@
+name: My Awesome Home Assistant powered by Nico
+views:
+  - name: Casetta
+    cards:
+      - type: markdown
+        content: >
+          ## Cose da fare:
+          ## Riordinare tutte le entities
+          
+      - type: picture-glance
+        image: https://images.pexels.com/photos/276724/pexels-photo-276724.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=240&w=495
+        title: Living
+        entities:
+          - light.living__sofa__rgb
+          - light.living__door__rgb
+          - light.living__window__white
+      
+      - type: entity-filter
+        filter:
+          - entity_id: device_tracker.mamma_mamma
+            state: "home"
+          - entity_id: device_tracker.nico_nico
+            state: "home"
+          - entity_id: device_tracker.iphonemarie2
+            state: "home"            
+        card: glance
+        card_config:
+          title: People at home
+
+      - type: entity-filter
+        filter:
+          - entity_id: device_tracker.mamma_mamma
+            state: "work"
+          - entity_id: device_tracker.nico_nico
+            state: "work"
+          - entity_id: device_tracker.iphonemarie2
+            state: "work"            
+        card: glance
+        card_config:
+          title: People at Work        
+
+      - type: entity-filter
+        filter:
+          - entity_id: device_tracker.mamma_mamma
+            state: "not_home"
+          - entity_id: device_tracker.nico_nico
+            state: "not_home"
+          - entity_id: device_tracker.iphonemarie
+            state: "not_home"            
+        card: glance
+        card_config:
+          title: People Enjoying the life            
+
+      - type: camera-preview
+        entity: camera.iss
+        
+      - type: camera-preview
+        entity: camera.nico
+          
+      - type: camera-preview
+        entity: camera.mamma          
+          
+          
+          
+  - name: VideoCamera
+    cards:
+      - type: camera-preview
+        entity: camera.camera_salone_r2
+  
+  - name: Multimedia
+    cards:
+      - type: media-control
+        entity: media_player.sony_bravia_tv
+      - type: media-control
+        entity: media_player.kodi
+        
+  - name: Climate
+    cards:
+      - type: entity-filter
+        filter:
+          - domain: climate
+        card_config:
+          title: All Climate      
+  
+  
+  - name: Energy
+    cards:
+  
+
+
+  - name: Automations
+    cards:  
+      - type: entity-filter
+        filter:
+          - domain: automation
+        card_config:
+          title: All Automations  
+  
+  - name: Settings
+    cards:
+      - type: entity-filter
+        filter: [{}]
+        card_config:
+          title: All entities    
+
+  
+  - name: Nico
+    cards:
+      - type: camera-preview
+        entity: camera.nico
+        
+  - name: Mamma
+    cards:
+      - type: camera-preview
+        entity: camera.mamma    
+  
+  - name: Mascia
+    cards:  
+  

@@ -1,0 +1,8 @@
+living_bright:
+  name: Living Brightness
+  options:
+    - Low
+    - Medium
+    - Max
+  initial: Max
+  icon: mdi:lightbulb

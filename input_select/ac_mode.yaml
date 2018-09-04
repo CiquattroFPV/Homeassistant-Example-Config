@@ -1,0 +1,13 @@
+ac_mode:
+  name: AC Mode Morning
+  options:
+    - Power Off
+    - Hot
+    - Hot Morning
+    - Cold
+    - Cold Morning
+    - Humidity
+    - Humidity Morning
+    - None
+  initial: Power Off
+  icon: mdi:fan

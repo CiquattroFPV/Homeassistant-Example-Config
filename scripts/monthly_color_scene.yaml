@@ -1,0 +1,103 @@
+######################################################################################################
+###Script to turn on scene for the appropriate month for the front of the house but only when the sun is down. 
+#  action:
+#   - service: script.monthly_color_scene
+#
+#   scenes should be named month_[01-12]_colors (month_06_colors)
+######################################################################################################
+
+monthly_color_scene:
+  sequence:
+    - condition: state
+      entity_id: sun.sun
+      state: 'below_horizon'
+    - condition: state
+      entity_id: input_boolean.alert_mode
+      state: 'off'
+    
+    - service: logbook.log
+      data_template:
+        name: "Launching Scene:"
+        message: >
+          "scene.month_
+          {%- if now().strftime("%m%d")|int == 101 -%}
+          new_years_day
+          {%- elif now().strftime("%m%d")|int == 212
+          or now().strftime("%m%d")|int == 220
+          or now().strftime("%m%d")|int == 520
+          or now().strftime("%m%d")|int == 529
+          or now().strftime("%m%d")|int == 614
+          or now().strftime("%m%d")|int == 704
+          or now().strftime("%m%d")|int == 904
+          or now().strftime("%m%d")|int == 911
+          or now().strftime("%m%d")|int == 1111
+          -%}
+          RWB
+          {%- elif now().strftime("%m%d")|int >= 210 
+          and now().strftime("%m%d")|int <= 214-%}
+          valentine
+          {%- elif now().strftime("%m%d")|int == 228 -%}
+          marti_gras
+          {%- elif now().strftime("%m%d")|int >= 314 
+          and now().strftime("%m%d")|int <= 317-%}
+          st_patty
+          {%- else -%}
+          standard
+          {%- endif -%}_colors"
+          
+    - service: scene.turn_on
+      data_template:
+        entity_id: >
+          scene.month_
+          {%- if now().strftime("%m%d")|int == 101 -%}
+          new_years_day
+          {%- elif now().strftime("%m%d")|int == 212
+          or now().strftime("%m%d")|int == 220
+          or now().strftime("%m%d")|int == 520
+          or now().strftime("%m%d")|int == 529
+          or now().strftime("%m%d")|int == 614
+          or now().strftime("%m%d")|int == 704
+          or now().strftime("%m%d")|int == 904
+          or now().strftime("%m%d")|int == 911
+          or now().strftime("%m%d")|int == 1111
+          -%}
+          RWB
+          {%- elif now().strftime("%m%d")|int >= 210 
+          and now().strftime("%m%d")|int <= 214-%}
+          valentine
+          {%- elif now().strftime("%m%d")|int == 228 -%}
+          marti_gras
+          {%- elif now().strftime("%m%d")|int >= 314 
+          and now().strftime("%m%d")|int <= 317-%}
+          st_patty
+          {%- else -%}
+          standard
+          {%- endif -%}_colors
+ 
+ 
+# http://www.calendar-365.com/holidays/2017.html 
+# 101 New_years_day (colorloop)
+# RWB 212 Lincoln's Birthday
+# 214 Valentine's Day (pink, red) 
+# RWB 220 President's Day
+# 228 Mardi Gras (purple, green, gold )
+# 317 st Patty (green)
+# 414 Good Friday
+# 416 Easter
+# 422 Earth Day
+# 505 Cinco de Mayo
+# 514 Mother's Day
+# RWB 520 Armed Forces Day
+# RWB 529 Memorial Day
+# RWB 614 Flag Day
+# 618 Fathers day
+# RWB 704 July 4th
+# RWB 904 Labor Day
+# RWB 911 Patriots day
+# 1009 columbus day
+# 1031 halloween
+# RWB 1111 veterans day
+# 1123 Thanksgiving
+# 1212 Hanukkah start 8 days.
+# 1225 Chrismas
+# 1231 New years eve

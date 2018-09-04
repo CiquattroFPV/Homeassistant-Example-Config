@@ -1,0 +1,8 @@
+- name: Lights OFF - Living
+  entities:
+    light.Living__sofa__rgb:
+      state: off
+    light.Living__window__white:
+      state: off
+    light.Living__door__rgb:
+      state: off

@@ -1,0 +1,12 @@
+  sequence:
+    - condition: and
+      conditions:
+        - condition: or
+          conditions:
+            - condition: state
+              entity_id: group.scenes
+              state: 'on'
+
+    - service: notify.homemyassistant_bot
+      data:
+        message: " {{ trigger.entity_id }} is activated "

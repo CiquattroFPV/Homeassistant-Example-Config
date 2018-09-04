@@ -1,0 +1,80 @@
+- name: White - Living
+  entities:
+    light.Living__sofa__rgb:
+      state: on
+      color_name: 'white'
+      brightness: 255
+    light.Living__window__white:
+      state: on
+      brightness: 255
+    light.Living__door__rgb:
+      state: on
+      color_name: 'white'
+      brightness: 255
+
+- name: Green - Living
+  entities:
+    light.Living__sofa__rgb:
+      state: on
+      color_name: 'forestgreen'
+      brightness: 255
+    light.Living__window__white:
+      state: off
+    light.Living__door__rgb:
+      state: on
+      color_name: 'green'
+      brightness: 255
+
+- name: Movies - Living
+  entities:
+    light.Living__sofa__rgb:
+      state: on
+      color_name: 'blue'
+      brightness: 255
+    light.Living__window__white:
+      state: off
+    light.Living__door__rgb:
+      state: on
+      color_name: 'blue'
+      brightness: 255
+
+- name: Romantic - Living
+  entities:
+    light.Living__sofa__rgb:
+      state: on
+      color_name: red
+      brightness: 255
+    light.Living__window__white:
+      state: off
+      #rgb_color: [220, 20, 60]
+      #brightness: 255
+    light.Living__door__rgb:
+      state: on
+      color_name: red
+      brightness: 255
+
+- name: Purple - Living
+  entities:
+    light.Living__sofa__rgb:
+      state: on
+      color_name: 'purple'
+      brightness: 255
+    light.Living__window__white:
+      state: off
+    light.Living__door__rgb:
+      state: on
+      color_name: 'purple'
+      brightness: 255
+
+- name: Gold - Living
+  entities:
+    light.Living__sofa__rgb:
+      state: on
+      color_name: 'gold'
+      brightness: 255
+    light.Living__window__white:
+      state: off
+    light.Living__door__rgb:
+      state: on
+      color_name: 'gold'
+      brightness: 255

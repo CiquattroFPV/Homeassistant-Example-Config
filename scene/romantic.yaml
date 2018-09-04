@@ -1,0 +1,14 @@
+- name: Romantic - Living
+  entities:
+    light.Living__sofa__rgb:
+      state: on
+      color_name: red
+      brightness: 255
+    light.Living__window__white:
+      state: off
+      #rgb_color: [220, 20, 60]
+      #brightness: 255
+    light.Living__door__rgb:
+      state: on
+      color_name: red
+      brightness: 255

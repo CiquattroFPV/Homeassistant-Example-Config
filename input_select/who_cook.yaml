@@ -1,0 +1,8 @@
+who_cooks:
+  name: Who cooks today
+  options:
+    - my
+    - Rossella
+    - gf
+  initial: Rossella
+  icon: mdi:panda

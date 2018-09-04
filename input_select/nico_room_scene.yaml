@@ -1,0 +1,11 @@
+my_room_scene:
+  name: my Room Scenes
+  options:
+    - White
+    - Romantic (Red)
+    - Movie (Blue)
+    - Gold
+    - Purple
+    - Green
+  initial: White
+  icon: mdi:lightbulb

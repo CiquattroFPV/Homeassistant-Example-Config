@@ -1,0 +1,188 @@
+###################################################
+#                                                 #
+# Home Assistant Main Configuration File          #
+#                                                 #
+###################################################
+
+homeassistant:
+  auth_providers: 
+   - type: homeassistant
+   - type: legacy_api_password
+  name: !secret name
+  temperature_unit: C
+  time_zone: !secret timezone
+  latitude: !secret latitude
+  longitude: !secret longitude
+  unit_system: metric
+  elevation: 47
+  customize: !include customize.yaml
+
+# Show links to resources in log and frontend
+#introduction:
+
+####################################################
+#                                                  #
+#               Frontend/Themes                    #
+#                                                  #
+####################################################
+frontend:
+  themes: !include themes.yaml
+
+# Enables configuration UI
+config:
+
+http:
+  api_password: !secret http_password
+  cors_allowed_origins:
+    - http://10.10.20.216:7080
+    - https://reformedreality.com
+    - http://reformedreality.com
+    - https://google.com
+    - https://home-assistant.io
+    - https://api.ai
+  ip_ban_enabled: True
+  login_attempts_threshold: 5
+  base_url: !secret base_url
+  ssl_certificate: /ssl/fullchain.pem
+  ssl_key: /ssl/privkey.pem
+  trusted_networks:
+    - 127.0.0.1
+    - ::1
+    - 10.10.20.0/24
+    - 10.10.10.0/24
+    - fd00::/8
+  # Secrets are defined in the file secrets.yaml
+  # api_password: !secret http_password
+  # Uncomment this if you are using SSL/TLS, running in Docker container, etc.
+  #base_url:
+  #ssl_certificate: /ssl/fullchain.pem
+  #ssl_key: /ssl/privkey.pem
+
+####################################################
+#                                                  #
+#                 Geolocation                      #
+#                                                  #
+####################################################
+zone: !include zones.yaml
+mqtt: !include mqtt.yaml
+
+
+
+# Checks for available updates
+# Note: This component will send some information about your system to
+# the developers to assist with development of Home Assistant.
+# For more information, please see:
+# https://home-assistant.io/blog/2016/10/25/explaining-the-updater/
+updater:
+  # Optional, allows Home Assistant developers to focus on popular components.
+  # include_used_components: true
+
+# Discover some devices automatically
+discovery:
+hassio:
+# Allows you to issue voice commands from the frontend in enabled browsers
+conversation:
+# Enables support for tracking state changes over time
+history:
+# View all events in a logbook
+logbook:
+logger:
+  default: info
+map:
+
+# Track the sun
+sun:
+
+# Text to speech
+tts:
+  - platform: google
+    cache: true
+    cache_dir: /tts
+    time_memory: 300
+    language: 'it'
+
+
+
+# Cloud
+cloud:
+light: !include light.yaml
+camera: !include camera.yaml
+weblink: !include weblink.yaml
+group: !include groups.yaml
+automation: !include automations.yaml
+#automation old: !include_dir_merge_list automation
+
+script: !include scripts.yaml
+shell_command: !include shell_commands.yaml
+device_tracker: !include device_tracker.yaml
+sensor: !include sensor.yaml
+media_player: !include media_player.yaml
+switch: !include switch.yaml
+notify: !include notify.yaml
+binary_sensor: !include binary_sensors.yaml
+telegram_bot:
+  platform: polling
+  api_key: !secret telegram_apikey
+  allowed_chat_ids:
+    - !secret telegram_clientid
+    - !secret telegram_clientid2
+
+
+####################################################
+#                                                  #
+#                   Database                       #
+#                                                  #
+####################################################
+
+influxdb:
+  host: 10.10.20.216
+  port: 8086
+  database: home_assistant   
+  username: !secret influxdb_user
+  password: !secret influxdb_pwd
+  #max_retries: 3
+  #default_measurement: state
+
+
+###################################################
+#                                                 #
+#                   IFTTT                         #
+#                                                 #
+###################################################
+
+ifttt:
+  key: !secret ifttt_key
+
+
+###################################################
+#                                                 #
+#                 Smart Home                      #
+#                                                 #
+###################################################
+
+tado:
+  username: !secret tado_user
+  password: !secret tado_pwd
+
+fritzbox:
+  devices:
+    - host: fritz.box
+      username: !secret fritz_user
+      password: !secret fritz_pwd 
+
+
+####################################################
+#                                                  #
+#              Input Slider and Boolean            #
+#                                                  #
+####################################################
+
+#input_boolean: !include_dir_merge_named input_boolean
+input_select: !include_dir_merge_named input_select
+input_number: !include_dir_merge_named input_number
+
+####################################################
+#                                                  #
+#               Panel Iframe                       #
+#                                                  #
+####################################################

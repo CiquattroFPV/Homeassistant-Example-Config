@@ -1,0 +1,226 @@
+- platform: dnsip
+
+- platform: geo_rss_events
+  name: Terremoti
+  url: http://info.terremoti.ingv.it/feed/atom/all_week
+  radius: 100
+
+- platform: mqtt
+  state_topic: "owntracks/Nico/Nico"
+  name: "Batteria Telefono Nico"
+  unit_of_measurement: "%"
+  value_template: '{{ value_json.batt }}'
+
+- platform: mqtt
+  state_topic: "owntracks/Mamma/Mamma"
+  name: "Batteria Telefono Mamma"
+  unit_of_measurement: "%"
+  value_template: '{{ value_json.batt }}'
+
+#- platform: fitbit
+  #monitored_resources:
+    #- activities/activityCalories
+    #- activities/calories
+    #- activities/caloriesBMR
+    ####- activities/distance
+    ##- activities/elevation
+    ##- activities/floors
+    #- activities/heart
+    #####- activities/minutesFairlyActive
+    ####- activities/minutesLightlyActive
+    ###- activities/minutesSedentary
+    ##- activities/minutesVeryActive
+    #- activities/steps
+    #- activities/tracker/activityCalories
+    #- activities/tracker/calories
+    #- activities/tracker/distance
+    #- activities/tracker/elevation
+    #- activities/tracker/floors
+    #- activities/tracker/minutesFairlyActive
+    #- activities/tracker/minutesLightlyActive
+    #- activities/tracker/minutesSedentary
+    #- activities/tracker/minutesVeryActive
+    #- activities/tracker/steps
+    #- body/bmi
+    #- body/fat
+    #- body/weight
+    #- sleep/awakeningsCount
+    #- sleep/efficiency
+    #- sleep/minutesAfterWakeup
+    #- sleep/minutesAsleep
+    #- sleep/minutesAwake
+    #- sleep/minutesToFallAsleep
+    #- sleep/startTime
+    #- sleep/timeInBed
+
+#- platform: waqi
+  #token: !secret waqi
+  #locations:
+    #- guidonia
+  #stations:
+    #- roma
+
+- platform: speedtest
+  minute:
+    - 0
+    - 30
+  monitored_conditions:
+    - ping
+    - download
+    - upload
+
+- platform: fastdotcom
+  minute:
+    - 0
+    - 30
+
+- platform: openweathermap
+  api_key: !secret openweathermap
+  monitored_conditions:
+      - weather
+      - temperature
+      - wind_speed
+      - humidity
+      - pressure
+      - clouds
+      - rain
+      - snow
+
+- platform: synologydsm
+  host: 10.10.20.200
+  username: !secret synology_user
+  password: !secret synology_pwd
+  monitored_conditions:
+    - cpu_total_load
+    - cpu_other_load
+    - cpu_user_load
+    - cpu_15min_load
+    - memory_real_usage
+    - memory_available_real
+    - memory_total_real
+    - memory_size
+    - memory_cached
+    - memory_available_swap
+    - memory_total_swap
+    - network_up
+    - network_down
+    - disk_smart_status
+    - disk_status
+    - disk_temp
+    - volume_status
+    - volume_device_type
+    - volume_size_total
+    - volume_size_used
+    - volume_percentage_used
+
+- platform: time_date
+  display_options:
+    - time
+    - date
+    - date_time
+    - time_date
+    - time_utc
+
+# - platform: template
+#   sensors:
+#     alarm_time:
+#       friendly_name: 'Time'
+#       value_template: '{{ "%0.02d:%0.02d" | format(states("input_number.alarmhour") | int, states("input_number.alarmminutes") | int) }}'
+    
+    # androidtvkd55xd9305lan:
+    #   friendly_name: 'Sony Bravia - TV'
+    #   value_template: "{{ 'Online' if is_state('device_tracker.androidtvkd55xd9305lan', 'home') else 'Offline' }}"
+
+# - platform: efergy
+#   app_token: !secret efergy_token
+#   utc_offset: 120
+#   monitored_variables:
+#     - type: instant_readings
+#     - type: budget
+#     - type: cost
+#       period: day
+#       currency: €
+#     - type: amount
+#       period: day
+
+#- platform: fritzbox_netmonitor
+  #host: 10.10.20.1
+  #resources:
+    #- type: is_linked
+    #- type: is_connected
+    #- type: wan_access_type
+    #- type: external_ip
+    #- type: uptime
+    #- type: bytes_sent
+    #- type: bytes_received
+    #- type: transmission_rate_up
+    #- type: transmission_rate_down
+    #- type: max_byte_rate_up
+    #- type: max_byte_rate_down
+    #- type: max_bit_rate_up
+    #- type: max_bit_rate_down
+
+- platform: cert_expiry
+  host: !secret base_url2
+  port: 8123
+
+
+# - platform: google_travel_time
+#   name: Nico Phone To Home
+#   api_key: !secret google_api_travel
+#   origin: device_tracker.nico_nico
+#   destination: zone.home
+
+# - platform: google_travel_time
+#   name: Mom Phone To Home
+#   api_key: !secret google_api_travel
+#   origin: device_tracker.mamma_mamma
+#   destination: zone.home  
+
+# # Tracking entity to zone friendly name
+# - platform: google_travel_time
+#   name: Home To Work
+#   api_key: !secret google_api_travel
+#   origin: zone.home
+#   destination: zone.work
+
+# # Tracking entity to zone friendly name
+# - platform: google_travel_time
+#   name: Nico Phone To Work
+#   api_key: !secret google_api_travel
+#   origin: device_tracker.nico_nico
+#   destination: zone.work
+
+# - platform: google_travel_time
+#   name: Nico Phone To Mom Phone
+#   api_key: !secret google_api_travel
+#   origin: device_tracker.nico_nico
+#   destination: device_tracker.mamma_mamma
+
+# - platform: google_travel_time
+#   name: Nico Phone To Maria
+#   api_key: !secret google_api_travel
+#   origin: device_tracker.nico_nico
+#   destination: Via Giacinta pezzana 100, Roma
+
+# - platform: google_travel_time
+#   name: Nico Phone To Papa Home
+#   api_key: !secret google_api_travel
+#   origin: device_tracker.nico_nico
+#   destination: zone.papa
+
+- platform: haveibeenpwned
+  email: 
+      - !secret email1 
+      - !secret email2
+      - !secret email3
+      - !secret email4
+
+- platform: systemmonitor
+  resources:
+      - type: disk_use_percent
+        #arg: /home
+      - type: memory_free
+      - type: memory_use
+      - type: memory_use_percent
+      - type: ipv4_address

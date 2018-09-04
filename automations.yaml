@@ -1,0 +1,1037 @@
+####################################################
+#                                                  #
+#             Let's Encrypt Renewal                #
+#                                                  #
+####################################################
+- id: letsencrypt-renewal
+  alias: "Let's Encrypt Renewal"
+  trigger:
+  - platform: time
+    at: '00:00:00'
+  action:
+  - service: hassio.addon_restart
+    data:
+      addon: core_letsencrypt
+
+####################################################
+#                                                  #
+#                   Greetings                      #
+#                                                  #
+####################################################
+
+####################################################
+#                                                  #
+#                   Lights                         #
+#                                                  #
+####################################################
+
+####################################################
+#               Lights Self Shutdown               #
+####################################################
+
+- id: light-self-shutdown
+  alias: Lights Self Shutdown
+  trigger:
+    - platform: state
+      entity_id:
+        - light.room__nico__rgb
+      to: 'on'
+      for: '00:30:00'
+    - platform: state
+      entity_id:
+        - light.kitchen__white
+      to: 'on'
+      for: '01:00:00'
+    - platform: state
+      entity_id:
+        - light.Living__door__rgb
+        - light.Living__sofa__rgb
+        - light.Living__window__white
+      to: 'on'
+      for: '02:00:00'
+  action:
+    - service: light.turn_off
+      data_template:
+        entity_id: " {{ trigger.entity_id }} "
+    - service: notify.homenicoassistant_bot
+      data_template:
+        message: >
+          "{{ trigger.to_state.attributes.friendly_name }} just changed from {{ trigger.to_state.state }}
+          to {{ trigger.from_state.state }}. Self Shutdown!"
+
+####################################################
+#            Lights Midnight Shutdown              #
+####################################################
+- id: light-midnight-shutdown
+  alias: 'Turn off Light at Midnight'
+  trigger:
+    platform: time
+    at: '23:59:00'
+  action:
+   service: homeassistant.turn_off
+   entity_id: group.lights
+
+####################################################
+#            Lights Turn On Nico                   #
+####################################################
+
+- id: light-on-room-nico
+  alias: 'Turn on Light - WeekDays - Morning - Nicos Room '
+  trigger:
+    platform: state
+    entity_id: device_tracker.nicosgs6
+    to: 'home'
+  condition:
+    condition: time
+    after: '07:00:00'
+    before: '10:00:00'
+    weekday:
+      - mon
+      - tue
+      - wed
+      - thu
+      - fri
+  action:
+   service: homeassistant.turn_on
+   entity_id: light.room__nico__rgb
+
+####################################################
+#              Lights ON Sunset                    #
+####################################################
+- id: light-on-sunset
+  alias: 'Light on Sunset'  
+  trigger:
+    platform: sun
+    event: sunset
+    offset: "-00:15:00"
+  condition:
+    condition: state
+    entity_id: group.family
+    state: home
+  action:
+   - service: homeassistant.turn_on
+     entity_id: group.lights
+   - service: notify.homenicoassistant_bot
+     data:
+       message: "Sunset - Lights ON at {{ states('sensor.date__time') }}"
+####################################################
+#                                                  #
+#                   Notify                         #
+#                                                  #
+####################################################
+####################################################
+#                  Update Notify                   #
+####################################################
+
+- id: notify-update
+  alias: Update Available Notifications
+  trigger:
+    platform: state
+    entity_id: updater.updater
+  action:
+    service: notify.homenicoassistant_bot
+    data:
+      message: "Update for Home Assistant is available."
+
+####################################################
+#                  Bad Logins                      #
+####################################################
+
+- id: bad-logins
+  alias: Login Failure
+  hide_entity: True
+  trigger:
+    platform: template
+    value_template: "{{ states('persistent_notification.httplogin') != 'authentication' }}"
+  action:
+   service: notify.homenicoassistant_bot
+   data:
+     message: 'Bad Login.. There was a Hack attempt! Go Check the GUI for details.'
+
+####################################################
+#                  Today's Chef                    #
+####################################################
+- id: notify-today-chef
+  alias: Who Cook
+  trigger:
+    platform: state
+    entity_id: input_select.who_cooks
+  action:
+    - service: notify.homenicoassistant_bot
+      data_template:
+        message: >
+           "Today Cook {{ trigger.to_state.state }}"
+
+####################################################
+#                  Battery                         #
+#                Notifications                     #
+####################################################
+
+####################################################
+#                  Nico Battery                    #
+####################################################
+
+- id: notify-nico-battery-low
+  alias: Nico Battery Low - Notification
+  trigger:
+     platform: time
+     # You can also match on interval. This will match every 45 minutes
+     minutes: '/45'
+     seconds: 00
+
+  condition:
+     condition: or
+     conditions:
+       - condition: template
+         value_template: "{{ states.device_tracker.nico_nico.attributes.battery < 30 }}" 
+
+  action:
+    - service: notify.homenicoassistant_bot
+      data:
+        message: "Nico's Telephone is on low Battery at {{ states('sensor.date__time') }}"
+    - service: notify.homenicoassistant_bot
+      data:
+        message: "Nico's Telephone Battery Level is {{ states('sensor.batteria_telefono_nico') }}%"
+
+####################################################
+#                  Mom Battery                     #
+####################################################
+
+- id: notify-mamma-battery-low
+  alias: Mamma Battery Low - Notification
+  trigger:
+     platform: time
+     # You can also match on interval. This will match every 45 minutes
+     minutes: '/45'
+     seconds: 00
+
+  condition:
+     condition: or
+     conditions:
+       - condition: template
+         value_template: "{{ states.device_tracker.mamma_mamma.attributes.battery < 30 }}"
+
+  action:
+    - service: notify.homenicoassistant_bot
+      data:
+        message: "Mom's Telephone is on low Battery at {{ states('sensor.date__time') }}"
+    - service: notify.homenicoassistant_bot
+      data:
+        message: "Mom's Telephone Battery Level is {{ states('sensor.batteria_telefono_mamma') }}%"
+
+####################################################
+#                  Hass Start                      #
+####################################################
+
+- id: notify-hass-start
+  alias: Home Assistant Start - Notify
+  trigger:
+    platform: homeassistant
+    event: start
+  action:
+    service: notify.homenicoassistant_bot
+    data:
+      message: "Home Assistant Start at {{ states('sensor.date__time') }}"
+
+####################################################
+#                  Hass Stop                       #
+####################################################
+
+- id: notify-hass-stop
+  alias: Home Assistant Stop - Notify
+  trigger:
+    platform: event
+    event_type: homeassistant_stop
+  action:
+    service: notify.homenicoassistant_bot
+    data:
+      message: "Home Assistant Stop at {{ states('sensor.date__time') }}"
+
+####################################################
+#                   Zone                           #
+#                Notifications                     #
+####################################################
+
+####################################################
+#                   Mom  Home                      #
+####################################################
+
+- id: zone-mamma-home
+  alias: Mamma at Home - Notification
+  trigger:
+     platform: zone
+     event: enter
+     zone: zone.home
+     entity_id: device_tracker.mamma_mamma
+  action:
+   service: notify.homenicoassistant_bot
+   data:
+     message: "Mamma is at Home at {{ states('sensor.date__time') }}"
+
+####################################################
+#                   Mom Out Home                   #
+####################################################
+
+- id: zone-mamma-out-home
+  alias: Mamma Outside Home - Notification
+  trigger:
+     platform: zone
+     event: leave
+     zone: zone.home
+     entity_id: device_tracker.mamma_mamma
+  action:
+   service: notify.homenicoassistant_bot
+   data:
+     message: "Mamma is going out at {{ states('sensor.date__time') }}"
+
+####################################################
+#                   Maria  Home                    #
+####################################################
+
+- id: zone-maria-home
+  alias: Maria at Home - Notification
+  trigger:
+     platform: state
+     entity_id: device_tracker.iphonemarie
+     from: 'not_home'
+     to: 'home'
+  action:
+   service: notify.homenicoassistant_bot
+   data:
+     message: "Maria is at Home {{ states('sensor.date__time') }}"
+
+####################################################
+#               Maria out Home                     #
+####################################################
+
+- id: zone-maria-out-home
+  alias: Maria Outside Home - Notification
+  trigger:
+     platform: state
+     entity_id: device_tracker.iphonemarie  #device_tracker.iphonemarie_2
+     #from: 'home'
+     to: 'not_home'
+     for: '00:15:00'
+  action:
+   service: notify.homenicoassistant_bot
+   data:
+     message: "Maria is going out at {{ states('sensor.date__time') }}"
+
+####################################################
+#                  Nico Home                       #
+####################################################
+
+- id: zone-nico-home
+  alias: Nico at Home - Notification
+  trigger:
+     platform: zone
+     entity_id: device_tracker.nico_nico
+     zone: zone.home
+     event: enter
+  condition:
+     condition: time
+     after: '07:00:00'
+     before: '23:59:00'
+  action:
+   service: notify.homenicoassistant_bot
+   data:
+     message: "Nico is at Home at {{ states('sensor.date__time') }}"
+
+####################################################
+#                  Nico Out Home                   #
+####################################################
+
+- id: zone-nico-out-home
+  alias: Nico is going out - Notification
+  trigger:
+     platform: zone
+     entity_id: device_tracker.nico_nico     
+     zone: zone.home
+     event: leave
+  condition:
+     condition: time
+     after: '07:00:00'
+     before: '23:59:00'         
+  action:
+   service: notify.homenicoassistant_bot
+   data:
+     message: "Nico is going out at {{ states('sensor.date__time') }}"
+
+####################################################
+#                  Nico Dad                        #
+####################################################
+
+- id: zone-nico-dad-home
+  alias: Nico at Papa's Home - Notification
+  trigger:
+     platform: zone
+     event: enter
+     zone: zone.papa
+     entity_id: device_tracker.nico_nico
+  action:
+   service: notify.homenicoassistant_bot
+   data:
+     message: "Nico is at Papa's Home at {{ states('sensor.date__time') }}"
+
+####################################################
+#                  Nico Out Dad                    #
+####################################################
+
+- id: zone-nico-out-dad-home
+  alias: Nico leaving Papa's Home - Notification
+  trigger:
+      platform: zone
+      event: leave
+      zone: zone.papa
+      entity_id: device_tracker.nico_nico
+  action:
+    service: notify.homenicoassistant_bot
+    data:
+      message: "Nico is going out from Papa's Home {{ states('sensor.date__time') }}"
+
+####################################################
+#                  Nico Work                       #
+####################################################
+
+- id: zone-nico-work
+  alias: Nico at Work - Notification
+  trigger:
+    platform: zone
+    event: enter
+    zone: zone.work
+    entity_id: device_tracker.nico_nico
+  condition:
+    condition: time
+    after: '07:00:00'
+    before: '20:00:00'
+    weekday:
+      - mon
+      - tue
+      - wed
+      - thu
+      - fri
+  action:
+  -  service: notify.homenicoassistant_bot
+     data:
+       message: "Nico at Work at {{ states('sensor.date__time') }}"
+
+####################################################
+#                Nico out Work                     #
+####################################################
+
+- id: zone-nico-out-work
+  alias: Nico out from Work - Notification
+  trigger:
+    platform: zone
+    event: leave
+    zone: zone.work
+    entity_id: device_tracker.nico_nico
+  condition:
+    condition: time
+    after: '07:00:00'
+    before: '20:00:00'
+    weekday:
+      - mon
+      - tue
+      - wed
+      - thu
+      - fri
+  action:
+   - service: notify.homenicoassistant_bot
+     data:
+       message: "Nico is going out from Work at {{ states('sensor.date__time') }}"
+
+####################################################
+#                Notify Sunrise                    #
+####################################################
+
+- id: notify-sunrise
+  alias: Notify on sunrise
+  trigger:
+    platform: sun
+    event: sunrise
+    offset: '+00:00:00'
+  action:
+    # Actions are scripts so can also be a list of actions
+    - service: notify.homenicoassistant_bot
+      data:
+        message: "Beautiful sunrise!"
+    - service: notify.homenicoassistant_bot
+      data:
+        message: "The sun is up. Wake Up! {{ states('sensor.date__time') }}"
+
+####################################################
+#                Notify Sunset                     #
+####################################################
+
+- id: notify-sunset
+  alias: Notify on sunset
+  trigger:
+    platform: sun
+    event: sunset
+    offset: '+00:00:00'
+  action:
+    # Actions are scripts so can also be a list of actions
+    - service: notify.homenicoassistant_bot
+      data:
+        message: "Beautiful sunset!"
+    - service: notify.homenicoassistant_bot
+      data:
+        message: "Oh wow you really missed something great. {{ states('sensor.date__time') }}"
+
+####################################################
+#                                                  #
+#                   Scenes                         #
+#                                                  #
+####################################################
+
+
+####################################################
+#                Air Conditioner                   #
+####################################################
+####################################################
+#                Notify Sunset                     #
+####################################################
+- id: scene-ac-mode-off
+  alias: AC Mode OFF - Automation
+  trigger:
+    platform: state
+    entity_id: input_select.ac_mode
+    to: "Power Off"
+  action:
+    - service: switch.turn_off
+      entity_id: switch.air_conditioner__heat_30
+    - service: notify.homenicoassistant_bot
+      data_template:
+        message: >
+           "AC Mode changed to: {{ trigger.to_state.state }}"
+
+- id: scene-ac-mode-hot
+  alias: AC Mode - Hot
+  trigger:
+    platform: state
+    entity_id: input_select.ac_mode
+    to: "Hot"
+  action:
+    - service: switch.turn_on
+      entity_id: switch.air_conditioner__heat_30
+    - service: notify.homenicoassistant_bot
+      data_template:
+        message: >
+           "AC Mode  changed to: {{ trigger.to_state.state }}"
+
+- id: scene-ac-mode-hot-morning
+  alias: AC Mode - Hot Morning
+  trigger:
+    platform: state
+    entity_id: input_select.ac_mode
+    to: "Hot Morning"
+  action:
+    - service: notify.homenicoassistant_bot
+      data_template:
+        message: >
+           "AC Mode  changed to: {{ trigger.to_state.state }}"
+
+- id: scene-ac-mode-cold
+  alias: AC Mode - Cold
+  trigger:
+    platform: state
+    entity_id: input_select.ac_mode
+    to: "Cold"
+  action:
+    - service: switch.turn_on
+      entity_id: switch.air_conditioner__cold_18
+    - service: notify.homenicoassistant_bot
+      data_template:
+        message: >
+           "AC Mode  changed to: {{ trigger.to_state.state }}"
+
+- id: scene-ac-mode-cold-morning
+  alias: AC Mode - Cold Morning
+  trigger:
+    platform: state
+    entity_id: input_select.ac_mode
+    to: "Cold Morning"
+  action:
+    - service: notify.homenicoassistant_bot
+      data_template:
+        message: >
+           "AC Mode  changed to: {{ trigger.to_state.state }}"
+
+- id: scene-ac-mode-humidity
+  alias: AC Mode - Humidity
+  trigger:
+    platform: state
+    entity_id: input_select.ac_mode
+    to: "Himidity"
+  action:
+    - service: switch.turn_on
+      entity_id: switch.air_conditioner__humidity
+    - service: notify.homenicoassistant_bot
+      data_template:
+        message: >
+           "AC Mode  changed to: {{ trigger.to_state.state }}"
+
+- id: scene-ac-mode-humidity-morning
+  alias: AC Mode - Humidity Morning
+  trigger:
+    platform: state
+    entity_id: input_select.ac_mode
+    to: "Humidity Morning"
+  action:
+    - service: notify.homenicoassistant_bot
+      data_template:
+        message: >
+           "AC Mode  changed to: {{ trigger.to_state.state }}"
+
+####################################################
+#                     Room                         #
+#                    Living                        #
+####################################################
+- id: living-bright
+  alias: Living Brightness
+  trigger:
+    platform: state
+    entity_id: input_number.Living_bright
+  action:
+    - service: light.turn_on
+      data_template:
+        entity_id: light.Living__door__rgb
+        brightness: '{{ states.input_number.Living_bright.state | int }}'
+
+    - service: light.turn_on
+      data_template:
+        entity_id: light.Living__door__rgb
+        brightness: '{{ states.input_number.Living_bright.state | int }}'
+
+####################################################
+#                                                  #
+#                   PC States                      #
+#                                                  #
+####################################################
+####################################################
+#                   PC restart                     #
+####################################################
+
+- id: pc-restart
+  alias: pc_restart
+  trigger:
+    platform: state
+    entity_id: input_select.pcoptions
+    to: "Restart"
+  action:
+   - service: shell_command.restart_pc
+   - service: notify.homenicoassistant_bot
+     data:
+       message: "PC Restart at {{ states('sensor.date__time') }}"  
+
+####################################################
+#                   PC Shutdown                    #
+####################################################
+
+- id: pc-shutdown
+  alias: pc_shutdown
+  trigger:
+    platform: state
+    entity_id: input_select.pcoptions
+    to: "Shutdown"
+  action:
+   - service: shell_command.shutdown_pc
+   - service: notify.homenicoassistant_bot
+     data:
+       message: "PC Shutdown at {{ states('sensor.date__time') }}"
+
+####################################################
+#                   PC Sleep                       #
+####################################################
+
+- id: pc-sleep
+  alias: pc_sleep
+  trigger:
+    platform: state
+    entity_id: input_select.pcoptions
+    to: "Sleep"
+  action:
+   - service: shell_command.sleep_pc
+   - service: notify.homenicoassistant_bot
+     data:
+       message: "PC Sleep at {{ states('sensor.date__time') }}"
+
+####################################################
+#                   PC Hibernate                   #
+####################################################
+
+- id: pc-hibernate
+  alias: pc_hibernate
+  trigger:
+    platform: state
+    entity_id: input_select.pcoptions
+    to: "Hibernate"
+  action:
+   - service: shell_command.hibernate_pc
+   - service: notify.homenicoassistant_bot
+     data:
+       message: "PC Hibernated at {{ states('sensor.date__time') }}"
+
+####################################################
+#                                                  #
+#            Home/System Health Check              #
+#                                                  #
+####################################################
+####################################################
+#                A/C Self Shutdown                 #
+####################################################
+
+- id: ac-self-shutdown
+  alias: AC Self Shutdown - Heat
+  trigger:
+    - platform: state
+      entity_id:
+        - switch.air_conditioner__heat_30
+        - switch.air_conditioner__cold_18
+        - switch.air_conditioner__humidity
+      to: 'on'
+      for: '02:00:00'
+  action:
+    - service: switch.turn_off
+      data_template:
+        entity_id: " {{ trigger.entity_id }} "
+    - service: notify.homenicoassistant_bot
+      data_template:
+        message: >
+          "{{ trigger.to_state.attributes.friendly_name }} just changed from {{ trigger.to_state.state }}
+          to {{ trigger.from_state.state }} - AC Selfshutdown Notify"
+
+####################################################
+#                TTS Clear Cache                   #
+####################################################
+
+- id: TTS-flush-cache
+  alias: Flush TTS Cache
+  hide_entity: True
+  trigger:
+    platform: time
+    at: '2:35:00'
+  action:
+   service: tts.clear_cache
+
+####################################################
+#                                                  #
+#                   Telegram                       #
+#                                                  #
+####################################################
+
+- id: telegram-start
+  alias: 'Telegram Start Command'
+  trigger:
+    platform: event
+    event_type: telegram_command
+    event_data:
+      command: '/start'
+  action:
+  - service: notify.homenicoassistant_bot
+    data:
+      message: >
+       {{ [
+       "Ciao, sono il tuo assistente di casa.. Ti elenco seguito la lista dei comandi disponibili",
+       "Come posso esserti utile?",
+       "Yes Sir!",
+       "Se proprio insisti, questa è la lista dei comandi",
+       "Aaaaa.. ancora qui?",
+       "E' un piacere rivederti"
+       ] | random }}
+      data:
+        keyboard:
+          - '/nico, /mamma'
+          - '/nicopcon, /nicopcoff'
+          - '/ping, /camera'
+          - '/start'
+
+####################################################
+#                   Camera SS                      #
+####################################################
+- id: telegram-camera-ss
+  alias: 'Camera command'
+  hide_entity: true
+  trigger:
+    platform: event
+    event_type: telegram_command
+    event_data:
+      command: '/camera'
+  action:
+  - service: notify.homenicoassistant_bot
+    data:
+      message: 'R2 Salone - Snapshot'
+  - service: script.camera_snapshot
+
+####################################################
+#                   GPS Message                    #
+####################################################
+
+- id: telegram-nico-gps
+  alias: 'GPS Notify Nico'
+  hide_entity: true
+  trigger:
+    platform: event
+    event_type: telegram_command
+    event_data:
+      command: '/nico'
+  action:
+  - service: notify.homenicoassistant_bot
+    data:
+      message: 'Nico GPS Position'
+  - service: script.nico_gps_notify_telegram
+
+- id: telegram-mom-gps
+  alias: 'GPS Notify Mom'
+  hide_entity: true
+  trigger:
+    platform: event
+    event_type: telegram_command
+    event_data:
+      command: '/mamma'
+  action:
+  - service: notify.homenicoassistant_bot
+    data:
+      message: 'Mom GPS Position'  
+  - service: script.mamma_gps_notify_telegram
+
+####################################################
+#                   Ping Pong                      #
+####################################################
+- id: telegram-ping-pong
+  alias: 'Telegram bot that reply pong to ping'
+  hide_entity: true
+  trigger:
+    platform: event
+    event_type: telegram_command
+    event_data:
+      command: '/ping'
+  action:
+  - service: notify.homenicoassistant_bot
+    data:
+      message: 'pong'
+
+####################################################
+#               Nico PC - ON/OFF                   #
+####################################################
+
+- id: telegram-nico-pc-on
+  alias: 'Telegram - Nico PC ON'
+  hide_entity: true
+  trigger:
+    platform: event
+    event_type: telegram_command
+    event_data:
+      command: '/nicopcon'
+  action:
+  - service: notify.homenicoassistant_bot
+    data:
+      message: >
+       {{ [
+       "Il PC è stato accesso",
+       "Accendero il tuo PC nel piu breve tempo possibile!",
+       "Yes Sir! Accendo subito il PC",
+       "Aaaaa.. vuoi nuovamente che accendo il PC? Quanto rompi!",
+       "Hmmm.. ok dai ti accendo il PC"
+       ] | random }}
+  - service: switch.turn_on
+    entity_id: switch.nicopc
+
+
+
+- id: telegram-nico-pc-off
+  alias: 'Telegram - Nico PC OFF'
+  hide_entity: true
+  trigger:
+    platform: event
+    event_type: telegram_command
+    event_data:
+      command: '/nicopcoff'
+  action:
+  - service: notify.homenicoassistant_bot
+    data:
+      message: 'IL PC è stato spento'
+  - service: shell_command.shutdown_pc
+
+
+####################################################
+#                                                  #
+#                   Themes                         #
+#                                                  #
+####################################################
+####################################################
+#                   Sunset                         #
+####################################################
+
+- id: themes-sunset
+  alias: Random Darker Theme At Sunset
+  initial_state: true
+  trigger:
+    platform: sun
+    event: sunset
+  action:
+    - service: frontend.set_theme
+      data_template:
+        name: '{{ ["darkcyan", "darkred", "midnight", "darkorange", "darkblue"] | random  }}'
+
+####################################################
+#                   Sunrise                        #
+####################################################
+
+- id: themes-sunrise
+  alias: Random Lighter Theme At Sunrise
+  initial_state: true
+  trigger:
+    platform: sun
+    event: sunrise
+  action:
+    - service: frontend.set_theme
+      data_template:
+        name: '{{ ["default"] | random  }}'
+
+####################################################
+#                                                  #
+#                   Log Level                      #
+#                                                  #
+####################################################
+
+- id: log-level
+  alias: Log Level
+  trigger:
+    platform: state
+    entity_id: input_select.log_level
+  action:
+    service: logger.set_level
+
+####################################################
+#                                                  #
+#                   Owntracks                      #
+#                                                  #
+####################################################
+
+- id: owntracks-refresh
+  alias: Owntracks Refresh
+  trigger:
+    - platform: time
+      minutes: '/5'
+      seconds: 0
+  action:
+    service: script.owntracks_update
+
+####################################################
+#                                                  #
+#             Time Based Automation                #
+#                                                  #
+####################################################
+####################################################
+#            A/C Time Based Automations            #
+####################################################
+- id: ac-hot-morning-on
+  alias: AC - Hot Morning - ON
+  trigger:
+    platform: time
+    at: '07:30:00'
+  condition:
+   - condition: time
+     weekday:
+       - mon
+       - tue
+       - wed
+       - thu
+       - fri
+   - condition: state
+     entity_id: input_select.ac_mode
+     state: "Hot Morning"
+  action:
+    - service: switch.turn_on
+      entity_id: switch.air_conditioner__heat_30
+    - service: notify.homenicoassistant_bot
+      data:
+        message: "AC Morning ON - Heat 30 - Automation"
+
+- id: ac-cold-morning-on
+  alias: AC - Cold Morning - ON
+  trigger:
+    platform: time
+    at: '07:30:00'
+  condition:
+   - condition: time
+     weekday:
+       - mon
+       - tue
+       - wed
+       - thu
+       - fri
+   - condition: state
+     entity_id: input_select.ac_mode
+     state: "Cold Morning"
+  action:
+    - service: switch.turn_on
+      entity_id: switch.air_conditioner__cold_18
+    - service: notify.homenicoassistant_bot
+      data:
+        message: "AC Morning ON - Cold 18 - Automation  {{ trigger.entity_id }} "
+
+- id: ac-morning-off
+  alias: AC - Morning - OFF
+  trigger:
+    platform: time
+    at: '08:00:00'
+  condition:
+   - condition: time
+     weekday:
+       - mon
+       - tue
+       - wed
+       - thu
+       - fri
+  action:
+    - service: switch.turn_off
+      entity_id: switch.air_conditioner__heat_30
+    - service: switch.turn_off
+      entity_id: switch.air_conditioner__cold_18
+    - service: switch.turn_off
+      entity_id: switch.air_conditioner__humidity            
+    - service: notify.homenicoassistant_bot
+      data:
+        message: "AC Morning OFF - Automation. {{ trigger.entity_id }}"
+
+####################################################
+#                                                  #
+#                   Test Space                     #
+#                                                  #
+####################################################
+####################################################
+#                      Zoning                      #
+####################################################
+
+- alias: State Changed - Notification  
+  trigger:
+    platform: time
+    at: '05:30:00'
+  condition:
+     condition: or
+     conditions:
+       - condition: zone
+         event: enter
+         zone: zone.home
+         entity_id: group.family
+       - condition: zone
+         event: leave
+         zone: zone.home
+         entity_id: group.family
+       - condition: zone
+         event: enter
+         zone: zone.work
+         entity_id: group.family
+       - condition: zone
+         event: leave
+         zone: zone.work
+         entity_id: group.family
+  action:
+    service: notify.homenicoassistant_bot
+    data_template:
+      message: >
+        " {{ trigger.to_state.attributes.friendly_name }} just changed from {{ trigger.from_state.state }}
+        to {{ trigger.to_state.state }} "

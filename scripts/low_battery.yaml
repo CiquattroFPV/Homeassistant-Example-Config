@@ -1,0 +1,8 @@
+sequence:
+- event: LOGBOOK_ENTRY
+  event_data:
+    name: EVENT
+    message: "Low battery Event"
+- service: notify.homemyassistant_bot
+  data:
+    message: "{% if states('sensor.batteria_telefono_my') < '25'%}Low battery detected! my's battery is at {{states('sensor.batteria_telefono_my')}}%{% else %} {% endif %} {% if states('device_tracker.2275304c') < '25'%}Low battery detected! Cailin's battery is at {{states('sensor.batteria_telefono_person')}}%{% else %} {% endif %}"

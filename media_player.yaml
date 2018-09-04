@@ -1,0 +1,6 @@
+#- platform: cast
+  #host: 10.10.10.215
+- platform: braviatv
+  host: 10.10.10.215
+- platform: kodi
+  host: 10.10.10.215

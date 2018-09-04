@@ -1,0 +1,86 @@
+####################################################
+#                                                  #
+#               CUSTOMIZE DEVICES                  #
+#                                                  #
+####################################################
+      switch.mypc:
+        icon: mdi:laptop-windows
+      device_tracker.fritzbox:
+        icon: mdi:router-wireless
+      device_tracker.mysgs6:
+        icon: mdi:cellphone-android
+      device_tracker.mypc:
+        icon: mdi:laptop-windows
+      device_tracker.personsgs3:
+        icon: mdi:cellphone-android
+    device_tracker.wkmob021:
+        icon: mdi:laptop-windows
+    device_tracker.dsm01:
+        icon: mdi:server-network
+
+####################################################
+#                                                  #
+#            CUSTOMIZE MEDIA PLAYERS            #
+#                                                  #
+####################################################
+
+
+####################################################
+#                                                  #
+#             CUSTOMIZE SWITCHES                  #
+#                                                  #
+####################################################
+
+ ####MEDIA####
+
+ ####LIGHTS####
+
+####################################################
+#                                                  #
+#             CUSTOMIZE SENSORS                  #
+#                                                  #
+####################################################
+ ####WEATHER####
+   sensor.owm_condition:
+       icon: mdi:weather-sunny
+ sensor.owm_cloud_coverage:
+       icon: mdi:weather-cloudy
+ sensor.owm_rain:
+       icon: mdi:weather-rainy
+ sensor.owm_humidity:
+       icon: mdi:water-percent
+ sensor.owm_pressure:
+       icon: mdi:nest-thermostat
+ sensor.owm_snow:
+       icon: mdi:weather-snowy
+ sensor.owm_wind_speed:
+       icon: mdi:weather-windy
+
+####MQTT BATTERY####
+     sensor.batteria_telefono_my:
+        icon: mdi:battery
+     sensor.batteria_telefono_person:
+        icon: mdi:battery
+
+####MISC####
+     speedtest_download:
+        icon: mdi:download
+     sensor.speedtest_upload:
+        icon: mdi:upload
+     sensor.speedtest_ping:
+        icon: mdi:speedometer
+     sensor.fastcom_download:
+        icon: mdi:download
+
+####################################################
+#                                                  #
+#             CUSTOMIZE SCRIPTS                  #
+#                                                  #
+####################################################
+
+
+####################################################
+#                                                  #
+#             CUSTOMIZE SCENES                  #
+#                                                  #
+####################################################

@@ -1,0 +1,4 @@
+platform: manual
+name: House
+pending_time: 30
+trigger_time: 600

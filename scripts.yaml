@@ -1,0 +1,83 @@
+####ALARM ####
+
+####TEST SCRIPTS####
+
+####GLOBAL SCRIPTS####
+
+####TRIGGERED LIGHTS
+
+####NOTIFICATIONS AND ALERTS####
+  owntracks_update:
+   alias: Owntracks Update
+   sequence:
+     - service: mqtt.publish
+       data:
+         topic: "owntracks/Nico/Nico/cmd"
+         payload_template: '{"_type":"cmd","action":"reportLocation", "batt": %BATT}'
+     - service: mqtt.publish
+       data:
+         topic: "owntracks/mamma/mamma/cmd"
+         payload_template: '{"_type":"cmd","action":"reportLocation", "batt": %BATT}'
+
+
+####TELEGRAM
+  nico_gps_notify_telegram:    
+   alias: Script for Notify Nico's Location on Telegram
+   sequence:
+     - service: telegram_bot.send_location
+       data:
+         caption: 'Nico location'
+         target:
+           - !secret telegram_clientid
+           - !secret telegram_clientid2
+         latitude: '{{ states.device_tracker.nico_nico.attributes.latitude|float }}'
+         longitude: '{{ states.device_tracker.nico_nico.attributes.longitude|float }}'
+         disable_notification: true
+
+  mamma_gps_notify_telegram: 
+   alias: Script for Notify Mom's Location on Telegram
+   sequence:
+     - service: telegram_bot.send_location
+       data:
+         caption: 'Mom location'
+         target:
+           - !secret telegram_clientid
+           - !secret telegram_clientid2
+         latitude: '{{ states.device_tracker.mamma_mamma.attributes.latitude|float }}'
+         longitude: '{{ states.device_tracker.mamma_mamma.attributes.longitude|float }}'
+         disable_notification: true
+
+####MEDIA####
+
+  jarvis_greeting:  
+   alias: Jarvis Greeting
+   sequence:
+     - service: tts.google_say
+       data_template:
+         entity_id: media_player.kd55xd9305
+         message: >
+           {% if now().strftime("%H")|int < 12 %}
+           Buongiorno da Jarvis.
+           {% elif now().strftime("%H")|int < 18 %}
+           Buon Pomeriggio da Jarvis.
+           {% else %}
+           Buonasera da Jarvis
+           {% endif %}
+           Il tempo è {{states.sensor.owm_condition.state}} e la temperatura è di {{states.sensor.owm_temperature.state}} Centigradi a Roma. Ti auguro una buona giornata.
+  
+     - service: media_player.turn_off
+       entity_id: media_player.kd55xd9305
+
+
+####CAMERA####
+
+  camera_snapshot:
+   alias: Camera Snapshot
+   sequence:
+     - service: telegram_bot.send_photo
+       data:
+         caption: 'Camera Snapshot'
+         target:
+           - !secret telegram_clientid
+          # - !secret telegram_clientid2
+         url: !secret foscam_snapshot

@@ -1,0 +1,43 @@
+- name: White - my
+  entities:
+    light.room__my__rgb:
+      state: on
+      color_name: 'white'
+      brightness: 255
+
+- name: Green - my
+  entities:
+    light.room__my__rgb:
+      state: on
+      color_name: 'green'
+      brightness: 255
+
+- name: Movies - my
+  entities:
+    light.room__my__rgb:
+      state: on
+      color_name: 'blue'
+      brightness: 255
+
+
+- name: Romantic - my
+  entities:
+    light.room__my__rgb:
+      state: on
+      color_name: red
+      brightness: 255
+
+
+- name: Purple - my
+  entities:
+    light.room__my__rgb:
+      state: on
+      color_name: 'purple'
+      brightness: 255
+
+- name: Gold - my
+  entities:
+    light.room__my__rgb:
+      state: on
+      color_name: 'gold'
+      brightness: 255

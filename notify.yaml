@@ -1,0 +1,8 @@
+- name: homenicoassistant_bot
+  platform: telegram
+  api_key: !secret telegram_apikey
+  chat_id: !secret telegram_clientid
+
+- name: hasspushbulletnico
+  platform: pushbullet
+  api_key: !secret pushbullet_api

@@ -1,0 +1,21 @@
+  - platform: yeelight
+    devices:
+      10.10.10.239:
+        name: Living - Sofa - RGB
+        #transition: 1000
+        use_music_mode: True
+        #save_on_change: False  
+      10.10.10.218:
+        name: Living - Door - RGB
+        #transition: 1000
+        use_music_mode: True
+        #save_on_change: False
+      10.10.10.219:
+        name: Living - Window - White
+      10.10.10.216:
+        name: Room - my - RGB
+        transition: 3000
+        use_music_mode: True
+        #save_on_change: False
+      10.10.10.213:
+        name: Kitchen - White

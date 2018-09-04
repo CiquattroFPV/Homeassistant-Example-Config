@@ -1,0 +1,59 @@
+- name: month_standard_colors
+  entities:
+       light.room__my__rgb:
+           state: 'on'
+           color_name: 'Gold'
+
+- name: month_valentine_colors
+  entities:
+       light.room__my__rgb:
+           state: 'on'
+           color_name: 'Crimson'
+
+- name: month_st_patty_colors
+  entities:
+       light.room__my__rgb:
+           state: 'on'
+           #color_name: 'Dark Spring Green'
+           rgb_color: [23,114,69]
+
+############## OUTDOR LIGHTS - TO DO ############
+
+#- name: month_RWB_colors
+  #entities:
+       #light.outdoor_foyer:
+           #state: 'on'
+           ##color_name: 'Cream'
+           #rgb_color: [255,253,208]
+           #brightness: 30
+       #light.outdoor_sconce_3:
+           #state: 'on'
+           #color_name: 'Red'
+       #light.outdoor_sconce_2:
+           #state: 'on'
+           ##color_name: 'White' Smoke
+           #rgb_color: [245,245,245]
+       #light.outdoor_sconce_1:
+           #state: 'on'
+           #color_name: 'Blue'
+
+#- name: front_full_brightness
+  #entities:
+       #light.room__my__rgb:
+           #state: 'on'
+           #color_name: 'White'
+           #brightness: 250
+#- name: month_marti_gras_colors
+  #entities:
+       #light.outdoor_foyer:
+           #state: 'on'
+           #color_name: 'Gold'
+       #light.outdoor_sconce_1:
+           #state: 'on'
+           #color_name: 'Purple'
+       #light.outdoor_sconce_2:
+           #state: 'on'
+           #color_name: 'Green'
+       #light.outdoor_sconce_3:
+           #state: 'on'
+           #color_name: 'Gold'

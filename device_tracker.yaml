@@ -1,0 +1,23 @@
+- platform: fritz
+  host: 10.10.10.1
+  username: !secret fritz_user
+  password: !secret fritz_pwd
+
+- platform: fritz
+  host: 10.10.20.1
+  username: !secret fritz_user
+  password: !secret fritz_pwd
+
+- platform: owntracks
+  max_gps_accuracy: 200
+
+- platform: mqtt
+  devices:
+     Nico_SGS6: /location/Nico
+     Mamma-SGS3: /location/mamma
+
+- platform: nmap_tracker
+  hosts: 
+    - 10.10.10.0/24
+    - 10.0.20.0/24  
+  home_interval: 10

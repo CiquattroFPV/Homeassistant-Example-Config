@@ -1,0 +1,514 @@
+############################################################
+#                                                          #
+#                     Group Tabs                           #
+#                                                          #
+############################################################
+
+#default_view:
+ #view: yes
+ #name: casetta
+ #entities:
+   #- group.sun
+   #- group.weather_condition
+   #- group.lights
+   #- group.themes
+   #- group.living
+   #- group.Lights_Flux
+   #- group.nico_room
+   #- group.kitchen
+   #- group.who_cook
+   #- group.Entertainment
+   #- group.salone_video_camera
+   #- group.family
+   #- group.Telephones_battery
+   #- group.travel_times
+   #- group.efergy
+   #- group.ac
+   #- group.ac_automations
+   #- group.wake_on_lan
+   #- group.nico
+   #- group.mamma
+   #- group.iss
+   #- group.certificate
+
+ 
+Climate:
+  view: yes
+  name: Climate
+  entities:
+   - group.tado_sensor
+   - group.tado_livingroom
+   - group.tado_bedroom
+   - group.tado_bathroom
+   #- group.grafana_temperature
+   - camera.grafana_home_temperature
+
+   
+Weather:
+  view: yes
+  icon: mdi:temperature-celsius
+  name: Weather
+  entities:
+   - group.sun
+   - group.weather_condition
+   - group.iss
+   - binary_sensor.floorplan
+
+TV:
+  view: yes
+  name: TV
+  entities:
+    - group.Entertainment
+    - media_player.kodi
+    - media_player.sony_bravia_tv
+
+Rooms:
+  view: yes
+  icon: mdi:lightbulb
+  entities:
+    - group.lights
+    - group.living
+
+
+Cook:
+  view: yes
+  name: Who Cook?
+  icon: mdi:cookie
+  entities:
+    - group.who_cook
+
+Energy:
+  view: yes
+  name: Energy
+  entities:
+  - group.efergy
+
+Videocamere:
+  view: yes
+  icon: mdi:video
+  name: Video Camere
+  entities:
+   - group.salone_video_camera
+
+Device:
+  view: yes
+  icon: mdi:laptop-mac
+  name: Dispositivi
+  entities:
+   - group.device_tracker_casa_nico
+   - group.fritz
+
+Settings:
+  view: yes
+  name: Settings
+  icon: mdi:settings
+  entities:
+  - group.triggers
+  - group.wake_on_lan
+  - group.scripts
+  - group.automation_tasks
+
+clock:
+  view: yes
+  name: Wake Me Up
+  icon: mdi:clock
+  entities:
+  - group.alarmclock
+
+Synology:
+  view: yes
+  icon: mdi:server-network
+  entities:
+  - group.synology_cpus_status
+  - group.synology_network_status
+  - group.synology_memory_status
+  - group.synology_disk_status
+
+Miscellaneous:
+  view: yes
+  name: Misc and Tools
+  entities:
+  - script.restart_ha
+  - group.binary_sensor
+
+Nicos:
+  view: yes
+  name: Nico
+  entities:
+  - group.nico
+  - group.nico_room
+
+Mammas:
+  view: yes
+  name: Mamma
+  entities:
+  - group.mamma
+
+Mascia:
+  view: yes
+  name: Mascia
+  entities:
+  - group.maria
+
+############################################################
+#                                                          #
+#                  Entities Groups                         #
+#                                                          #
+############################################################
+
+Sun:
+    entities:
+    - sun.sun
+    - sensor.yr_symbol
+
+Lights:
+    entities:
+    - light.living__sofa__rgb
+    - light.living__door__rgb
+    - light.living__window__white
+    - light.room__nico__rgb
+    - light.kitchen__white
+    
+Lights Flux:
+    entities:
+    - switch.fluxer
+
+Living:
+    entities:
+    - light.living__sofa__rgb
+    - light.living__door__rgb
+    - light.living__window__white
+    - input_select.living_scene
+    - input_slider.living_bright
+
+Nico Room:
+    entities:
+    - light.room__nico__rgb
+    - input_select.nico_room_scene
+
+Kitchen:
+    entities:
+    - light.kitchen__white  
+
+Who Cook:
+  entities:
+    - input_select.who_cooks
+
+
+AC:
+  entities:
+  - switch.air
+  - switch.air2
+  - switch.air3
+  - input_select.ac_mode
+
+AC Automations:
+  entities:
+  - automation.ac__morning__on
+  - automation.ac__morning__off
+
+
+Wake on LAN:
+  entities:
+  - switch.nicopc
+  - input_select.pcoptions
+  - switch.dsm01
+  - sensor.myipopendnscom
+
+
+Weather Condition:
+    entities:
+    - sensor.owm_temperature
+    - sensor.owm_condition
+    - sensor.owm_cloud_coverage
+    - sensor.owm_rain
+    - sensor.owm_humidity
+    - sensor.owm_pressure
+    - sensor.owm_snow
+    - sensor.owm_wind_speed
+    - camera.rome
+
+Efergy:
+  entities:
+  - sensor.energy_usage
+  - sensor.energy_budget
+  - sensor.energy_consumed
+  - sensor.energy_cost
+
+Date:
+    entities:
+    - sensor.date
+    - sensor.date__time
+    - sensor.time
+    - sensor.time__date
+    - sensor.time_utc
+
+Family:
+    entities:
+    - device_tracker.nico_nico
+    - device_tracker.mamma_mamma
+    - device_tracker.iphonemarie
+
+Telephones Battery: 
+    entities:
+    - sensor.batteria_telefono_nico
+    - sensor.batteria_telefono_mamma
+    
+Salone Video Camera:
+  entities:  
+  - camera.camera_salone_r2
+  - camera.r2_onvif
+
+Entertainment:
+  entities:
+  - media_player.sony_bravia_tv
+  - media_player.kd55xd9305
+  - media_player.kodi
+  - sensor.androidtvkd55xd9305lan
+
+Nico:
+  entities:
+  - device_tracker.nico_nico
+  - sensor.batteria_telefono_nico
+  - camera.nico_battery_stat
+  - camera.nico
+
+Mamma:
+  entities:
+  - device_tracker.mamma_mamma
+  - sensor.batteria_telefono_mamma
+  - camera.mom_battery_stat
+  - camera.mamma
+
+Maria:
+  entities:
+  - device_tracker.iphonemarie
+  - device_tracker.iphonemarie_2
+
+ISS:
+  entities:
+  - camera.iss
+  - binary_sensor.iss
+
+Speedtest:
+  entities:
+  - sensor.speedtest_ping
+  - sensor.speedtest_download
+  - sensor.speedtest_upload
+  - sensor.fastcom_download
+  - camera.internet_speed
+
+
+Scripts:
+  entities:
+  - script.restart_ha
+  - script.refresh_devices
+  - script.low_battery
+  - script.sunrise
+  - script.sunset
+  - script.jarvis_notify
+
+Synology CPUs Status:
+  entities:
+  - sensor.cpu_load_total
+  - sensor.cpu_load_user
+  - sensor.cpu_load_total
+  - sensor.cpu_load_other
+  - sensor.cpu_load_15_min
+
+Synology Network Status:
+  entities:
+  - sensor.network_up
+  - sensor.network_down
+
+Synology Memory Status:
+  entities:
+  - sensor.memory_usage_real
+  - sensor.memory_available_real
+  - sensor.memory_size
+  - sensor.memory_available_swap
+  - sensor.memory_cached
+  - sensor.memory_total_real
+  - sensor.memory_total_swap
+
+Synology Disk Status:
+  entities:
+  - sensor.status_sda
+  - sensor.status_smart_sda
+  - sensor.temperature_sda
+  - sensor.status_sdb
+  - sensor.status_smart_sdb
+  - sensor.temperature_sdb
+  - sensor.status_volume_1
+  - sensor.total_size_volume_1
+  - sensor.type_volume_1
+  - sensor.used_space_volume_1
+  - sensor.volume_used_volume_1
+
+fritz:
+  entities:
+  - sensor.fritz_netmonitor
+
+Dispositivi Mobili:
+    entities:
+    - device_tracker.mammasgs3
+    - device_tracker.nicosgs6
+
+Device Tracker Casa Nico:
+    entities:
+    - device_tracker.android22b03b5e29e75f3
+    - device_tracker.android7956eaa11ad0a44a
+    - device_tracker.androida2a540b2b1ffcd7f
+    - device_tracker.androidtvkd55xd9305lan
+    - device_tracker.broadlinkrmminifc0109
+    - device_tracker.chromecast
+    - device_tracker.dsm01
+    - device_tracker.efergyegocharger
+    - device_tracker.efergyengage
+    - device_tracker.efergysp2bcfaf1
+    - device_tracker.erpc
+    - device_tracker.fritzbox
+    - device_tracker.fritzbox_2
+    - device_tracker.galaxys8
+    - device_tracker.huaweimate10lite
+    - device_tracker.huaweimt7tl1023feea67f
+    - device_tracker.huaweinova
+    - device_tracker.huaweip8
+    - device_tracker.huaweip9lite
+    - device_tracker.ipad
+    - device_tracker.iphoneditatiana
+    - device_tracker.iphonemarie
+    - device_tracker.iphonemarie2
+    - device_tracker.mamma_mamma
+    - device_tracker.mammasgs3
+    - device_tracker.nico_forzalazio
+    - device_tracker.nico_nico
+    - device_tracker.nicopc
+    - device_tracker.nicopc_2
+    - device_tracker.nicosgs6
+    - device_tracker.pc101010207
+    - device_tracker.pcd059e4a617a5
+    - device_tracker.tvsalone
+    - device_tracker.videocamerasaloner2
+    - device_tracker.wkmob021
+    - device_tracker.yeelightrgbnicoroom
+    - device_tracker.yeelightrgbsalone
+    - device_tracker.yeelightrgbsaloneporta
+    - device_tracker.yeelightwhitecucina
+    - device_tracker.yeelightwhitesalonefinestra
+
+#Automation Tasks:
+  #- automation.ac__morning__off
+  #- automation.ac__morning__on
+  #- automation.tv_time
+  #- automation.tv_time_off
+  #- automation.automation_24
+  #- automation.flush_tts_cache
+  #- automation.home_assistant_start__notify
+  #- automation.light_on_sunset
+  #- automation.lights_self_shutdown
+  #- automation.login_failure
+  #- automation.mamma_at_home__notification
+  #- automation.mamma_battery_low__notification
+  #- automation.mamma_outside_home__notification
+  #- automation.mamma_outside_home__notification_2
+  #- automation.maria_at_home__notification
+  #- automation.nico_at_home__notification
+  #- automation.nico_at_papas_home__notification
+  #- automation.nico_at_work__notification
+  #- automation.nico_battery_low__notification
+  #- automation.nico_is_going_out__notification
+  #- automation.nico_leaving_papas_home__notification
+  #- automation.nico_out_from_work__notification
+  #- automation.no_one_at_home__notification
+  #- automation.notify_on_sunrise
+  #- automation.notify_on_sunset
+  #- automation.owntracks_refresh
+  #- automation.people_greeting
+  #- automation.presence__notification
+  #- automation.turn_off_light_at_midnight
+  #- automation.turn_on_light__weekdays__morning__nicos_room
+  #- automation.update_available_notifications
+
+Triggers:
+  entities:
+  - input_select.log_level
+  #- input_boolean.tv_time
+
+
+Tado Sensor:
+  entities:
+  - sensor.casetta_nico_e_mascia_tado_bridge_status
+  - climate.bathroom
+  - climate.bedroom
+  - climate.living_room
+
+Tado Bathroom:
+  entities:  
+  - sensor.bathroom_heating
+  - sensor.bathroom_humidity
+  - camera.bath_room_humidity
+  - sensor.bathroom_link
+  - sensor.bathroom_overlay
+  - sensor.bathroom_power
+  - sensor.bathroom_tado_mode
+  - sensor.bathroom_temperature
+
+Tado Bedroom: 
+  entities:
+  - sensor.bedroom_heating
+  - sensor.bedroom_humidity
+  - camera.bed_room_humidity
+  - sensor.bedroom_link
+  - sensor.bedroom_overlay
+  - sensor.bedroom_power
+  - sensor.bedroom_tado_mode
+  - sensor.bedroom_temperature
+
+Tado LivingRoom: 
+  entities:
+  - sensor.living_room_heating
+  - sensor.living_room_humidity
+  - camera.living_room_humidity
+  - sensor.living_room_link
+  - sensor.living_room_overlay
+  - sensor.living_room_power
+  - sensor.living_room_tado_mode
+  - sensor.living_room_temperature
+
+Certificate:
+  entities:
+  - sensor.ssl_certificate_expiry
+
+Themes:
+  entities:
+  - script.theme_happy
+  - script.theme_sad
+
+Binary sensor:
+  entities:
+  - binary_sensor.floorplan
+  - sensor.terremoti_any
+  - sensor.alarm_time
+
+Travel_times:
+  entities:
+  - sensor.nico_phone_to_work
+  - sensor.nico_phone_to_home
+  - sensor.home_to_work
+  - sensor.mom_phone_to_home
+  - sensor.nico_phone_to_maria
+  - sensor.nico_phone_to_papa_home
+  - sensor.nico_phone_to_mom_phone
+
+Grafana Temperature:
+   entities:
+   - camera.grafana_home_temperature
+
+
+Security:
+   entities:
+   - sensor.breaches_nicolosteffegmailcom
+   - sensor.breaches_rcpt021gmailcom
+   - sensor.breaches_securityeuroflashcom
+   - sensor.breaches_subsrcptgmailcom

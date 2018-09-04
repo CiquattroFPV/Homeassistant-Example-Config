@@ -1,0 +1,6 @@
+living_bright:
+  name: Lights Brightness
+  initial: 254
+  min: 0
+  max: 254
+  step: 1

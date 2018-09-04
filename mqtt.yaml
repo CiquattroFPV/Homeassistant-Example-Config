@@ -1,0 +1,8 @@
+
+### MOSQUITTO ON HASSIO ###
+broker: !secret mqtt_broker
+username: !secret mqtt_hassio_user
+password: !secret mqtt_hassio_pwd
+discovery: true
+discovery_prefix: !secret discoveryprefix
+

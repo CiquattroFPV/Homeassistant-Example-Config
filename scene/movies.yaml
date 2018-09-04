@@ -1,0 +1,12 @@
+- name: Movies - Living
+  entities:
+    light.Living__sofa__rgb:
+      state: on
+      color_name: 'blue'
+      brightness: 120
+    light.Living__window__white:
+      state: off
+    light.Living__door__rgb:
+      state: on
+      color_name: 'blue'
+      brightness: 120
