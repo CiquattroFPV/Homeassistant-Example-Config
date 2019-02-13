@@ -312,3 +312,39 @@ input_number: !include_dir_merge_named input_number
 #               Panel Iframe                       #
 #                                                  #
 ####################################################
+
+
+####################################################
+#                                                  #
+#               Panel Custom                       #
+#                                                  #
+####################################################
+
+panel_custom:
+  - name: floorplan
+    sidebar_title: Floorplan
+    sidebar_icon: mdi:home
+    url_path: floorplan
+    config: !include floorplan.yaml
+
+####################################################
+#                                                  #
+#             Restfull commands                    #
+#                                                  #
+####################################################
+
+rest_command:
+  google_backup:
+    url: 'http://x.x.x.x:8055/gb/doBackup'
+    timeout: '300'
+
+
+####################################################
+#                                                  #
+#                    Weather                       #
+#                                                  #
+####################################################
+
+weather:
+  - platform: openweathermap
+    api_key: !secret openweathermap
