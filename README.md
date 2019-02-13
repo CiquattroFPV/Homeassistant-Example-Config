@@ -4,7 +4,7 @@ Home assistant Configuration (YAMLs)
 
 This is my Home Assistant Configuration created with a Docker Installation on a Synology DSM 713+ with an expanded 4GB ram.
 
-
+- Alexa voice command integrated with haaska https://github.com/mike-grant/haaska/wiki
 - Android Devices (iPads, iPods, iPhones)
 - Owntracks for presence detection and GPS logging
 ![alt text](screenshots/hass02.png "Screenshot Example")
