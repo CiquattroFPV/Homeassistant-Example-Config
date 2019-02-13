@@ -66,6 +66,132 @@ http:
 zone: !include zones.yaml
 mqtt: !include mqtt.yaml
 
+###############  Earth Quake  ######################
+geo_location:
+  - platform: usgs_earthquakes_feed
+    feed_type: 'past_day_all_earthquakes'
+    #feed_type: 'past_month_all_earthquakes'
+    radius: 500
+    minimum_magnitude: 0.0
+    latitude: !secret latitude
+    longitude: !secret longitude
+
+####################################################
+#                    Alexa                         #
+#               Smart Home Speakers                #
+#             Powered by Haaska Skill              #
+####################################################
+### URL https://github.com/mike-grant/haaska/wiki
+alexa:
+  smart_home:
+    endpoint: https://api.eu.amazonalexa.com/v3/events
+    client_id: !secret alexa_client_id
+    client_secret: !secret alexa_client_secret
+    filter:
+      include_entities:
+        - group.all_lights
+        - light.kitchen_white
+        - light.living_door_rgb
+        - light.living_sofa_rgb
+        - light.living_window_white
+        - light.room_nico_rgb
+        - switch.air
+        - switch.air2
+        - switch.air3
+        - switch.dsm01
+        - switch.fritz_dect_200_1
+        - switch.fritz_dect_200_2
+        - switch.nico_computer
+        - sensor.miflora_1_temperature
+        - media_player.sony_bravia_tv
+        - sensor.bathroom_temperature
+        - sensor.bedroom_temperature
+        - sensor.living_room_temperature
+      include_domains:
+        - switch
+        - light
+        - script
+        - alarm_control_panel
+        - climate
+        - media_player
+      exclude_entities:
+        - switch.foscam_state
+        - switch.foscam_motion
+        - media_player.nicolos_alexa_apps
+        - media_player.nicolos_bose_home_speaker_500
+        - media_player.this_device
+        - switch.fluxer
+        - climate.living_room
+        - climate.bathroom
+        - climate.living_room
+        - sensor.bathroom_temperature
+        - sensor.bedroom_temperature
+        - sensor.living_room_temperature
+      exclude_domains:
+        - automation
+        - automation
+        - group
+        - lock
+        - cover
+        - alert
+        
+    entity_config:
+      light.kitchen_white:
+        name: Luce Cucina
+        description: La Luce in Cucina
+        display_categories: LIGHT
+      light.living_door_rgb:
+        name: Luce Salone
+        description: la luce del Salone
+        display_categories: LIGHT 
+      light.living_sofa_rgb:
+        name: Luce Divano
+        description: la Luce del divano
+        display_categories: LIGHT
+      light.living_window_white:
+        name: Luce Finestra Salone
+        description: la luce vicino la Finestra del salone
+        display_categories: LIGHT
+      light.room_nico_rgb:
+        name: Luce Camera Nico
+        description: La Luce della stanza di Nico
+        display_categories: LIGHT
+      switch.nico_computer:
+        name: il PC
+        description: il Computer di Nico
+        display_categories: SWITCH
+      switch.dsm01:
+        name: Synology
+        description: Il Nas
+        display_categories: SWITCH
+      group.all_lights:
+        name: Tutte le luci
+        description: Tutte le luci
+      media_player.sony_bravia_tv:
+        name: TV Mamma
+        description: La televisione di Mamma
+        display_categories: SWITCH
+      switch.air:
+        name: Aria Calda
+        description: l'aria calda
+        display_categories: SWITCH
+      switch.air2:
+        name: Aria Fredda
+        description: l'aria fredda
+        display_categories: SWITCH
+      switch.air3:
+        name: Deumidificatore
+        description: il deumidificatore
+        display_categories: SWITCH
+      switch.fritz_dect_200_1:
+        name: Presa Cucina 1
+        description: La presa cucina 1
+        display_categories: SWITCH
+      switch.fritz_dect_200_2:
+        name: Presa Cucina 2
+        description: La presa cucina 2
+        display_categories: SWITCH
+
 
 
 # Checks for available updates
