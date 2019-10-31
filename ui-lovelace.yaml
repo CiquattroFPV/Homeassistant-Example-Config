@@ -1,119 +1,2109 @@
-name: My Awesome Home Assistant powered by Nico
+title: Casetta - Nico e Mascia
+# Include external resources
+resources:
+
+   - url: /community_plugin/monster-card/monster-card.js
+     type: js
+   - url: /community_plugin/plan-coordinates/plan-coordinates.js
+     type: js
+   - url: /local/custom-lovelace/weather-card/weather-card.js
+     type: module
+   - url: /community_plugin/atomic_calendar/atomic_calendar.js
+     type: module
+   - url: /local/mini-media-player-bundle.js?v=1.4.1
+     type: module
+   - url: /local/mini-graph-card-bundle.js?v=0.6.0
+     type: module
+   - url: /community_plugin/lovelace-animated-background/animated-background.js
+     type: module
+   - url: /community_plugin/lovelace-slider-entity-row/slider-entity-row.js    
+     type: module
+
+
+animated_background:
+  default_url: /community_plugin/lovelace-animated-background/background-animations/sunny.html
+  #included_users:
+    #- Nicolò
+    #- Rossella
+    #- Mascia
+  entity: "weather.dark_sky"
+  state_url:
+      'sunny': /community_plugin/lovelace-animated-background/background-animations/sunny.html
+      'partlycloudy': /community_plugin/lovelace-animated-background/background-animations/cloudy.html
+      'cloudy': /community_plugin/lovelace-animated-background/background-animations/cloudy.html
+      'mostlycloudy': /community_plugin/lovelace-animated-background/background-animations/mostlycloudy.html
+      'clear-night': /community_plugin/lovelace-animated-background/background-animations/night.html
+      'fog': /community_plugin/lovelace-animated-background/background-animations/fog.html
+# Optional background for all views. Check https://developer.mozilla.org/en-US/docs/Web/CSS/background for more examples.
+background: center / cover no-repeat url("/background.png") fixed
+# Exclude entities from "Unused entities" view
+excluded_entities:
+  - weblink.router
+
+####################################################
+#                                                  #
+#                View - Home                       #
+#                                                  #
+####################################################
+
 views:
-  - name: Casetta
+    # View tab title.
+  - title: Home
+    # Optional unique id for direct access /lovelace/${id}
+    id: Home
+    # Optional background (overwrites the global background).
+
+    #background: radial-gradient(crimson, skyblue)
+    # Each view can have a different theme applied. Theme should be defined in the frontend.
+    #theme: dark-mode
+    # The cards to show on this view.
+
+####################################################
+#                                                  #
+#                     Cards                        #
+#                                                  #
+####################################################
+
     cards:
       - type: markdown
-        content: >
-          ## Cose da fare:
-          ## Riordinare tutte le entities
-          
-      - type: picture-glance
-        image: https://images.pexels.com/photos/276724/pexels-photo-276724.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=240&w=495
-        title: Living
+        content: > 
+           ## Home Tab
+      - type: custom:weather-card
+        entity: weather.dark_sky
+        # The filter card will filter entities for their state
+
+
+
+####################################################
+### Meteo DarkSky V. 2.02 - 05.04.19               #
+####################################################
+
+      - type: glance
+        show_name: false
         entities:
-          - light.living__sofa__rgb
-          - light.living__door__rgb
-          - light.living__window__white
+          - sun.sun
+          - entity: sensor.sunrise_time
+            icon: mdi:weather-sunset-up
+          - entity: sensor.sunset_time
+            icon: mdi:weather-sunset-down
+        
+####################################################
+#                 Entity-Filter                    #
+####################################################        
+      - type: custom:monster-card
+        show_empty: false
+        card:
+          type: glance
+          title: Low Battery Devices
+        filter:
+          include:
+            - entity_id: "*battery_level*"
+              state: '< 25'
+            - attributes:
+                battery: '< 25'
+            - attributes:
+                battery_level: '< 25'
+                
+      - type: vertical-stack
+        cards:
+          - type: horizontal-stack
+            cards:
+              - type: glance
+                entities:
+                  - sensor.kitchen_temperature 
+                  - sensor.bedroom_temperature 
+                  - sensor.living_room_temperature
+          - type: glance
+            entities:
+              - device_tracker.nico_nico
+              - device_tracker.mamma_mamma
+              - device_tracker.iphone
+          - type: entity-filter
+            entities:
+              - device_tracker.nico_nico
+              - device_tracker.mamma_mamma
+              - device_tracker.iphone
+            state_filter:
+              - 'home'
+              - 'casetta'
+              - 'papa'
+            card:
+              type: glance
+              title: People at Home
+              
+          - type: entity-filter
+            entities:
+              - device_tracker.nico_nico
+              - device_tracker.mamma_mamma
+              - device_tracker.iphone
+            state_filter:
+              - 'work'
+              - 'ale'
+              - 'tigre'
+            card:
+              type: glance
+              title: People at Work              
+
+          - type: entity-filter
+            entities:
+              - device_tracker.nico_nico
+              - device_tracker.mamma_mamma
+              - device_tracker.iphone
+            state_filter:
+              - 'not_home'
+            card:
+              type: glance
+              title: People enjoying the life
+
+      - type: custom:mini-graph-card
+        name: Potenza Istantanea
+        entities:
+          - sensor.potenza_istantanea
+        hours_to_show: 24
+        points_per_hour: 8
+        show:
+          labels: true
+        color_thresholds:
+          - value: 0
+            color: "#0FEE07"
+          - value: 500
+            color: "#ffb400"
+          - value: 1000
+            color: "#c0392b"
+
+      #- type: picture-entity
+        #title: Camera Salone
+        #entity:  camera.onvif_camera
+        #camera_view: live
+        # tap_action:
+        #   action: call-service
+        #   service: camera.snapshot
+        #   service_data:
+        #     entity_id:  camera.onvif_camera
+
+      - type: picture-elements
+        entity: camera.onvif_camera
+        camera_image: camera.onvif_camera
+        camera_view: live
+        elements:
+          - type: icon
+            icon: 'mdi:arrow-up'
+            style:
+              background: 'rgba(255, 255, 255, 0.5)'
+              right: 25px
+              bottom: 50px
+            tap_action:
+              action: call-service
+              service: camera.onvif_ptz
+              service_data:
+                tilt: UP
+          - type: icon
+            icon: 'mdi:arrow-down'
+            style:
+              background: 'rgba(255, 255, 255, 0.5)'
+              right: 25px
+              bottom: 0px
+            tap_action:
+              action: call-service
+              service: camera.onvif_ptz
+              service_data:
+                tilt: DOWN
+          - type: icon
+            icon: 'mdi:arrow-left'
+            style:
+              background: 'rgba(255, 255, 255, 0.5)'
+              right: 50px
+              bottom: 25px
+            tap_action:
+              action: call-service
+              service: camera.onvif_ptz
+              service_data:                
+                pan: LEFT
+          - type: icon
+            icon: 'mdi:arrow-right'
+            style:
+              background: 'rgba(255, 255, 255, 0.5)'
+              right: 0px
+              bottom: 25px
+            tap_action:
+              action: call-service
+              service: camera.onvif_ptz
+              service_data:
+                pan: RIGHT
+          - type: icon
+            icon: 'mdi:arrow-top-left'
+            style:
+              background: 'rgba(255, 255, 255, 0.5)'
+              right: 50px
+              bottom: 50px
+            tap_action:
+              action: call-service
+              service: camera.onvif_ptz
+              service_data:
+                tilt: UP
+                pan: LEFT
+          - type: icon
+            icon: 'mdi:arrow-top-right'
+            style:
+              background: 'rgba(255, 255, 255, 0.5)'
+              right: 0px
+              bottom: 50px
+            tap_action:
+              action: call-service
+              service: camera.onvif_ptz
+              service_data:
+                tilt: UP
+                pan: RIGHT
+          - type: icon
+            icon: 'mdi:arrow-bottom-left'
+            style:
+              background: 'rgba(255, 255, 255, 0.5)'
+              right: 50px
+              bottom: 0px
+            tap_action:
+              action: call-service
+              service: camera.onvif_ptz
+              service_data:
+                tilt: DOWN
+                pan: LEFT
+          - type: icon
+            icon: 'mdi:arrow-bottom-right'
+            style:
+              background: 'rgba(255, 255, 255, 0.5)'
+              right: 0px
+              bottom: 0px
+            tap_action:
+              action: call-service
+              service: camera.onvif_ptz
+              service_data:
+                tilt: DOWN
+                pan: RIGHT
+          - type: icon
+            icon: 'mdi:door'
+            style:
+              background: 'rgba(255, 255, 255, 0.5)'
+              left: 40px
+              top: 25px
+            tap_action:
+              action: call-service
+              service: rest_command.ss_preset_home
+          - type: icon
+            icon: 'mdi:sofa'
+            style:
+              background: 'rgba(255, 255, 255, 0.5)'
+              left: 65px
+              top: 25px
+            tap_action:
+              action: call-service
+              service: rest_command.ss_preset_living
+          - type: icon
+            icon: 'mdi:bed-king-outline'
+            style:
+              background: 'rgba(255, 255, 255, 0.5)'
+              left: 90px
+              top: 25px
+            tap_action:
+              action: call-service
+              service: rest_command.ss_preset_bedroom
+          - type: icon
+            icon: 'mdi:file-cabinet'
+            style:
+              background: 'rgba(255, 255, 255, 0.5)'
+              left: 115px
+              top: 25px
+            tap_action:
+              action: call-service
+              service: rest_command.ss_preset_rack
+          - type: icon
+            icon: 'mdi:lightbulb-on-outline'
+            style:
+              background: 'rgba(255, 255, 255, 0.5)'
+              left: 40px
+              bottom: 0px
+            tap_action:
+              action: toggle
+            entity: switch.shelly_shsw_25_68796e_1
+          - type: icon
+            icon: 'mdi:lightbulb-on-outline'
+            style:
+              background: 'rgba(255, 255, 255, 0.5)'
+              left: 65px
+              bottom: 0px
+            tap_action:
+              action: toggle
+            entity: switch.shelly_shsw_25_68796e_2
+          - type: icon
+            icon: 'mdi:lightbulb-on-outline'
+            style:
+              background: 'rgba(255, 255, 255, 0.5)'
+              left: 100px
+              bottom: 0px
+            tap_action:
+              action: toggle
+            entity: switch.shelly_shsw_25_686d62_1
+          - type: icon
+            icon: 'mdi:lightbulb-on-outline'
+            style:
+              background: 'rgba(255, 255, 255, 0.5)'
+              left: 125px
+              bottom: 0px
+            tap_action:
+              action: toggle
+            entity: switch.shelly_shsw_25_686d62_2
+
+
+      # - type: picture-glance
+      #   title: Living room
+      #   entities:
+      #     - switch.shelly_shsw_25_68796e_1
+      #     - switch.shelly_shsw_25_68796e_2
+      #     - switch.shelly_shsw_25_686d62_1
+      #     - switch.shelly_shsw_25_686d62_2
+          #- cover.shelly_shsw_25_e6704f
+          # - script.ss_preset_home
+          # - script.ss_preset_living
+          # - script.ss_preset_bedroom
+          # - script.ss_preset_rack
+        # camera_image: camera.onvif_camera
+        # camera_view: live
+
+
+      # - type: picture-entity
+      #   entity: camera.onvif_camera
+      #   camera_view: live
+
+      # - type: picture-entity
+      #   entity:  camera.onvif_camera
+      #   camera_view: live
+
+      - type: entities
+        entities:
+          - type: section
+            label: Data
+          #- sensor.date
+          - sensor.date_time
+          - type: section
+            label: Season
+          - sensor.season 
+          - type: section
+            label: Home Temperature        
+          - sensor.kitchen_temperature 
+          - sensor.bedroom_temperature 
+          - sensor.living_room_temperature
+          - type: section
+            label: Internet Speed
+          - sensor.speedtest_download
+          - sensor.speedtest_upload            
+          - sensor.speedtest_ping
+          - type: section
+            label: Home Assistant Info       
+          - sensor.current_version          
+          - sensor.uptime 
+          - type: section
+            label: CA Expiration Days       
+          - sensor.ssl_certificate_expiry         
+          - type: section
+            label: Raspberry
+          - sensor.disk_use_percent_home
+          - sensor.disk_free_home
+          - sensor.memory_free
+          - sensor.memory_use_percent
+          - sensor.processor_use
+          - type: section
+            label: Database Size
+          - sensor.mariadb_size         
+          - type: section
+            label: Links
+          - type: weblink
+            url: http://google.com/
+            icon: mdi:google
+            name: Google
+          - type: section
+
+      # - type: entities
+      #   entities:
+      #     - type: section
+      #       label: Prezzi Benzina
+      #     - sensor.q8easy_torpignattara_diesel_self_pre_pay
+      #     - sensor.q8easy_torpignattara_diesel_self_service
       
-      - type: entity-filter
-        filter:
-          - entity_id: device_tracker.mamma_mamma
-            state: "home"
-          - entity_id: device_tracker.nico_nico
-            state: "home"
-          - entity_id: device_tracker.iphonemarie2
-            state: "home"            
-        card: glance
-        card_config:
-          title: People at home
+      - type: entities
+        title: Who's Cooking Today?
+        show_header_toggle: false
+        entities:
+          - input_select.who_cooks
+          - group.family
+####################################################
+#                                                  #
+#                 Media/Audio                      #
+#                                                  #
+####################################################
 
-      - type: entity-filter
-        filter:
-          - entity_id: device_tracker.mamma_mamma
-            state: "work"
-          - entity_id: device_tracker.nico_nico
-            state: "work"
-          - entity_id: device_tracker.iphonemarie2
-            state: "work"            
-        card: glance
-        card_config:
-          title: People at Work        
+      - type: custom:mini-media-player
+        entity: media_player.tv_casetta        
+        icon: mdi:television
+        artwork: cover
+      - type: custom:mini-media-player
+        entity: media_player.nicolo_s_bose_home_speaker_500
+        icon: mdi:amazon-alexa
+        artwork: cover
+        #tts:
+          #platform: alexa
+          #language: it
+          #entity_id: media_player.nicolo_s_bose_home_speaker_500
 
-      - type: entity-filter
-        filter:
-          - entity_id: device_tracker.mamma_mamma
-            state: "not_home"
-          - entity_id: device_tracker.nico_nico
-            state: "not_home"
-          - entity_id: device_tracker.iphonemarie
-            state: "not_home"            
-        card: glance
-        card_config:
-          title: People Enjoying the life            
+      - type: custom:mini-media-player
+        entity: media_player.salotto
+        icon: mdi:amazon-alexa
+        artwork: cover
+        tts:
+          platform: alexa
+          entity_id: media_player.salotto
 
-      - type: camera-preview
-        entity: camera.iss
+      - type: custom:mini-media-player
+        entity: media_player.echo_dot_di_nicolo
+        icon: mdi:amazon-alexa
+        artwork: cover
+      - type: custom:mini-media-player
+        entity: media_player.this_device_2
+        icon: mdi:amazon-alexa
+        artwork: cover
+
+####################################################
+#                 Sensor/Gauge                     #
+####################################################
+
+      - type: vertical-stack
+        cards:
+          # - type: gauge
+          #   name: Batteria Telefono Nico
+          #   graph: line
+          #   unit: '%'
+          #   entity: sensor.batteria_telefono_nico
+          #   min: 0
+          #   max: 100
+          #   severity:
+          #     green: 60
+          #     yellow: 30
+          #     red: 0
+
+          # - type: sensor
+          #   name: Batteria Telefono Nico
+          #   graph: line
+          #   height: 100
+          #   icon: battery
+          #   unit: '%'
+          #   entity: sensor.batteria_telefono_nico
+          #   line_color: "#3498db"
+
+          - type: custom:mini-graph-card
+            name: Batteria Telefono Nico
+            entities:
+              - sensor.batteria_telefono_nico
+            hours_to_show: 24
+            #points_per_hour: 0.25
+            show:
+              labels: true
+            color_thresholds:
+              - value: 70
+                color: "#0FEE07"
+              - value: 40
+                color: "#ffb400"
+              - value: 0
+                color: "#c0392b"
+
+          # - type: gauge
+          #   name: Batteria Telefono Mamma
+          #   unit_of_measurement: '%'
+          #   entity: sensor.batteria_telefono_mamma
+          #   severity:
+          #     green: 85
+          #     yellow: 45
+          #     red: 0
+
+          - type: custom:mini-graph-card
+            name: Batteria Telefono Mamma
+            entities:
+              - sensor.batteria_telefono_mamma
+            hours_to_show: 24
+            #points_per_hour: 0.25
+            show:
+              labels: true
+            color_thresholds:
+              - value: 70
+                color: "#0FEE07"
+              - value: 40
+                color: "#ffb400"
+              - value: 0
+                color: "#c0392b"
+
+          # - type: sensor
+          #   name: Batteria Telefono Mamma
+          #   graph: line
+          #   height: 100
+          #   icon: battery
+          #   unit: '%'
+          #   entity: sensor.batteria_telefono_mamma
+          #   #line_color: "#3498db"
+
+          # - type: gauge
+          #   name: Pi3 Temp
+          #   #graph: line
+          #   unit: '°'
+          #   entity: sensor.command_sensor
+          #   min: 0
+          #   max: 100
+          #   severity:
+          #     green: 0
+          #     yellow: 55
+          #     red: 70
+
+          # - type: sensor
+          #   name: CPU Temp Pi3
+          #   graph: line
+          #   height: 100
+          #   icon: battery
+          #   unit: '%'
+          #   entity: sensor.command_sensor
+          #   #line_color: "#3498db"
+
+          - type: custom:mini-graph-card
+            name: CPU Temp Pi3
+            entities:
+              - sensor.command_sensor
+            hours_to_show: 24
+            #points_per_hour: 0.25
+            show:
+              labels: true
+            color_thresholds:
+              - value: 55
+                color: "#0FEE07"
+              - value: 60
+                color: "#ffb400"
+              - value: 65
+                color: "#c0392b"
+
+
+      - type: history-graph
+        title: "Telephones Battery History"
+        entities:
+          - sensor.batteria_telefono_nico
+          - sensor.batteria_telefono_mamma
+
+    # cards:
+    #     # The filter card will filter entities for their state
+    #   - type: entity-filter
+    #     entities:
+    #       - device_tracker.nico_nico
+    #       - device_tracker.mamma_mamma
+    #       - device_tracker.iphone
+    #     state_filter:
+    #       - 'work'
+    #       - 'tigre'        
+    #     card:
+    #       type: glance
+    #       title: People that are at Work          
+
+        # The picture entity card will represent an entity with a picture
+
+####################################################
+#                 Shopping List                    #
+####################################################
+
+      - type: shopping-list
+        title: Shopping List
+
+
+####################################################
+#                                                  #
+#             View - Lights and Switches           #
+#                                                  #
+####################################################
+
+
+    # Specify a tab icon if you want the view tab to be an icon.
+  - title: Lights/Swtiches
+    # Title of the view. Will be used as the tooltip for tab icon
+    path: Lights
+    cards:    
+        # The markdown card will render markdown text.
+      - type: markdown
+        title: Lights and Switch Card
+        content: >
+          ## This is the Lights and Switch Cards where you can find all the component to turn On or Off.
+        # Entities card will take a list of entities and show their state.
+      #- type: 'custom:monster-card'
+        #card:          
+          #title: Shelly
+          #type: entities
+          #entities:
+          #show_header_toggle: false
+        #filter:
+          #exclude:
+            #- entity_id: '*rssi*'
+            #- entity_id: '*uptime*'
+            #- entity_id: '*firmware*'
+          #include:
+            #- entity_id: '*shelly*'
+            #- entity_id: input_number.living_room_cover
+
+      # - type: entities
+      #   title: Shellys
+      #   show_header_toggle: false
+      #   entities:
+      #     - entity: cover.shelly_shsw_25_e6704f
+      #       name: Serranda Salone
+      #     - type: custom:slider-entity-row
+      #       entity: cover.shelly_shsw_25_e6704f          
+      #       name: Apertura Serranda
+      #       full_row: true
+      #       min: 0
+      #       max: 100
+      #       step: 1
+          #- type: custom:slider-entity-row
+            #entity: cover.shelly_shsw_25_e6704f
+            #toggle: true
+            #hide_state: true
+            #min: 0
+            #max: 100
+            #step: 1
+     
+# sensor.shelly_shsw_25_e6704f_1_consumtion
+  #sensor.shelly_shsw_25_e6704f_2_consumtion
+  #switch.shelly_shsw_25_e6704f_1
+  #switch.shelly_shsw_25_e6704f_2
+####################################################
+#                                                  #
+#              Lights and Switches                 #
+#                                                  #
+####################################################
+
+####################################################
+#                    Lights                        #
+####################################################      
+      - type: entities
+        title: Lights
+        show_header_toggle: false
+        entities:
+          - type: section
+            label: Luci Salone           
+          - switch.shelly_shsw_25_68796e_1
+          - switch.shelly_shsw_25_68796e_2
+          - type: section
+            label: Luci Cucina    
+          - switch.shelly_shsw_25_686d62_1
+          - switch.shelly_shsw_25_686d62_2
+          - type: section
+            label: Luci Camera da Letto   
+          - switch.shelly_shsw_25_687269_1
+          - switch.shelly_shsw_25_687269_2
+          - type: section
+            label: Luci Bagno
+          - switch.shelly_shsw_25_e5e601_1
+          - switch.shelly_shsw_25_e5e601_2
+
+      - type: entities
+        title: Switches
+        show_header_toggle: false
+        entities:
+          - type: section
+            label: Salone
+          - entity: cover.shelly_shsw_25_e6704f
+            name: Serranda Salone
+          - type: custom:slider-entity-row
+            entity: cover.shelly_shsw_25_e6704f          
+            name: Apertura Serranda
+            full_row: true
+            min: 0
+            max: 100
+            step: 1          
+          - switch.shelly_shplg_s_041a07  # presa tv
+          - switch.shelly_shplg_s_0409b4  # Presa Alexa
+          - switch.air
+          - switch.air2
+          - switch.air3
+          - switch.nico_computer
+          - switch.shelly_shplg_s_7a33ff
+          - switch.fritz_box_guest_wifi
+          - type: section
+            label: Rack
+          - switch.shelly_shplg_s_041a76
+          - switch.ciabatta_rack_fritz_dect_200_1
+          - switch.presa_rasp_pi3_fritz_dect_200_2
+          - switch.dsm01        
+          - type: section
+            label: Cucina          
+          - switch.shelly_shplg_s_04169c
+          - type: section
+            label: Sgabuzzino
+          - switch.shelly_shplg_s_5b2502
+          - sensor.shelly_shwt_1_694834_flood
+          - sensor.shelly_shwt_1_694834_temperature
+          
+      
+      - type: entities
+        title: Scripts
+        show_header_toggle: false
+        entities:
+          - type: section
+            label: Alexa Sequence
+          - script.alexaimathome
+          - script.alexaflash
+          - script.alexafun
+          - script.alexastory
+          - script.alexasing
+          - script.alexanight
+          - script.alexamorning
+          - script.alexatraffic
+          - script.alexatraffic2
+          - script.alexaweather
+          - type: section
+            label: Alexa Radios
+          - script.alexaradiofreccia
+          - script.alexaglobo
+          - script.alexartl1025
+          - script.alexa105
+          - script.alexards
+          - script.alexam2o
+          - script.alexalazio
+          - script.alexamediapause2
+          - type: section
+            label: Scripts
+          - script.alexascripthastart
+          - script.alexascriptvoipcall
+          - script.alexascriptmariatiamo
+          - script.alexascriptvoiptest
+          #- script.alexascriptbirthday
+          - script.alexa_tts
+          - script.jarvis_greeting
+          - type: section
+            label: Camera Preset
+          - script.camera_rack_preset
+
+####################################################
+#                                                  #
+#                  Calendar                        #
+#                                                  #
+####################################################
+    # Specify a tab icon if you want the view tab to be an icon.
+  - title: Calendar
+    # Title of the view. Will be used as the tooltip for tab icon
+    icon: mdi:calendar
+    path: Calendar
+    cards:    
+        # The markdown card will render markdown text.
+      - type: markdown
+        title: Calendar Events
+        content: >
+          ### This is the Calendar event card where you can find info about your scheduled events.
+        # Entities card will take a list of entities and show their state.
+
+      - type: "custom:atomic-calendar"
+        #numberOfDays: 14
+        entities:
+          #- calendar.contacts
+          - calendar.festivita_in_italia
+          - calendar.nicolo_steffe_gmail_com
+          - calendar.euroflash_security_rcpt021_gmail_com
+          - calendar.festivita_in_italia
+          - calendar.lazio
+        fullDayEventText: 'All day'
+        untilText: 'Until'
+        showColors: true
+        maxDaysToShow: 14
+        showLocation: true
+        showMonth: false
+        showCurrentEventLine: false
+        dateColor: black
+        dateSize: 90
+        timeColor: blue
+        timeSize: 90
+        titleColor: black
+        titleSize: 100
+        locationIconColor: 'rgb(230, 124, 115)'
+        locationLinkColor: black
+        locationTextSize: 90
+        dimFinishedEvents: true
+        finishedEventOpacity: 0.6
+        finishedEventFilter: 'grayscale(100%)'
+        dayWrapperLineColor: black
+        eventBarColor: blue
+        showProgressBar: true
+        progressBarColor: blue
+        max_results: 15
+
+      - type: "custom:atomic-calendar"
+        name: "Birthdays"
+        #showProgressBar: false
+        #numberOfDays: 14
+        entities:
+          - calendar.contacts
+        fullDayEventText: 'All day'
+        untilText: 'Until'
+        showColors: true
+        maxDaysToShow: 7
+        showLocation: true
+        showMonth: false
+        showCurrentEventLine: false
+        dateColor: black
+        dateSize: 90
+        timeColor: blue
+        timeSize: 90
+        titleColor: black
+        titleSize: 100
+        locationIconColor: 'rgb(230, 124, 115)'
+        locationLinkColor: black
+        locationTextSize: 90
+        dimFinishedEvents: true
+        finishedEventOpacity: 0.6
+        finishedEventFilter: 'grayscale(100%)'
+        dayWrapperLineColor: black
+        eventBarColor: blue
+        showProgressBar: true
+        progressBarColor: blue
+        max_results: 15
+
+
+      - type: entities
+        title: Birthdays
+        show_header_toggle: false
+        entities:
+          #- input_label.mascia_birthday
+          #- input_label.mascia_birthday_days2go
+          #- input_label.nico_birthday
+          #- input_label.nico_birthday_days2go
+          #- input_label.rossella_birthday
+          #- input_label.rossella_birthday_days2go
+          - sensor.nico_e_mascia_anniversary
+
+
+####################################################
+#                                                  #
+#                View - Climate                    #
+#                                                  #
+####################################################
+
+
+    # Specify a tab icon if you want the view tab to be an icon.
+  - title: Climate
+    # Title of the view. Will be used as the tooltip for tab icon
+    path: Climate
+    cards:    
+        # The markdown card will render markdown text.
+      - type: markdown
+        #icon: mdi:weather-lightning
+        title: Climate Card
+        content: >
+          ## This is the Climate Card where you can set the Temperature in your Home.
+
+####################################################
+#                                                  #
+#               Thermostat/Climate                 #
+#                                                  #
+####################################################
+      - type: vertical-stack
+        cards:
+          - type: horizontal-stack
+            cards:
+              - type: glance
+                entities:
+                  - sensor.kitchen_temperature 
+                  - sensor.bedroom_temperature 
+                  - sensor.living_room_temperature
+
+      - type: vertical-stack
+        cards:
+          - type: thermostat
+            entity: climate.termosifone_salone
+          - type: custom:mini-graph-card
+            name: Living Room Humidity
+            entities:
+              - sensor.living_room_humidity
+            hours_to_show: 24
+            #points_per_hour: 0.25
+            show:
+              labels: true
+            color_thresholds:
+              - value: 40
+                color: "#0FEE07"
+              - value: 50
+                color: "#ffb400"
+              - value: 60
+                color: "#c0392b"
+
+      - type: vertical-stack
+        cards:
+          - type: thermostat
+            entity: climate.termosifone_notte
+          - type: custom:mini-graph-card
+            name: Bed Room Humidity
+            entities:
+              - sensor.bedroom_humidity
+            hours_to_show: 24
+            #points_per_hour: 0.25
+            show:
+              labels: true
+            color_thresholds:
+              - value: 40
+                color: "#0FEE07"
+              - value: 50
+                color: "#ffb400"
+              - value: 60
+                color: "#c0392b"
+
+      - type: vertical-stack
+        cards:
+          - type: thermostat
+            entity: climate.termosifone_cucina
+          - type: custom:mini-graph-card
+            name: Kitchen Humidity
+            entities:
+              - sensor.kitchen_humidity
+            hours_to_show: 24
+            #points_per_hour: 0.25
+            show:
+              labels: true
+            color_thresholds:
+              - value: 40
+                color: "#0FEE07"
+              - value: 50
+                color: "#ffb400"
+              - value: 60
+                color: "#c0392b"
+
+      #- type: thermostat
+        #entity: climate.kitchen
+      #- type: sensor
+        #name: Kitchen Humidity
+        #graph: line
+        #unit: '%'
+        #entity: sensor.kitchen_humidity
+
+      - type: history-graph
+        title: "Climate History"
+        entities:
+          - sensor.kitchen_temperature 
+          - sensor.bedroom_temperature 
+          - sensor.living_room_temperature
+
+      - type: history-graph
+        title: "Humidity History"
+        entities:
+          - sensor.living_room_humidity
+          - sensor.bedroom_humidity
+          - sensor.kitchen_humidity
+
+####################################################
+#                                                  #
+#                Weather Alerts                    #
+#                                                  #
+####################################################
+
+  - title: Weather Alerts
+    icon: mdi:weather-lightning
+    path: WeatherAlerts
+    cards:
+      - type: markdown
+        title: Meteo Warnings
+        content: |
+          _Meteo Warning effective from **[[ binary_sensor.meteoalarm.attributes.effective ]]** and it will expires on **[[ binary_sensor.meteoalarm.attributes.expires ]]**_
+          
+          ***
+          
+          **[[ binary_sensor.meteoalarm.attributes.headline ]]**
+          [[ binary_sensor.meteoalarm.attributes.event ]]
+          Severity: [[ binary_sensor.meteoalarm.attributes.severity ]]
+
+          ***
+          
+          **Area of Interest**
+          [[ binary_sensor.meteoalarm.attributes.description ]]
+          
+          ***
+          
+          **Instructions**
+          [[ binary_sensor.meteoalarm.attributes.instruction ]]
+          
+          ***
+          
+          **Source: [[ binary_sensor.meteoalarm.attributes.senderName  ]]**
+          [[ binary_sensor.meteoalarm.attributes.web ]]
+
+
+########################################################################
+### Meteo DarkSky V. 2.02 - 05.04.19
+########################################################################
+
+      - type: custom:weather-card
+        entity: weather.dark_sky
+
+    #######################################################
+
+      - type: glance
+        show_name: false
+        entities:
+          - sun.sun
+          - entity: sensor.sunrise_time
+            icon: mdi:weather-sunset-up
+          - entity: sensor.sunset_time
+            icon: mdi:weather-sunset-down
+
+    #######################################################
         
-      - type: camera-preview
-        entity: camera.nico
+      - type: entities
+        title: Condizioni Meteo
+        show_header_toggle: false
+        entities:
+          - sensor.data_e_ora
+          - type: divider
+          - entity: sensor.dark_sky_summary_tmpl
+            secondary_info: last-changed
+          - entity: sensor.dark_sky_temperature
+            secondary_info: last-changed
+          - entity: sensor.dark_sky_humidity
+            secondary_info: last-changed
+          - entity: sensor.dark_sky_wind_speed
+            secondary_info: last-changed
+          - entity: sensor.dark_sky_wind_dir
+            secondary_info: last-changed
+          - entity: sensor.dark_sky_precip_intensity
+            secondary_info: last-changed
+          - entity: sensor.dark_sky_precip_probability
+            secondary_info: last-changed
+          - entity: sensor.dark_sky_hourly_summary_tmpl
+            secondary_info: last-changed
           
-      - type: camera-preview
-        entity: camera.mamma          
-          
-          
-          
-  - name: VideoCamera
-    cards:
-      - type: camera-preview
-        entity: camera.camera_salone_r2
-  
-  - name: Multimedia
-    cards:
-      - type: media-control
-        entity: media_player.sony_bravia_tv
-      - type: media-control
-        entity: media_player.kodi
-        
-  - name: Climate
-    cards:
-      - type: entity-filter
+    #######################################################
+     
+      - type: entities
+        title: Previsioni Meteo
+        show_header_toggle: false
+        entities:
+          - sensor.forecast_0
+          - sensor.forecast_1
+          - sensor.forecast_2
+          - sensor.forecast_3
+          - sensor.forecast_4
+          - sensor.forecast_5
+          - sensor.forecast_6
+          - sensor.forecast_7
+
+#######################################################
+
+      - type: iframe
+        url: https://embed.windy.com/embed2.html
+        aspect_ratio: 100%
+
+####################################################
+#                                                  #
+#                View - Shellys                    #
+#                                                  #
+####################################################
+
+
+    # Specify a tab icon if you want the view tab to be an icon.
+  - title: Shellys
+    # Title of the view. Will be used as the tooltip for tab icon
+    path: Shellys
+    cards:    
+        # The markdown card will render markdown text.
+      - type: markdown
+        title: Shelly Maintenance Card
+        content: >
+          ## This is the Shelly maintenance Cards where you can find all the Shelly component.
+        # Entities card will take a list of entities and show their state.
+      - type: 'custom:monster-card'
+        card:          
+          title: Shelly
+          type: entities
+          entities:
+          show_header_toggle: false
         filter:
-          - domain: climate
-        card_config:
-          title: All Climate      
-  
-  
-  - name: Energy
-    cards:
-  
+          exclude:
+            - entity_id: '*rssi*'
+            - entity_id: '*uptime*'
+            - entity_id: '*firmware*'
+          include:
+            - entity_id: '*shelly*'
+            
 
+      - type: entities
+        title: Shellys
+        show_header_toggle: false
+        entities:
+          - entity: cover.shelly_shsw_25_e6704f
+            name: Serranda Salone
+          - type: custom:slider-entity-row
+            entity: cover.shelly_shsw_25_e6704f          
+            name: Apertura Serranda
+            full_row: true
+            min: 0
+            max: 100
+            step: 1
 
-  - name: Automations
-    cards:  
-      - type: entity-filter
+      - type: 'custom:monster-card'
+        card:
+          title: Shelly need update
+          type: entities
+          show_header_toggle: false
         filter:
-          - domain: automation
-        card_config:
-          title: All Automations  
-  
-  - name: Settings
-    cards:
-      - type: entity-filter
-        filter: [{}]
-        card_config:
-          title: All entities    
+          include:
+           - entity_id: '*firmware_update*'
 
-  
-  - name: Nico
+      - type: 'custom:monster-card'
+        card:
+          title: Shelly RSSI
+          type: entities
+          show_header_toggle: false
+        filter:
+          include:
+          - entity_id: '*rssi*'
+
+####################################################
+#                                                  #
+#                     Energy                       #
+#                                                  #
+####################################################
+    # Title of the view. Will be used as the tooltip for tab icon
+  - title: Energy
+    path: Energy
     cards:
-      - type: camera-preview
-        entity: camera.nico
-        
-  - name: Mamma
+      - type: custom:mini-graph-card
+        name: Potenza Istantanea
+        entities:
+          - sensor.potenza_istantanea
+        hours_to_show: 24
+        points_per_hour: 8
+        show:
+          labels: true
+        color_thresholds:
+          - value: 0
+            color: "#0FEE07"
+          - value: 500
+            color: "#ffb400"
+          - value: 1000
+            color: "#c0392b"
+      - type: entities
+        title: Controllo Carichi
+        show_header_toggle: false
+        entities:
+          - entity: automation.innesco_controllo_carichi
+            name: Controllo carichi Off/On
+            icon: mdi:power
+          - sensor.potenza_istantanea
+          #- sensor.efergy_798034
+          - sensor.tempo_in_extrasoglia
+          - entity: sensor.ultimo_carico_spento
+          - sensor.ultimo_intervento
+          - input_boolean.impostazioni_controllo_carichi
+          - input_boolean.notifiche_standard_or_centro_notifiche
+      - type: conditional
+        conditions:
+          - entity: input_boolean.impostazioni_controllo_carichi
+            state: 'off'
+        card:
+            type: glance
+            columns: 3
+            title: Carichi controllati
+            show_name: false
+            show_header_toggle: false
+            entities:
+            - entity: input_text.carico_1
+              tap_action:
+                action: none
+            - entity: input_text.carico_2
+              tap_action:
+                action: none
+            - entity: input_text.carico_3
+              tap_action:
+                action: none
+            - entity: input_text.carico_4
+              tap_action:
+                action: none
+            - entity: input_text.carico_5
+              tap_action:
+                action: none
+            - entity: input_text.carico_6
+              tap_action:
+                action: none
+            - entity: input_text.carico_7
+              tap_action:
+                action: none
+            - entity: input_text.carico_8
+              tap_action:
+                action: none
+            - entity: input_text.carico_9
+              tap_action:
+                action: none
+      - type: conditional
+        conditions:
+          - entity: input_boolean.impostazioni_controllo_carichi
+            state: 'on'
+        card:
+            type: entities
+            title: Configurazione contatore
+            show_header_toggle: false
+            entities:
+            - input_select.selettore_kw_contatore
+            - input_number.tempo_intervento
+            - input_text.sensore_lettura_potenza_instantanea
+      - type: conditional
+        conditions:
+          - entity: input_boolean.impostazioni_controllo_carichi
+            state: 'on'
+        card:    
+            type: entities
+            title: Configurazione Carichi
+            show_header_toggle: false
+            entities:
+            - input_text.carico_1
+            - input_text.carico_2
+            - input_text.carico_3
+            - input_text.carico_4
+            - input_text.carico_5
+            - input_text.carico_6
+            - input_text.carico_7
+            - input_text.carico_8
+            - input_text.carico_9
+      - type: conditional
+        conditions:
+          - entity: input_boolean.impostazioni_controllo_carichi
+            state: 'on'
+        card:    
+          type: entities
+          title: Accensione Ultimo carico spento
+          show_header_toggle: false
+          entities:
+            - input_boolean.accensione_autmatica_carico
+            - input_select.accensione_automatica_carico
+            - input_text.esclusione_1_riaccensione
+            - input_text.esclusione_2_riaccensione
+      - type: conditional
+        conditions:
+          - entity: input_boolean.impostazioni_controllo_carichi
+            state: 'on'
+          - entity: input_boolean.notifiche_standard_or_centro_notifiche
+            state: 'off'
+        card:    
+            type: entities
+            show_header_toggle: false
+            title: Configurazione Notifiche
+            entities:
+            - input_boolean.notifiche_cc
+            - input_text.notifiche_cc
+            - input_boolean.notifiche_cc_google
+            - input_text.notifiche_cc_google
+            - input_boolean.notifiche_cc_alexa
+            - input_text.notifiche_cc_alexa
+
+####################################################
+#                                                  #
+#                Battery Alerts                    #
+#                                                  #
+####################################################
+    # Title of the view. Will be used as the tooltip for tab icon
+  - title: Battery
+    path: Battery
     cards:
-      - type: camera-preview
-        entity: camera.mamma    
-  
-  - name: Mascia
-    cards:  
-  
+    
+      - type: entities
+        title: Battery Alerts Settings
+        show_header_toggle: false
+        entities:
+          - group.battery_alert
+          - input_boolean.low_batteries
+          - input_number.battery_alert_threshold_min
+          - input_number.battery_alert_threshold_max
+          - input_text.delete_battery_sensor
+          - input_text.notifier_name
+
+      - type: conditional
+        conditions:
+          - entity: input_boolean.low_batteries
+            state: 'on'
+        card:    
+            type: entities
+            show_header_toggle: false
+            title: Configurazione Notifiche
+            entities:
+            - input_select.notifier_format
+            - automation.battery_persistent_notification
+            - automation.battery_persistent_notification_clear
+            - automation.battery_notification_default
+            - automation.battery_notification_slack
+            - automation.battery_sensor_from_attributes
+            - automation.update_battery_status_group_members
+            - automation.delete_battery_sensor
+
+
+
+          
+####################################################
+#                                                  #
+#                   AD Guard                       #
+#                                                  #
+####################################################
+    # Title of the view. Will be used as the tooltip for tab icon
+  # - title: Ad Guard
+  #   path: Ad Guard
+  #   cards:
+  #       # The markdown card will render markdown text.
+  #     - type: markdown
+  #       title: Ad Guard
+  #       content: >
+  #         ## This is the Ad Guard card.
+  #     - type: entities
+  #       show_header_toggle: false
+  #       title: AD Guard Stats
+  #       entities:
+  #       - sensor.adguard_average_processing_speed
+  #       - sensor.adguard_dns_queries
+  #       - sensor.adguard_dns_queries_blocked
+  #       - sensor.adguard_dns_queries_blocked_ratio
+  #       - sensor.adguard_rules_count
+  #       - sensor.adguard_safe_browsing_blocked
+  #       - sensor.searches_safe_search_enforced
+  #       - sensor.adguard_parental_control_blocked
+
+  #     - type: entities
+  #       title: AD Guard Switch
+  #       show_header_toggle: false        
+  #       entities:
+  #       - switch.adguard_protection
+  #       - switch.adguard_filtering
+  #       - switch.adguard_parental_control
+  #       - switch.adguard_safe_browsing
+  #       - switch.adguard_safe_search
+  #       - switch.adguard_query_log    
+
+
+####################################################
+#                                                  #
+#                 View - Alarm                     #
+#                                                  #
+####################################################
+    # Title of the view. Will be used as the tooltip for tab icon
+  - title: Alarm
+    path: Alarm
+    cards:
+        # The markdown card will render markdown text.
+      - type: markdown
+        title: Alarm
+        content: >
+          ## This is the Alarm card.
+      - type: alarm-panel
+        entity: alarm_control_panel.home_alarm
+
+####################################################
+#                                                  #
+#              AV Remote Controller                #
+#                                                  #
+####################################################
+    # Title of the view. Will be used as the tooltip for tab icon
+  - title: Movie
+    path: Movie
+    cards:
+        # The markdown card will render markdown text.
+      - type: markdown
+        title: Movie Card and Upcoming Events
+        content: >
+          ## This is the Alarm card.
+      - type: custom:upcoming-media-card
+        entity: sensor.trakt_upcoming_calendar
+
+####################################################
+#                                                  #
+#                 View - Maps                      #
+#                                                  #
+####################################################
+
+
+    # Specify a tab icon if you want the view tab to be an icon.
+  - icon: mdi:google-maps
+    # Title of the view. Will be used as the tooltip for tab icon
+    title: Map/Geo
+    path: map
+    cards:
+        # The markdown card will render markdown text.
+      - type: markdown
+        title: Family Map
+        content: >
+          This is the Map Cards where you can find all family members around the World.
+
+####################################################
+#                                                  #
+#                     Map                          #
+#                                                  #
+####################################################
+
+      - type: map
+        aspect_ratio: 16:9
+        default_zoom: 20
+        entities:
+          - device_tracker.nico_nico
+          - device_tracker.mamma_mamma
+          - zone.home
+          - zone.work
+          - zone.tigre
+          - zone.casetta
+          - zone.papa
+          - zone.ale
+
+      - type: map
+        title: Where is Nico?
+        aspect_ratio: 16:9
+        default_zoom: 16
+        entities:
+          - device_tracker.nico_nico
+
+      - type: map
+        title: Where is Mom?
+        aspect_ratio: 16:9
+        default_zoom: 16
+        entities:
+          - device_tracker.mamma_mamma
+          
+      # - type: map
+      #   aspect_ratio: 16:9
+      #   default_zoom: 16
+      #   entities:
+      #     - camera.iss       
+
+      #- type: media-control
+        #entity: media_player.lounge_room
+
+      #- type: picture-glance
+        #title: Where is ISS?
+        #image: http://www.fashiondesignz.com/wp-content/uploads/2018/07/living-10-room-maisons-du-monde.jpg
+        #entities:
+          #- binary_sensor.iss
+          #- light.living_window_white
+          #- light.living_door_rgb
+          #- switch.nico_computer
+        #camera_image: camera.iss
+
+
+####################################################
+#                                                  #
+#                    Camera                        #
+#                                                  #
+####################################################
+    # Title of the view. Will be used as the tooltip for tab icon
+  - title: Video Camera
+    path: VideoCamera
+    cards:
+      # - type: vertical-stack
+      #   cards:      
+      #     - camera_image: camera.onvif_camera
+      #       entities: []
+      #       camera_view: live
+      #       #title: Test Camera
+      #       type: picture-glance
+      #     - type: horizontal-stack
+      #       cards:
+      #         - type: entity-button
+      #           entity: camera.onvif_camera
+      #           icon: mdi:arrow-top-left-bold-outline
+      #           show_name: false
+      #           tap_action:
+      #             action: call-service
+      #             service: camera.onvif_ptz
+      #             service_data:
+      #               tilt: UP
+      #               pan: LEFT
+      #         - type: entity-button
+      #           entity:  camera.onvif_camera
+      #           icon: mdi:arrow-up-bold-outline
+      #           show_name: false
+      #           tap_action:
+      #             action: call-service
+      #             service: camera.onvif_ptz
+      #             service_data:
+      #               tilt: UP
+      #         - type: entity-button
+      #           entity:  camera.onvif_camera
+      #           icon: mdi:arrow-top-right-bold-outline
+      #           show_name: false
+      #           tap_action:
+      #             action: call-service
+      #             service: camera.onvif_ptz
+      #             service_data:
+      #               tilt: UP
+      #               pan: RIGHT
+      #     - type: horizontal-stack
+      #       cards:
+      #         - type: entity-button
+      #           entity:  camera.onvif_camera
+      #           icon: mdi:arrow-left-bold-outline
+      #           show_name: false
+      #           tap_action:
+      #             action: call-service
+      #             service: camera.onvif_ptz
+      #             service_data:
+      #               pan: LEFT
+      #         - type: entity-button
+      #           entity:  camera.onvif_camera
+      #           icon: mdi:arrow-right-bold-outline
+      #           show_name: false
+      #           tap_action:
+      #             action: call-service
+      #             service: camera.onvif_ptz
+      #             service_data:
+      #               pan: RIGHT
+      #     - type: horizontal-stack
+      #       cards:
+      #         - type: entity-button
+      #           entity:  camera.onvif_camera
+      #           icon: mdi:arrow-bottom-left-bold-outline
+      #           show_name: false
+      #           tap_action:
+      #             action: call-service
+      #             service: camera.onvif_ptz
+      #             service_data:
+      #               tilt: DOWN
+      #               pan: LEFT
+      #         - type: entity-button
+      #           entity:  camera.onvif_camera
+      #           icon: mdi:arrow-down-bold-outline
+      #           show_name: false
+      #           tap_action:
+      #             action: call-service
+      #             service: camera.onvif_ptz
+      #             service_data:
+      #               tilt: DOWN
+      #         - type: entity-button
+      #           entity:  camera.onvif_camera
+      #           icon: mdi:arrow-bottom-right-bold-outline
+      #           show_name: false
+      #           tap_action:
+      #             action: call-service
+      #             service: camera.onvif_ptz
+      #             service_data:
+      #               tilt: DOWN
+      #               pan: RIGHT
+      #- type: custom:plan-coordinates
+      - type: picture-elements
+        entity: camera.onvif_camera
+        camera_image: camera.onvif_camera
+        camera_view: live
+        elements:
+          - type: icon
+            icon: 'mdi:arrow-up'
+            style:
+              background: 'rgba(255, 255, 255, 0.5)'
+              right: 25px
+              bottom: 50px
+            tap_action:
+              action: call-service
+              service: camera.onvif_ptz
+              service_data:
+                tilt: UP
+          - type: icon
+            icon: 'mdi:arrow-down'
+            style:
+              background: 'rgba(255, 255, 255, 0.5)'
+              right: 25px
+              bottom: 0px
+            tap_action:
+              action: call-service
+              service: camera.onvif_ptz
+              service_data:
+                tilt: DOWN
+          - type: icon
+            icon: 'mdi:arrow-left'
+            style:
+              background: 'rgba(255, 255, 255, 0.5)'
+              right: 50px
+              bottom: 25px
+            tap_action:
+              action: call-service
+              service: camera.onvif_ptz
+              service_data:                
+                pan: LEFT
+          - type: icon
+            icon: 'mdi:arrow-right'
+            style:
+              background: 'rgba(255, 255, 255, 0.5)'
+              right: 0px
+              bottom: 25px
+            tap_action:
+              action: call-service
+              service: camera.onvif_ptz
+              service_data:
+                pan: RIGHT
+          - type: icon
+            icon: 'mdi:arrow-top-left'
+            style:
+              background: 'rgba(255, 255, 255, 0.5)'
+              right: 50px
+              bottom: 50px
+            tap_action:
+              action: call-service
+              service: camera.onvif_ptz
+              service_data:
+                tilt: UP
+                pan: LEFT
+          - type: icon
+            icon: 'mdi:arrow-top-right'
+            style:
+              background: 'rgba(255, 255, 255, 0.5)'
+              right: 0px
+              bottom: 50px
+            tap_action:
+              action: call-service
+              service: camera.onvif_ptz
+              service_data:
+                tilt: UP
+                pan: RIGHT
+          - type: icon
+            icon: 'mdi:arrow-bottom-left'
+            style:
+              background: 'rgba(255, 255, 255, 0.5)'
+              right: 50px
+              bottom: 0px
+            tap_action:
+              action: call-service
+              service: camera.onvif_ptz
+              service_data:
+                tilt: DOWN
+                pan: LEFT
+          - type: icon
+            icon: 'mdi:arrow-bottom-right'
+            style:
+              background: 'rgba(255, 255, 255, 0.5)'
+              right: 0px
+              bottom: 0px
+            tap_action:
+              action: call-service
+              service: camera.onvif_ptz
+              service_data:
+                tilt: DOWN
+                pan: RIGHT
+          - type: icon
+            icon: 'mdi:door'
+            style:
+              background: 'rgba(255, 255, 255, 0.5)'
+              left: 40px
+              top: 25px
+            tap_action:
+              action: call-service
+              service: rest_command.ss_preset_home
+          - type: icon
+            icon: 'mdi:sofa'
+            style:
+              background: 'rgba(255, 255, 255, 0.5)'
+              left: 65px
+              top: 25px
+            tap_action:
+              action: call-service
+              service: rest_command.ss_preset_living
+          - type: icon
+            icon: 'mdi:bed-king-outline'
+            style:
+              background: 'rgba(255, 255, 255, 0.5)'
+              left: 90px
+              top: 25px
+            tap_action:
+              action: call-service
+              service: rest_command.ss_preset_bedroom
+          - type: icon
+            icon: 'mdi:file-cabinet'
+            style:
+              background: 'rgba(255, 255, 255, 0.5)'
+              left: 115px
+              top: 25px
+            tap_action:
+              action: call-service
+              service: rest_command.ss_preset_rack
+          - type: icon
+            icon: 'mdi:lightbulb-on-outline'
+            style:
+              background: 'rgba(255, 255, 255, 0.5)'
+              left: 40px
+              bottom: 0px
+            tap_action:
+              action: toggle
+            entity: switch.shelly_shsw_25_68796e_1
+          - type: icon
+            icon: 'mdi:lightbulb-on-outline'
+            style:
+              background: 'rgba(255, 255, 255, 0.5)'
+              left: 65px
+              bottom: 0px
+            tap_action:
+              action: toggle
+            entity: switch.shelly_shsw_25_68796e_2
+          - type: icon
+            icon: 'mdi:lightbulb-on-outline'
+            style:
+              background: 'rgba(255, 255, 255, 0.5)'
+              left: 100px
+              bottom: 0px
+            tap_action:
+              action: toggle
+            entity: switch.shelly_shsw_25_686d62_1
+          - type: icon
+            icon: 'mdi:lightbulb-on-outline'
+            style:
+              background: 'rgba(255, 255, 255, 0.5)'
+              left: 125px
+              bottom: 0px
+            tap_action:
+              action: toggle
+            entity: switch.shelly_shsw_25_686d62_2
+
+
+      # - type: entities
+      #   title: Camera Presets
+      #   show_header_toggle: false
+      #   entities:
+      #     - type: section
+      #       label: Camera Presets
+      #     - script.ss_preset_home
+      #     - script.ss_preset_living
+      #     - script.ss_preset_bedroom
+      #     - script.ss_preset_rack
+
+####################################################
+#                                                  #
+#                 View - Plan                      #
+#                                                  #
+####################################################
+    # Title of the view. Will be used as the tooltip for tab icon
+  - title: Plan
+    path: Plan
+    cards:
+        # The markdown card will render markdown text.
+      - type: markdown
+        title: Plan of the House
+        content: >
+          ## This is the Home plan card where you can find the plan of home.
+
+
+      - type: custom:plan-coordinates
+      - type: picture-elements
+        image: /local/Casetta3.png
+        #title: My House
+        elements:
+          - type: service-button
+            title: Lights Off
+            style:
+              top: 6%
+              left: 90%
+              padding: 0px
+            service: switch.turn_off
+            service_data:
+              entity_id: group.lights
+          - type: service-button
+            title: Lights On
+            style:
+              top: 3%
+              left: 90%
+              padding: 0px
+            service: switch.turn_on
+            service_data:
+              entity_id: group.lights              
+          - type: icon
+            icon: mdi:cctv
+            entity:  camera.onvif_camera
+            style:
+              top: 37%
+              left: 12%
+              transform: rotate(30deg) scaleX(-1)
+              --iron-icon-height: 30px
+              --iron-icon-width: 30px
+              --iron-icon-stroke-color: black
+              --iron-icon-fill-color: rgba(50, 50, 50, .75)
+          - type: image
+            entity: switch.shelly_shsw_25_686d62_1
+            tap_action:
+              action: toggle
+            image: /local/bulb.png
+            state_image:
+              'on': /local/bulb_on.png
+            state_filter:
+              'on': brightness(130%) saturate(1.5) drop-shadow(0px 0px 10px gold)
+              'off': brightness(80%) saturate(0.8)
+            style:
+              top: 77%
+              left: 40%
+              width: 15%
+              #padding: 50px 50px 100px 50px
+          - type: image
+            entity: switch.shelly_shsw_25_686d62_2
+            tap_action:
+              action: toggle
+            image: /local/bulb.png
+            state_image:
+              'on': /local/bulb_on.png
+            state_filter:
+              'on': brightness(130%) saturate(1.5) drop-shadow(0px 0px 10px gold)
+              'off': brightness(80%) saturate(0.8)
+            style:
+              top: 77%
+              left: 60%
+              width: 15%
+              #padding: 50px 50px 100px 50px
+          - type: image
+            entity: switch.shelly_shsw_25_68796e_1
+            tap_action:
+              action: toggle
+            image: /local/bulb.png
+            state_image:
+              'on': /local/bulb_on.png
+            state_filter:
+              'on': brightness(130%) saturate(1.5) drop-shadow(0px 0px 10px gold)
+              'off': brightness(80%) saturate(0.8)
+            style:
+              top: 53%
+              left: 40%
+              width: 15%
+              #padding: 50px 50px 100px 50px
+          - type: image
+            entity: switch.shelly_shsw_25_68796e_2
+            tap_action:
+              action: toggle
+            image: /local/bulb.png
+            state_image:
+              'on': /local/bulb_on.png
+            state_filter:
+              'on': brightness(130%) saturate(1.5) drop-shadow(0px 0px 10px gold)
+              'off': brightness(80%) saturate(0.8)
+            style:
+              top: 53%
+              left: 60%
+              width: 15%
+              #padding: 50px 50px 100px 50px
+          - type: image
+            entity: switch.shelly_shsw_25_e5e601_1
+            tap_action:
+              action: toggle
+            image: /local/bulb.png
+            state_image:
+              'on': /local/bulb_on.png
+            state_filter:
+              'on': brightness(130%) saturate(1.5) drop-shadow(0px 0px 10px gold)
+              'off': brightness(80%) saturate(0.8)
+            style:
+              top: 35%
+              left: 40%
+              width: 15%
+              #padding: 50px 50px 100px 50px
+          - type: image
+            entity: switch.shelly_shsw_25_e5e601_2
+            tap_action:
+              action: toggle
+            image: /local/bulb.png
+            state_image:
+              'on': /local/bulb_on.png
+            state_filter:
+              'on': brightness(130%) saturate(1.5) drop-shadow(0px 0px 10px gold)
+              'off': brightness(80%) saturate(0.8)
+            style:
+              top: 35%
+              left: 60%
+              width: 15%
+              #padding: 50px 50px 100px 50px
+          - type: image
+            entity: switch.shelly_shsw_25_687269_1
+            tap_action:
+              action: toggle
+            image: /local/bulb.png
+            state_image:
+              'on': /local/bulb_on.png
+            state_filter:
+              'on': brightness(130%) saturate(1.5) drop-shadow(0px 0px 10px gold)
+              'off': brightness(80%) saturate(0.8)
+            style:
+              top: 18%
+              left: 40%
+              width: 15%
+              #padding: 50px 50px 100px 50px
+          - type: image
+            entity: switch.shelly_shsw_25_687269_2
+            tap_action:
+              action: toggle
+            image: /local/bulb.png
+            state_image:
+              'on': /local/bulb_on.png
+            state_filter:
+              'on': brightness(130%) saturate(1.5) drop-shadow(0px 0px 10px gold)
+              'off': brightness(80%) saturate(0.8)
+            style:
+              top: 18%
+              left: 60%
+              width: 15%
+              #padding: 50px 50px 100px 50px
+          - type: image
+            entity: switch.air
+            tap_action:
+              action: toggle
+            image: /local/air-conditioner.png
+            state_image:
+              'on': /local/air-conditioner.png
+            state_filter:
+              'on': brightness(80%) saturate(1.5) drop-shadow(0px 0px 10px gold)
+              'off': brightness(20%) saturate(0.8)
+            style:
+              top: 63%
+              left: 80%
+              width: 7%
+              #padding: 50px 50px 100px 50px
+####################################################
+#                                                  #
+#                    Traffic                       #
+#                                                  #
+####################################################
+    # Title of the view. Will be used as the tooltip for tab icon
+  - title: Traffic
+    icon: mdi:cctv
+    #panel: true
+    path: Traffic
+    cards:
+        # The markdown card will render markdown text.
+#      - type: custom:surveillance-card
+#        thumb_interval: 15
+#        update_interval: 2
+#        cameras:
+#          - entity: camera.camera_salone_r2
+#            #motion_entity: binary_sensor.front_porch_motion
+#          - entity: camera.romatraffico
+            #motion_entity: binary_sensor.back_yard_motion
+          #- entity: camera.mamma
+#          - entity: camera.rome
+      - type: iframe
+        #title: Tangenziale EST - Portonaccio
+        url: https://www.autostrade.it/autostrade-gis/popupVideocam.do?tlc=3141 
+        aspect_ratio: 92%
+      - type: iframe
+        #title: boh
+        url: https://www.autostrade.it/autostrade-gis/popupVideocam.do?tlc=3136 
+        aspect_ratio: 92%
+      - type: iframe
+        #title: boh due
+        url: https://www.autostrade.it/autostrade-gis/popupVideocam.do?tlc=5837 
+        aspect_ratio: 92%
+      - type: iframe
+        #title: boh tre
+        url: https://www.autostrade.it/autostrade-gis/popupVideocam.do?tlc=5836 
+        aspect_ratio: 92%  
+
+####################################################
+#                                                  #
+#                  Plan Test                       #
+#                                                  #
+####################################################
+    # Title of the view. Will be used as the tooltip for tab icon
+  # - title: Plan
+  #   icon: mdi:floor-plan
+  #   id: tab_plan
+  #   panel: true
+  #   cards:
+  #     - type: vertical-stack
+  #       cards:
+  #       - type: custom:plan-coordinates
+  #       - type: picture-elements
+  #         image: /local/Casetta.png?v=1
+  #         elements:
+  #         - type: image
+  #           tap_action: none
+  #           hold_action: none
+  #           entity: light.living_sofa_rgb
+  #           state_image:
+  #             "on": /local/lovelace/table_left.png?v=1
+  #             "off": /local/lovelace/_empty.png?v=2
+  #           style:
+  #             transform: none
+  #             left: 0%
+  #             top: 0%
+              
+  #     - type: image
+  #       tap_action:
+  #         action: call-service
+  #         service: light.toggle
+  #         service_data:
+  #           entity_id: light.living_sofa_rgb
+  #       image: /local/lovelace/_round_button.png?v=2
+      
+      
+  #         - light.living_sofa_rgb
+  #         - light.living_window_white
+  #         - light.living_door_rgb
+  #         - switch.nico_computer
+  #       camera_image: camera.camera
+
+
+####################################################
+#                                                  #
+#              Component Tracker                   #
+#                                                  #
+####################################################
+    # Title of the view. Will be used as the tooltip for tab icon
+#  - title: Component Tracker
+    #icon: mdi:cctv
+    #panel: true
+    #path: tracker
+    #cards:
+        # The markdown card will render markdown text.
+      #- type: custom:tracker-card
+        #title:
+        #trackers:
+          #- sensor.custom_card_tracker
+          #- sensor.custom_component_tracker
+
+      #- type: custom:monster-card
+        #card:
+          #type: entities
+          #title: Things that are broken
+        #filter:
+          #include:
+            #- state: "unknown"
+          #exclude:
+            #- entity_id: group.*
+
+
+####################################################
+#                                                  #
+#                 Maintenance                      #
+#                                                  #
+####################################################
+    # Title of the view. Will be used as the tooltip for tab icon
+  - title: Maintenance
+    #icon: mdi:cctv
+    #panel: true
+    path: Maintenance
+    cards:
+        # The markdown card will render markdown text.
+      - type: custom:monster-card
+        card:
+          type: glance
+          title: Low Battery Devices
+        filter:
+          include:
+            - entity_id: "*battery_level*"
+              state: '< 25'
+            - attributes:
+                battery: '< 25'
+            - attributes:
+                battery_level: '< 25'            
+
+      - type: custom:monster-card
+        card:
+          type: entities
+          title: Things that are broken
+        filter:
+          include:
+            - state: "unknown"
+          exclude:
+            - entity_id: group.*
+
+      - type: custom:monster-card
+        card:
+          type: entities
+          title: Scripts
+        filter:
+          include:
+            - entity_id: "script.*"
+
+      - type: custom:unused-card
+        name: unused entities
