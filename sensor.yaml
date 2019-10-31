@@ -1,9 +1,11 @@
 - platform: dnsip
 
-- platform: geo_rss_events
-  name: Terremoti
-  url: http://info.terremoti.ingv.it/feed/atom/all_week
-  radius: 100
+- platform: season
+  type: astronomical
+
+- platform: uptime
+
+- platform: version
 
 - platform: mqtt
   state_topic: "owntracks/Nico/Nico"
@@ -12,106 +14,197 @@
   value_template: '{{ value_json.batt }}'
 
 - platform: mqtt
-  state_topic: "owntracks/Mamma/Mamma"
+  state_topic: "owntracks/mamma/mamma"
   name: "Batteria Telefono Mamma"
   unit_of_measurement: "%"
   value_template: '{{ value_json.batt }}'
 
-#- platform: fitbit
-  #monitored_resources:
-    #- activities/activityCalories
-    #- activities/calories
-    #- activities/caloriesBMR
-    ####- activities/distance
-    ##- activities/elevation
-    ##- activities/floors
-    #- activities/heart
-    #####- activities/minutesFairlyActive
-    ####- activities/minutesLightlyActive
-    ###- activities/minutesSedentary
-    ##- activities/minutesVeryActive
-    #- activities/steps
-    #- activities/tracker/activityCalories
-    #- activities/tracker/calories
-    #- activities/tracker/distance
-    #- activities/tracker/elevation
-    #- activities/tracker/floors
-    #- activities/tracker/minutesFairlyActive
-    #- activities/tracker/minutesLightlyActive
-    #- activities/tracker/minutesSedentary
-    #- activities/tracker/minutesVeryActive
-    #- activities/tracker/steps
-    #- body/bmi
-    #- body/fat
-    #- body/weight
-    #- sleep/awakeningsCount
-    #- sleep/efficiency
-    #- sleep/minutesAfterWakeup
-    #- sleep/minutesAsleep
-    #- sleep/minutesAwake
-    #- sleep/minutesToFallAsleep
-    #- sleep/startTime
-    #- sleep/timeInBed
-
-#- platform: waqi
-  #token: !secret waqi
-  #locations:
-    #- guidonia
-  #stations:
-    #- roma
-
-- platform: speedtest
-  minute:
-    - 0
-    - 30
+- platform: darksky
+  api_key: !secret darksky
+  forecast:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
   monitored_conditions:
-    - ping
-    - download
-    - upload
+    - summary
+    - icon
+    - temperature
+    - temperature_low
+    - temperature_high
+    - apparent_temperature
+    - humidity
+    - hourly_summary
+    - daily_summary
+    - precip_type
+    - precip_intensity
+    - precip_probability
+    #- precip_accumulation
+    - wind_speed
+    - wind_bearing
+    - pressure
+    - visibility
+    - ozone
+    - uv_index
+    - sunrise_time
+    - sunset_time
+  scan_interval:
+    # At least one of these must be specified:
+    days: 0
+    hours: 1
+    minutes: 0
+    seconds: 0
+    milliseconds: 0
 
-- platform: fastdotcom
-  minute:
-    - 0
-    - 30
-
-- platform: openweathermap
-  api_key: !secret openweathermap
-  monitored_conditions:
-      - weather
-      - temperature
-      - wind_speed
-      - humidity
-      - pressure
-      - clouds
-      - rain
-      - snow
-
-- platform: synologydsm
-  host: 10.10.20.200
-  username: !secret synology_user
-  password: !secret synology_pwd
-  monitored_conditions:
-    - cpu_total_load
-    - cpu_other_load
-    - cpu_user_load
-    - cpu_15min_load
-    - memory_real_usage
-    - memory_available_real
-    - memory_total_real
-    - memory_size
-    - memory_cached
-    - memory_available_swap
-    - memory_total_swap
-    - network_up
-    - network_down
-    - disk_smart_status
-    - disk_status
-    - disk_temp
-    - volume_status
-    - volume_device_type
-    - volume_size_total
-    - volume_size_used
-    - volume_percentage_used
+- platform: template
+  sensors:
+    data_e_ora:
+      entity_id: sensor.time
+      value_template: >
+        {{now().strftime("%d/%m/%Y - %H:%M")}}
+      friendly_name: "Data e Ora"
+      icon_template: mdi:calendar-clock
+    
+    dark_sky_summary_tmpl:
+      friendly_name_template: Condizione
+      value_template: >
+        {{ states('sensor.dark_sky_summary') }}
+      entity_picture_template: >-
+        {{ '/local/icons/dark_sky/' ~ states.sensor.dark_sky_icon.state ~ '.png'}}
+    dark_sky_hourly_summary_tmpl:
+      friendly_name_template: Condizione Giornaliera
+      value_template: >
+        {{ states('sensor.dark_sky_hourly_summary') }}
+      entity_picture_template: >-
+        {{ '/local/icons/dark_sky/' ~ states.sensor.dark_sky_hourly_summary.attributes.entity_picture | replace("/static/images/darksky/","") | replace(".svg","") ~ '.png'}}
+    dark_sky_wind_dir:
+      friendly_name: 'Direzione Vento'
+      value_template: >-
+        {% set wind_dir = states.weather.dark_sky_wind_bearing.state %}
+        {% if wind_dir | float<=23 %}Nord [Tramontana]
+        {% elif wind_dir | float>338 %}Nord [Tramontana]
+        {% elif 23 < (wind_dir|float) <=68 %}NE [Grecale]
+        {% elif 68 < (wind_dir|float) <=113 %}Est [Levante]
+        {% elif 113 < (wind_dir|float) <=158 %}SE [Scirocco]
+        {% elif 158 < (wind_dir|float) <=203 %}Sud [Ostro]
+        {% elif 203 < (wind_dir|float) <=248 %}SO [Libeccio]
+        {% elif 248 < (wind_dir|float) <=293 %}Ovest [Ponente]
+        {% elif 293 < (wind_dir|float) <=338 %}NO [Maestrale]
+        {%- endif %}
+      icon_template: mdi:compass
+    forecast_0:
+      friendly_name_template: Giorno
+      value_template: Max | Min | Pioggia
+      icon_template: mdi:weather-partlycloudy
+    forecast_1:
+      friendly_name_template: >
+        {%- set date = as_timestamp(now()) + (1 * 86400 ) -%}
+        {% set giorno = ["Domenica", "Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato"] %}
+        {% set mese = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"] %}
+        {% set m_ok = date | timestamp_custom("%m") | int %}
+        {% set g_ok = date | timestamp_custom("%w") | int %}
+        {{giorno[g_ok] + ' ' + date | timestamp_custom("%d") + ' ' + mese[m_ok - 1]}}
+      value_template: >
+        {{states.sensor.dark_sky_daytime_high_temperature_1d.state|round(0)}}°|{{states.sensor.dark_sky_overnight_low_temperature_1d.state|round(0)}}°|{{states.sensor.dark_sky_precip_probability_1d.state|round(0)}}%
+      entity_picture_template: >-
+        {{ '/local/icons/dark_sky/' ~ states.sensor.dark_sky_icon_1d.state ~ '.png'}}
+      entity_id: sensor.dark_sky_daytime_high_temperature_1d, sensor.dark_sky_overnight_low_temperature_1d, sensor.dark_sky_precip_probability_1d, sensor.date
+    forecast_2:
+      friendly_name_template: >
+        {%- set date = as_timestamp(now()) + (2 * 86400 ) -%}
+        {% set giorno = ["Domenica", "Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato"] %}
+        {% set mese = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"] %}
+        {% set m_ok = date | timestamp_custom("%m") | int %}
+        {% set g_ok = date | timestamp_custom("%w") | int %}
+        {{giorno[g_ok] + ' ' + date | timestamp_custom("%d") + ' ' + mese[m_ok - 1]}}
+      value_template: >
+        {{states.sensor.dark_sky_daytime_high_temperature_2d.state|round(0)}}°|{{states.sensor.dark_sky_overnight_low_temperature_2d.state|round(0)}}°|{{states.sensor.dark_sky_precip_probability_2d.state|round(0)}}%
+      entity_picture_template: >-
+        {{ '/local/icons/dark_sky/' ~ states.sensor.dark_sky_icon_2d.state ~ '.png'}}
+      entity_id: sensor.dark_sky_daytime_high_temperature_2d, sensor.dark_sky_overnight_low_temperature_2d, sensor.dark_sky_precip_probability_2d, sensor.date
+    forecast_3:
+      friendly_name_template: >
+        {%- set date = as_timestamp(now()) + (3 * 86400 ) -%}
+        {% set giorno = ["Domenica", "Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato"] %}
+        {% set mese = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"] %}
+        {% set m_ok = date | timestamp_custom("%m") | int %}
+        {% set g_ok = date | timestamp_custom("%w") | int %}
+        {{giorno[g_ok] + ' ' + date | timestamp_custom("%d") + ' ' + mese[m_ok - 1]}}
+      value_template: >
+        {{states.sensor.dark_sky_daytime_high_temperature_3d.state|round(0)}}°|{{states.sensor.dark_sky_overnight_low_temperature_3d.state|round(0)}}°|{{states.sensor.dark_sky_precip_probability_3d.state|round(0)}}%
+      entity_picture_template: >-
+        {{ '/local/icons/dark_sky/' ~ states.sensor.dark_sky_icon_3d.state ~ '.png'}}
+      entity_id: sensor.dark_sky_daytime_high_temperature_3d, sensor.dark_sky_overnight_low_temperature_3d, sensor.dark_sky_precip_probability_3d, sensor.date
+    forecast_4:
+      friendly_name_template: >
+        {%- set date = as_timestamp(now()) + (4 * 86400 ) -%}
+        {% set giorno = ["Domenica", "Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato"] %}
+        {% set mese = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"] %}
+        {% set m_ok = date | timestamp_custom("%m") | int %}
+        {% set g_ok = date | timestamp_custom("%w") | int %}
+        {{giorno[g_ok] + ' ' + date | timestamp_custom("%d") + ' ' + mese[m_ok - 1]}}
+      value_template: >
+        {{states.sensor.dark_sky_daytime_high_temperature_4d.state|round(0)}}°|{{states.sensor.dark_sky_overnight_low_temperature_4d.state|round(0)}}°|{{states.sensor.dark_sky_precip_probability_4d.state|round(0)}}%
+      entity_picture_template: >-
+        {{ '/local/icons/dark_sky/' ~ states.sensor.dark_sky_icon_4d.state ~ '.png'}}
+      entity_id: sensor.dark_sky_daytime_high_temperature_4d, sensor.dark_sky_overnight_low_temperature_4d, sensor.dark_sky_precip_probability_4d, sensor.date
+    forecast_5:
+      friendly_name_template: >
+        {%- set date = as_timestamp(now()) + (5 * 86400 ) -%}
+        {% set giorno = ["Domenica", "Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato"] %}
+        {% set mese = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"] %}
+        {% set m_ok = date | timestamp_custom("%m") | int %}
+        {% set g_ok = date | timestamp_custom("%w") | int %}
+        {{giorno[g_ok] + ' ' + date | timestamp_custom("%d") + ' ' + mese[m_ok - 1]}}
+      value_template: >
+        {{states.sensor.dark_sky_daytime_high_temperature_5d.state|round(0)}}°|{{states.sensor.dark_sky_overnight_low_temperature_5d.state|round(0)}}°|{{states.sensor.dark_sky_precip_probability_5d.state|round(0)}}%
+      entity_picture_template: >-
+        {{ '/local/icons/dark_sky/' ~ states.sensor.dark_sky_icon_5d.state ~ '.png'}}
+      entity_id: sensor.dark_sky_daytime_high_temperature_5d, sensor.dark_sky_overnight_low_temperature_5d, sensor.dark_sky_precip_probability_5d, sensor.date
+    forecast_6:
+      friendly_name_template: >
+        {%- set date = as_timestamp(now()) + (6 * 86400 ) -%}
+        {% set giorno = ["Domenica", "Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato"] %}
+        {% set mese = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"] %}
+        {% set m_ok = date | timestamp_custom("%m") | int %}
+        {% set g_ok = date | timestamp_custom("%w") | int %}
+        {{giorno[g_ok] + ' ' + date | timestamp_custom("%d") + ' ' + mese[m_ok - 1]}}
+      value_template: >
+        {{states.sensor.dark_sky_daytime_high_temperature_6d.state|round(0)}}°|{{states.sensor.dark_sky_overnight_low_temperature_6d.state|round(0)}}°|{{states.sensor.dark_sky_precip_probability_6d.state|round(0)}}%
+      entity_picture_template: >-
+        {{ '/local/icons/dark_sky/' ~ states.sensor.dark_sky_icon_6d.state ~ '.png'}}
+      entity_id: sensor.dark_sky_daytime_high_temperature_6d, sensor.dark_sky_overnight_low_temperature_6d, sensor.dark_sky_precip_probability_6d, sensor.date
+    forecast_7:
+      friendly_name_template: >
+        {%- set date = as_timestamp(now()) + (7 * 86400 ) -%}
+        {% set giorno = ["Domenica", "Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato"] %}
+        {% set mese = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"] %}
+        {% set m_ok = date | timestamp_custom("%m") | int %}
+        {% set g_ok = date | timestamp_custom("%w") | int %}
+        {{giorno[g_ok] + ' ' + date | timestamp_custom("%d") + ' ' + mese[m_ok - 1]}}
+      value_template: >
+        {{states.sensor.dark_sky_daytime_high_temperature_7d.state|round(0)}}°|{{states.sensor.dark_sky_overnight_low_temperature_7d.state|round(0)}}°|{{states.sensor.dark_sky_precip_probability_7d.state|round(0)}}%
+      entity_picture_template: >-
+        {{ '/local/icons/dark_sky/' ~ states.sensor.dark_sky_icon_7d.state ~ '.png'}}
+      entity_id: sensor.dark_sky_daytime_high_temperature_7d, sensor.dark_sky_overnight_low_temperature_7d, sensor.dark_sky_precip_probability_7d, sensor.date
+ 
+########################################################################
+### Definizione Orario Alba e Tramonto
+########################################################################
+- platform: template
+  sensors:
+    sunset_time:
+      value_template: '{% set timestamp = as_timestamp(states.sun.sun.attributes.next_setting) | timestamp_custom("%H:%M") %} {{ timestamp.lstrip("0") }}'
+      friendly_name: "Tramonto"
+ 
+- platform: template
+  sensors:
+    sunrise_time:
+      value_template: '{% set timestamp = as_timestamp(states.sun.sun.attributes.next_rising) | timestamp_custom("%H:%M") %} {{ timestamp.lstrip("0") }}'
+      friendly_name: "Alba"
 
 - platform: time_date
   display_options:
@@ -120,107 +213,89 @@
     - date_time
     - time_date
     - time_utc
-
-# - platform: template
-#   sensors:
-#     alarm_time:
-#       friendly_name: 'Time'
-#       value_template: '{{ "%0.02d:%0.02d" | format(states("input_number.alarmhour") | int, states("input_number.alarmminutes") | int) }}'
-    
-    # androidtvkd55xd9305lan:
-    #   friendly_name: 'Sony Bravia - TV'
-    #   value_template: "{{ 'Online' if is_state('device_tracker.androidtvkd55xd9305lan', 'home') else 'Offline' }}"
-
-# - platform: efergy
-#   app_token: !secret efergy_token
-#   utc_offset: 120
-#   monitored_variables:
-#     - type: instant_readings
-#     - type: budget
-#     - type: cost
-#       period: day
-#       currency: €
-#     - type: amount
-#       period: day
-
-#- platform: fritzbox_netmonitor
-  #host: 10.10.20.1
-  #resources:
-    #- type: is_linked
-    #- type: is_connected
-    #- type: wan_access_type
-    #- type: external_ip
-    #- type: uptime
-    #- type: bytes_sent
-    #- type: bytes_received
-    #- type: transmission_rate_up
-    #- type: transmission_rate_down
-    #- type: max_byte_rate_up
-    #- type: max_byte_rate_down
-    #- type: max_bit_rate_up
-    #- type: max_bit_rate_down
-
-- platform: cert_expiry
-  host: !secret base_url2
-  port: 8123
-
-
-# - platform: google_travel_time
-#   name: Nico Phone To Home
-#   api_key: !secret google_api_travel
-#   origin: device_tracker.nico_nico
-#   destination: zone.home
-
-# - platform: google_travel_time
-#   name: Mom Phone To Home
-#   api_key: !secret google_api_travel
-#   origin: device_tracker.mamma_mamma
-#   destination: zone.home  
-
-# # Tracking entity to zone friendly name
-# - platform: google_travel_time
-#   name: Home To Work
-#   api_key: !secret google_api_travel
-#   origin: zone.home
-#   destination: zone.work
-
-# # Tracking entity to zone friendly name
-# - platform: google_travel_time
-#   name: Nico Phone To Work
-#   api_key: !secret google_api_travel
-#   origin: device_tracker.nico_nico
-#   destination: zone.work
-
-# - platform: google_travel_time
-#   name: Nico Phone To Mom Phone
-#   api_key: !secret google_api_travel
-#   origin: device_tracker.nico_nico
-#   destination: device_tracker.mamma_mamma
-
-# - platform: google_travel_time
-#   name: Nico Phone To Maria
-#   api_key: !secret google_api_travel
-#   origin: device_tracker.nico_nico
-#   destination: Via Giacinta pezzana 100, Roma
-
-# - platform: google_travel_time
-#   name: Nico Phone To Papa Home
-#   api_key: !secret google_api_travel
-#   origin: device_tracker.nico_nico
-#   destination: zone.papa
-
-- platform: haveibeenpwned
-  email: 
-      - !secret email1 
-      - !secret email2
-      - !secret email3
-      - !secret email4
+    - beat
 
 - platform: systemmonitor
   resources:
-      - type: disk_use_percent
-        #arg: /home
-      - type: memory_free
-      - type: memory_use
-      - type: memory_use_percent
-      - type: ipv4_address
+    - type: disk_use_percent
+      arg: /home
+    - type: disk_free
+      arg: /home
+    - type: memory_free
+    - type: memory_use
+    - type: memory_use_percent
+    - type: processor_use
+    - type: last_boot
+    #- type: since_last_boot
+    #- type: network_in
+    #  arg: eth0
+    #- type: network_out
+    #  arg: eth0
+
+- platform: template
+  sensors:
+    uptime:
+      friendly_name: Up time
+      value_template: "{{ states.sensor.last_boot.state.split('.')[0] }}"
+    since_last_boot_templated:
+      friendly_name: Last boot
+      value_template: >-
+        {%- set slb = states.sensor.last_boot.state.split(' ') -%}
+        {%- set count = slb | length -%}
+        {%- set hms = slb[count - 1] -%}
+        {%- set hms_trimmed = hms.split('.')[0] -%}
+        {%- set hms_split = hms_trimmed.split(':') -%}
+        {%- set hours = hms_split[0] | int -%}
+        {%- set minutes = hms_split[1] | int -%}
+        {%- set seconds = hms_split[2] | int -%}
+        {%- if count == 3 -%}
+          {{ slb[0] ~ ' ' ~ slb[1] ~ ' ' }}
+        {%- endif -%}
+        {%- if hours > 0 -%}
+          {%- if hours == 1 -%}
+            1 hour
+          {%- else -%}
+            {{ hours }} hours
+          {%- endif -%}
+        {%- endif -%}
+        {%- if minutes > 0 -%}
+          {%- if hours > 0 -%}
+            {{ ', ' }}
+          {%- endif -%}
+          {%- if minutes == 1 -%}
+            1 minute
+          {%- else -%}
+            {{ minutes }} minutes
+          {%- endif -%}
+        {%- endif -%}
+        {%- if seconds > 0 -%}
+          {%- if hours > 0 or minutes > 0 -%}
+            {{ ', ' }}
+          {%- endif -%}
+          {%- if seconds == 1 -%}
+            1 second
+          {%- else -%}
+            {{ seconds }} seconds
+          {%- endif -%}
+        {%- endif -%}
+
+- platform: command_line
+  name: CPU Temp
+  command: "cat /sys/class/thermal/thermal_zone0/temp"
+  unit_of_measurement: "°C"
+  value_template: '{{ value | multiply(0.001) | round(1) }}'
+
+- platform: command_line
+  command: "cat /sys/class/thermal/thermal_zone0/temp"
+  unit_of_measurement: "°C"
+  value_template: '{{ value | multiply(0.001) | round(2) }}'
+
+- platform: sql
+  db_url: !secret dburl
+  queries:
+    - name: MariaDB size
+      query: 'SELECT table_schema "homeassistant", Round(Sum(data_length + index_length) / 1024 / 1024, 1) "value" FROM information_schema.tables WHERE table_schema="homeassistant" GROUP BY table_schema;'
+      column: 'value'
+      unit_of_measurement: MB
+
+- platform: authenticated
