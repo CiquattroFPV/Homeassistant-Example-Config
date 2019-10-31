@@ -15,6 +15,8 @@ This is my Home Assistant Configuration created with Raspberry Pi3 with Hassio.
 .   ![alt text](screenshots/ir01.png "Player View")
 
 - Sony Bravia Android TV and Chromecast TV 
+
+
 .   ![alt text](screenshots/player01.png "Media Player View")
 
 - Alexa Media Player
@@ -27,6 +29,7 @@ This is my Home Assistant Configuration created with Raspberry Pi3 with Hassio.
 ![alt text](screenshots/cam01.png "Camera View")
 
 - Shelly Devices
+
 ![alt text](screenshots/shelly01.png "Lights View")
 ![alt text](screenshots/shelly02.png "Lights View")
 
