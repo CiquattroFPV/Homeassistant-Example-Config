@@ -1,8 +1,7 @@
-- name: homenicoassistant_bot
+- name: hassnico_bot
   platform: telegram
   api_key: !secret telegram_apikey
   chat_id: !secret telegram_clientid
 
-- name: hasspushbulletnico
-  platform: pushbullet
-  api_key: !secret pushbullet_api
+- platform: alexa_media
+  name: alexa_media
