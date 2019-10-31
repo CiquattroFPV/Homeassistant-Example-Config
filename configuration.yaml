@@ -16,6 +16,8 @@ homeassistant:
   unit_system: metric
   elevation: 47
   customize: !include customize.yaml
+  customize_glob: !include customize_glob.yaml
+  packages: !include_dir_named packages
 
 # Show links to resources in log and frontend
 #introduction:
@@ -26,8 +28,21 @@ homeassistant:
 #                                                  #
 ####################################################
 frontend:
-  themes: !include themes.yaml
+  themes: !include_dir_merge_named themes
 
+####################################################
+#                                                  #
+#             Lovelace/CustomUpdater               #
+#                                                  #
+####################################################
+lovelace:
+  mode: yaml
+
+wake_on_lan:
+
+google:
+  client_id: !secret google_clientid
+  client_secret: !secret google_secret
 # Enables configuration UI
 config:
 
@@ -45,19 +60,44 @@ http:
   base_url: !secret base_url
   ssl_certificate: /ssl/fullchain.pem
   ssl_key: /ssl/privkey.pem
-  trusted_networks:
-    - 127.0.0.1
-    - ::1
-    - 10.10.20.0/24
-    - 10.10.10.0/24
-    - fd00::/8
+
   # Secrets are defined in the file secrets.yaml
   # api_password: !secret http_password
   # Uncomment this if you are using SSL/TLS, running in Docker container, etc.
   #base_url:
   #ssl_certificate: /ssl/fullchain.pem
   #ssl_key: /ssl/privkey.pem
+websocket_api:
 
+system_health:
+
+owntracks:
+  max_gps_accuracy: 200
+  #mqtt_topic: "owntracks/#"
+
+shopping_list:
+
+stream:
+ffmpeg:
+
+####################################################
+#                                                  #
+#                     Alarm                        #
+#                                                  #
+####################################################
+
+alarm_control_panel:
+  - platform: manual
+    name: Home Alarm
+    code: 1234567890
+    pending_time: 30
+    delay_time: 20
+    trigger_time: 4
+    disarmed:
+      trigger_time: 0
+    armed_home:
+      pending_time: 0
+      delay_time: 0
 ####################################################
 #                                                  #
 #                 Geolocation                      #
@@ -69,12 +109,12 @@ mqtt: !include mqtt.yaml
 ###############  Earth Quake  ######################
 geo_location:
   - platform: usgs_earthquakes_feed
-    feed_type: 'past_day_all_earthquakes'
-    #feed_type: 'past_month_all_earthquakes'
-    radius: 500
+    #feed_type: 'past_day_all_earthquakes'
+    feed_type: 'past_hour_significant_earthquakes'
+    radius: 100
     minimum_magnitude: 0.0
-    latitude: !secret latitude
-    longitude: !secret longitude
+    latitude: !secret latitude2
+    longitude: !secret longitude2
 
 ####################################################
 #                    Alexa                         #
@@ -89,12 +129,6 @@ alexa:
     client_secret: !secret alexa_client_secret
     filter:
       include_entities:
-        - group.all_lights
-        - light.kitchen_white
-        - light.living_door_rgb
-        - light.living_sofa_rgb
-        - light.living_window_white
-        - light.room_nico_rgb
         - switch.air
         - switch.air2
         - switch.air3
@@ -108,18 +142,22 @@ alexa:
         - sensor.bedroom_temperature
         - sensor.living_room_temperature
       include_domains:
-        - switch
-        - light
-        - script
-        - alarm_control_panel
-        - climate
+        #- switch
+        #- light
+        #- script
+        #- alarm_control_panel
+        #- climate
         - media_player
       exclude_entities:
-        - switch.foscam_state
-        - switch.foscam_motion
-        - media_player.nicolos_alexa_apps
-        - media_player.nicolos_bose_home_speaker_500
+        #- switch.foscam_state
+        #- switch.foscam_motion
+        - media_player.nicolo_s_alexa_apps
+        - media_player.nicolo_s_bose_home_speaker_500
         - media_player.this_device
+        - media_player.echo_dot_di_nicolo
+        - media_player.this_device_2
+        - media_player.salotto
+        - media_player.kd_55xf9005
         - switch.fluxer
         - climate.living_room
         - climate.bathroom
@@ -134,31 +172,17 @@ alexa:
         - lock
         - cover
         - alert
+        - switch
+        - script
+        - light
+        - climate
+        #- media_player
+
         
     entity_config:
-      light.kitchen_white:
-        name: Luce Cucina
-        description: La Luce in Cucina
-        display_categories: LIGHT
-      light.living_door_rgb:
-        name: Luce Salone
-        description: la luce del Salone
-        display_categories: LIGHT 
-      light.living_sofa_rgb:
-        name: Luce Divano
-        description: la Luce del divano
-        display_categories: LIGHT
-      light.living_window_white:
-        name: Luce Finestra Salone
-        description: la luce vicino la Finestra del salone
-        display_categories: LIGHT
-      light.room_nico_rgb:
-        name: Luce Camera Nico
-        description: La Luce della stanza di Nico
-        display_categories: LIGHT
       switch.nico_computer:
         name: il PC
-        description: il Computer di Nico
+        description: Computer
         display_categories: SWITCH
       switch.dsm01:
         name: Synology
@@ -183,15 +207,6 @@ alexa:
         name: Deumidificatore
         description: il deumidificatore
         display_categories: SWITCH
-      switch.fritz_dect_200_1:
-        name: Presa Cucina 1
-        description: La presa cucina 1
-        display_categories: SWITCH
-      switch.fritz_dect_200_2:
-        name: Presa Cucina 2
-        description: La presa cucina 2
-        display_categories: SWITCH
-
 
 
 # Checks for available updates
@@ -200,20 +215,21 @@ alexa:
 # For more information, please see:
 # https://home-assistant.io/blog/2016/10/25/explaining-the-updater/
 updater:
+  include_used_components: true
   # Optional, allows Home Assistant developers to focus on popular components.
   # include_used_components: true
 
 # Discover some devices automatically
 discovery:
 hassio:
+shelly:
+  discovery: true  #add all devices (default)
+  username: !secret shellyuser
+  password: !secret shellypwd
+  additional_information: true
 # Allows you to issue voice commands from the frontend in enabled browsers
 conversation:
-# Enables support for tracking state changes over time
-history:
-# View all events in a logbook
-logbook:
-logger:
-  default: info
+
 map:
 
 # Track the sun
@@ -221,13 +237,23 @@ sun:
 
 # Text to speech
 tts:
-  - platform: google
+  - platform: google_translate
+    service_name: google_say
     cache: true
-    cache_dir: /tts
+    cache_dir: /tmp/tts
     time_memory: 300
     language: 'it'
+    base_url: https://yourdynamicdns:8123
 
 
+speedtestdotnet:
+  server_id: 123
+  scan_interval:
+    hours: 4
+  monitored_conditions:
+    - ping
+    - download
+    - upload
 
 # Cloud
 cloud:
@@ -242,10 +268,19 @@ script: !include scripts.yaml
 shell_command: !include shell_commands.yaml
 device_tracker: !include device_tracker.yaml
 sensor: !include sensor.yaml
+cover: !include cover.yaml
 media_player: !include media_player.yaml
 switch: !include switch.yaml
 notify: !include notify.yaml
 binary_sensor: !include binary_sensors.yaml
+
+alexa_media:
+  accounts:
+    - email: !secret amazonemail
+      password: !secret amazonpwd
+      #url: !secret amazonurl
+      url: !secret amazonurl_it
+      scan_interval: 30
 telegram_bot:
   platform: polling
   api_key: !secret telegram_apikey
@@ -253,7 +288,94 @@ telegram_bot:
     - !secret telegram_clientid
     - !secret telegram_clientid2
 
+####################################################
+#                                                  #
+#                   Recorder                       #
+#                                                  #
+####################################################
 
+recorder:
+   db_url: !secret dburl
+   purge_keep_days: 7
+   purge_interval: 1
+   exclude:
+    domains:
+      - automation
+      - weblink
+      - updater
+      - sensor
+      - switch
+      - mqtt
+    entities:
+      - sensor.date
+      - sun.sun
+   include:
+    entities:
+      - cover.shelly_shsw_25_e6704f
+      - switch.shelly_shsw_25_68796e_1
+      - switch.shelly_shsw_25_68796e_2
+      - switch.shelly_shsw_25_686d62_1
+      - switch.shelly_shsw_25_686d62_2
+      - switch.shelly_shsw_25_687269_1
+      - switch.shelly_shsw_25_687269_2
+      - switch.shelly_shsw_25_e5e601_1
+      - switch.shelly_shsw_25_e5e601_2
+      - switch.shelly_shplg_s_041a07
+      - switch.shelly_shplg_s_0409b4
+      - switch.air
+      - switch.air2
+      - switch.air3
+      - switch.nico_computer
+      - switch.shelly_shplg_s_7a33ff
+      - switch.fritz_box_guest_wifi
+      - switch.shelly_shplg_s_041a76
+      - switch.ciabatta_rack_fritz_dect_200_1
+      - switch.presa_rasp_pi3_fritz_dect_200_2       
+      - switch.shelly_shplg_s_04169c
+      - switch.shelly_shplg_s_5b2502
+      - sensor.shelly_shwt_1_694834_flood
+      - sensor.shelly_shwt_1_694834_temperature
+      - sensor.potenza_istantanea
+      - sensor.living_room_heating
+      - sensor.living_room_humidity
+      - sensor.living_room_power
+      - sensor.living_room_temperature
+      - sensor.mamma_battery
+      - sensor.nico_battery
+      - sensor.processor_use
+      - sensor.shelly_flood_battery
+
+####################################################
+#                                                  #
+#                   History                        #
+#                                                  #
+####################################################
+# Enables support for tracking state changes over time
+history:
+  #exclude:
+    #domains:
+      #- automation
+      #- weblink
+      #- updater
+    #entities:
+      #- sensor.date
+  #include:
+    #domains:
+      #- sensor
+      #- switch
+      #- media_player
+      #- light
+
+####################################################
+#                                                  #
+#                   LogBook                        #
+#                                                  #
+####################################################
+
+# View all events in a logbook
+logbook:
+logger:
+  default: warn
 ####################################################
 #                                                  #
 #                   Database                       #
@@ -261,7 +383,7 @@ telegram_bot:
 ####################################################
 
 influxdb:
-  host: 10.10.20.216
+  host: 1.1.1.1
   port: 8086
   database: home_assistant   
   username: !secret influxdb_user
@@ -296,6 +418,10 @@ fritzbox:
       username: !secret fritz_user
       password: !secret fritz_pwd 
 
+fritzbox_tools:
+  host: 1.1.1.1
+  username: !secret fritz_user
+  password: !secret fritz_pwd
 
 ####################################################
 #                                                  #
@@ -320,12 +446,6 @@ input_number: !include_dir_merge_named input_number
 #                                                  #
 ####################################################
 
-panel_custom:
-  - name: floorplan
-    sidebar_title: Floorplan
-    sidebar_icon: mdi:home
-    url_path: floorplan
-    config: !include floorplan.yaml
 
 ####################################################
 #                                                  #
@@ -337,6 +457,34 @@ rest_command:
   google_backup:
     url: 'http://x.x.x.x:8055/gb/doBackup'
     timeout: '300'
+  ss_cookie:
+    url: !secret ss_cookie
+    method: get
+    verify_ssl: false
+  ss_preset_home:
+    url: !secret ss_preset_home
+    method: get
+    verify_ssl: false
+  ss_preset_living:
+    url: !secret ss_preset_living
+    method: get
+    verify_ssl: false
+  ss_preset_bedroom:
+    url: !secret ss_preset_bedroom
+    method: get
+    verify_ssl: false
+  ss_preset_rack:
+    url: !secret ss_preset_rack
+    method: get
+    verify_ssl: false
+  ss_home_on:
+    url: !secret ss_home_on
+    method: get
+    verify_ssl: false
+  ss_home_off:
+    url: !secret ss_home_off
+    method: get
+    verify_ssl: false
 
 
 ####################################################
@@ -346,5 +494,8 @@ rest_command:
 ####################################################
 
 weather:
-  - platform: openweathermap
-    api_key: !secret openweathermap
+  # - platform: openweathermap
+  #   api_key: !secret openweathermap
+  - platform: darksky
+    api_key: !secret darksky
+    mode: daily
