@@ -10,16 +10,20 @@ This is my Home Assistant Configuration created with Raspberry Pi3 with Hassio.
 ![alt text](screenshots/hass02.png "Screenshot Example")
 
 - Mitsubishi Air Conditioner and Belkin IR Blaster - Mini R3
-.   ![alt text](screenshots/ir01.png "Player View")
 .   ![alt text](screenshots/ir02.png "Player View")
+.   ![alt text](screenshots/ir01.png "Player View")
 
 - Sony Bravia Android TV and Chromecast TV 
-.   ![alt text](screenshots/player01.png "Player View")
+.   ![alt text](screenshots/player01.png "Media Player View")
+
+- Alexa Media Player
+![alt text](screenshots/alexa01.png "Alexa Media players")
 
 - Fritbox and Presence detection
+
 - Synology NAS
 - Reolink E1 Pro
-![alt text](screenshots/cam01.png "Lights View")
+![alt text](screenshots/cam01.png "Camera View")
 
 - Shelly Devices
 ![alt text](screenshots/shelly01.png "Lights View")
@@ -29,6 +33,7 @@ This is my Home Assistant Configuration created with Raspberry Pi3 with Hassio.
 ![alt text](screenshots/lights01.png "Lights View")
 
 - Efergy for Energy cost monitor
+![alt text](screenshots/energy01.png "Efergy Example")
 ![alt text](screenshots/efergy01.png "Efergy Example")
 ![alt text](screenshots/efergy02.png "Efergy Example")
 
