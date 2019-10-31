@@ -10,6 +10,7 @@ This is my Home Assistant Configuration created with Raspberry Pi3 with Hassio.
 ![alt text](screenshots/hass02.png "Screenshot Example")
 
 - Mitsubishi Air Conditioner and Belkin IR Blaster - Mini R3
+
 .   ![alt text](screenshots/ir02.png "Player View")
 .   ![alt text](screenshots/ir01.png "Player View")
 
