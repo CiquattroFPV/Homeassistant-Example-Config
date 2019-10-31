@@ -18,7 +18,13 @@ This is my Home Assistant Configuration created with Raspberry Pi3 with Hassio.
 
 - Fritbox and Presence detection
 - Synology NAS
-- Foscam R2 Camera
+- Reolink E1 Pro
+![alt text](screenshots/cam01.png "Lights View")
+
+- Shelly Devices
+![alt text](screenshots/shelly01.png "Lights View")
+![alt text](screenshots/shelly02.png "Lights View")
+
 - Yeelight RGB and White Bulb and Hass Scenes
 ![alt text](screenshots/lights01.png "Lights View")
 
