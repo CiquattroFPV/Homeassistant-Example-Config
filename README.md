@@ -1,8 +1,8 @@
-# Homeassistant Template Example By Ciquattro
+# Homeassistant Template Example By Nicolò Steffè
 
 Home assistant Configuration (YAMLs)
 
-This is my Home Assistant Configuration created with a Docker Installation on a Synology DSM 713+ with an expanded 4GB ram.
+This is my Home Assistant Configuration created with Raspberry Pi3 with Hassio.
 
 - Alexa voice command integrated with haaska https://github.com/mike-grant/haaska/wiki
 - Android Devices (iPads, iPods, iPhones)
@@ -11,6 +11,7 @@ This is my Home Assistant Configuration created with a Docker Installation on a 
 
 - Mitsubishi Air Conditioner and Belkin IR Blaster - Mini R3
 .   ![alt text](screenshots/ir01.png "Player View")
+.   ![alt text](screenshots/ir02.png "Player View")
 
 - Sony Bravia Android TV and Chromecast TV 
 .   ![alt text](screenshots/player01.png "Player View")
