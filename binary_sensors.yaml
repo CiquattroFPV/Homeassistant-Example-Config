@@ -1,0 +1,38 @@
+  #- platform: iss
+  
+  
+  # - platform: mqtt
+  #   state_topic: dummy/floorplan/sensor
+  #   name: Floorplan
+  - platform: workday
+    country: IT
+    province: RM
+    workdays: [mon, tue, wed, thu, fri]
+
+  - platform: meteoalarm
+    country: 'IT'
+    province: 'Lazio'
+
+  # - platform: template
+  #   sensors:
+  #     nico_battery_low:
+  #       value_template: "{{ state_attr('device_tracker.nico_nico', 'battery') < 36 }}"
+  #       friendly_name: 'Nico Tel Battery is low'
+
+  # - platform: template
+  #   sensors:
+  #     mom_battery_low:
+  #       value_template: "{{ state_attr('device_tracker.mamma_mamma', 'battery') < 36 }}"
+  #       friendly_name: 'Mom Tel Battery is low'
+
+  - platform: template
+    sensors:
+      nico_car:
+        value_template: "{{ state_attr('device_tracker.nico_nico', 'velocity') > 30 }}"
+        friendly_name: 'Nico in Car'
+
+  - platform: template
+    sensors:
+      mom_car:
+        value_template: "{{ state_attr('device_tracker.mamma_mamma', 'velocity') > 30 }}"
+        friendly_name: 'Mom in Car'
