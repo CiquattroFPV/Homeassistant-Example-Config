@@ -1,26 +1,29 @@
-#- platform: foscam
-  #ip: 10.10.10.205
-  #username: !secret foscam_username
-  #password: !secret foscam_pwd
-  #name: "Camera Salone R2"
+- platform: onvif
+  host: 1.1.1.1
+  username: !secret e1user
+  password: !secret e1pwd
+  port: 5000
+
+- platform: generic
+  still_image_url: https://www.autostrade.it/autostrade-gis/popupVideocam.do?tlc=3141
+  name: PGeneric
+ 
+- platform: mjpeg
+  mjpeg_url: https://www.autostrade.it/autostrade-gis/popupVideocam.do?tlc=3141
+  name: Pmjpeg
+  
 - platform: generic
   still_image_url: http://api.sat24.com/animated/IT/visual/1/Central%20European%20Standard%20Time/2380259'%20width=400%20height=291
   name: Rome
 - platform: generic
-  name: my
-  still_image_url: https://maps.googleapis.com/maps/api/staticmap?center={{ states.device_tracker.my_my.attributes.latitude }},{{ states.device_tracker.my_my.attributes.longitude }}&zoom=15&size=500x500&maptype=roadmap&markers=color:blue%7Clabel:P%7C{{ states.device_tracker.my_my.attributes.latitude }},{{ states.device_tracker.my_my.attributes.longitude }}
+  name: Nico
+  still_image_url: https://maps.googleapis.com/maps/api/staticmap?center={{states.device_tracker.nico_nico.attributes.latitude}},{{states.device_tracker.nico_nico.attributes.longitude}}&zoom=15&size=500x500&maptype=roadmap&markers=color:blue%7Clabel:P%7C{{states.device_tracker.nico_nico.attributes.latitude}},{{states.device_tracker.nico_nico.attributes.longitude}}&keyYOURAPIKEY   
   limit_refetch_to_url_change: true
 - platform: generic
-  name: person
-  still_image_url: https://maps.googleapis.com/maps/api/staticmap?center={{ states.device_tracker.person_person.attributes.latitude }},{{ states.device_tracker.person_person.attributes.longitude }}&zoom=15&size=500x500&maptype=roadmap&markers=color:blue%7Clabel:P%7C{{ states.device_tracker.person_person.attributes.latitude }},{{ states.device_tracker.person_person.attributes.longitude }}
+  name: Mamma
+  still_image_url: https://maps.googleapis.com/maps/api/staticmap?center={{states.device_tracker.mamma_mamma.attributes.latitude}},{{states.device_tracker.mamma_mamma.attributes.longitude}}&zoom=15&size=500x500&maptype=roadmap&markers=color:blue%7Clabel:P%7C{{states.device_tracker.mamma_mamma.attributes.latitude}},{{states.device_tracker.mamma_mamma.attributes.longitude}}&keyYOURAPIKEY
   limit_refetch_to_url_change: true
 - platform: generic
   name: ISS
-  still_image_url: https://maps.googleapis.com/maps/api/staticmap?center={{ states.binary_sensor.iss.attributes.lat }},{{ states.binary_sensor.iss.attributes.long }}&zoom=3&size=500x500&maptype=roadmap&markers=color:blue%7Clabel:P%7C{{ states.binary_sensor.iss.attributes.lat }},{{ states.binary_sensor.iss.attributes.long }}
+  still_image_url: https://maps.googleapis.com/maps/api/staticmap?center={{states.binary_sensor.iss.attributes.lat}},{{states.binary_sensor.iss.attributes.long}}&zoom=3&size=500x500&maptype=roadmap&markers=color:blue%7Clabel:P%7C{{states.binary_sensor.iss.attributes.lat}},{{states.binary_sensor.iss.attributes.long}}&keyYOURAPIKEY 
   limit_refetch_to_url_change: true
-- platform: synology
-  url: !secret synology_url
-  username: !secret synology_user
-  password: !secret synology_pwd
-  timeout: 15
-  verify_ssl: False
