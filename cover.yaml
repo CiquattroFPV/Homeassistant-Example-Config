@@ -1,0 +1,17 @@
+- platform: mqtt
+  name: "Serranda Salone"    
+  command_topic: "shellies/shellyswitch25-abcd1234/roller/0/command" 
+  position_topic: "shellies/shellyswitch25-abcd1234/roller/0/pos"
+  set_position_topic: "shellies/shellyswitch25-abcd1234/roller/0/command/pos"
+  availability_topic: "shellies/shellyswitch25-abcd1234/online"
+  #state_topic: "shellies/shellyswitch25-abcd1234/roller/0"
+  payload_available: "true"
+  payload_not_available: "false"
+  qos: 1
+  retain: false
+  optimistic: false
+  payload_open: "open"
+  payload_close: "close"
+  payload_stop: "stop"
+  position_open: 100
+  position_closed: 0
