@@ -228,7 +228,6 @@
     - light.shelly_shsw_25_68796e_1
     - switch.shelly_shsw_25_68796e_2
     - light.shelly_shsw_25_68796e_2
-
     to: 'on'
     for: 02:00:00
   action:
@@ -985,52 +984,6 @@
     data:
       message: PC Hibernated at {{ states('sensor.date_time') }}
 
-
-- id: ac-self-shutdown
-  alias: AC Self Shutdown - Heat
-  initial_state: 'on'
-  trigger:
-  - platform: state
-    entity_id:
-    - switch.air
-    - switch.air2
-    to: 'on'
-    for: 02:00:00
-  - platform: state
-    entity_id:
-    - switch.air3
-    to: 'on'
-    for: 00:45:00
-  action:
-  - service: input_select.select_option
-    data:
-      entity_id: input_select.ac_state
-      option: Power Off
-  - service: switch.turn_off
-    data_template:
-      entity_id: ' {{ trigger.entity_id }} '
-  - service: notify.hassnico_bot
-    data_template:
-      message: '"{{ trigger.to_state.attributes.friendly_name }} just changed from
-        {{ trigger.to_state.state }} to {{ trigger.from_state.state }} - AC Self shutdown
-        Notify"'
-  # - service: media_player.volume_set
-  #   data:
-  #     entity_id: media_player.nicolo_s_bose_home_speaker_500
-  #     volume_level: 0.3
-  - delay: 00:00:03
-  - service: notify.alexa_media
-    data:
-      target:
-      - media_player.nicolo_s_2nd_bose_home_speaker_500
-      data:
-        type: tts
-      message: >
-         {{ [
-         "Risparmio Energetico attivato, ora spengo il condizionatore",
-         "L'aria condizionata è stata spenta automaticamente",
-         "Risparmio energetico attivo, spengo il condizonatore",       
-         ] | random }}
 
 - id: TTS-flush-cache
   alias: Flush TTS Cache
@@ -2546,283 +2499,6 @@
     data_template:
       message: 'Alexa Volume is {{ trigger.to_state.state }}'
 
-
-### Season Automation ###
-
-# - id: autumn-notify
-#   alias: Autumn notification
-#   trigger:
-#     platform: template
-#     value_template: "{{ is_state('sensor.season', 'autumn') }}"
-#   action:
-#   - service: input_select.select_option
-#     data:
-#       entity_id: input_select.ac_mode
-#       option: Power Off
-#   - service: notify.hassnico_bot
-#     data:
-#       message: Autumn is coming
-
-# - id: winter-notify
-#   alias: Winter Notification
-#   trigger:
-#     - platform: template
-#       value_template: "{{ is_state('sensor.season', 'winter') }}"
-#     - platform: time
-#       at: "06:45:00"
-#   condition:
-#     condition: and
-#     conditions:
-#     - condition: time
-#       # after: 05:00
-#       # before: 08:00
-#       weekday:
-#       - mon
-#       - tue
-#       - wed
-#       - thu
-#       - fri
-#     - condition: state
-#       entity_id: group.family
-#       state: home
-#     - condition: numeric_state
-#       entity_id: sensor.termosifone_salone_temperature
-#       below: 18
-#   action:
-#   - service: input_select.select_option
-#     data:
-#       entity_id: input_select.ac_mode
-#       option: Hot Morning
-#   - service: notify.hassnico_bot
-#     data:
-#       message: E' inverno e fa freddo, riscaldo un po l'aria
-
-# - id: spring-notify
-#   alias: Spring notification
-#   trigger:
-#     platform: template
-#     value_template: "{{ is_state('sensor.season', 'spring') }}"
-#   action:
-#   - service: input_select.select_option
-#     data:
-#       entity_id: input_select.ac_mode
-#       option: Power Off
-#   - service: notify.hassnico_bot
-#     data:
-#       message: Spring is coming
-
-# - id: summer-notify
-#   alias: Summer notification
-#   trigger:
-#     platform: template
-#     value_template: "{{ is_state('sensor.season', 'summer') }}"
-#   action:
-#   - service: input_select.select_option
-#     data:
-#       entity_id: input_select.ac_mode
-#       option: Cold Morning
-#   - service: notify.hassnico_bot
-#     data:
-#       message: Summer is Coming
-
-# - id: ac-hot-morning-on
-#   alias: AC - Hot Morning - ON
-#   initial_state: 'on'
-#   trigger:
-#     platform: state
-#     entity_id: input_select.ac_mode
-#     to: Hot Morning
-  # condition:
-  #   condition: and
-  #   conditions:
-  #   - condition: time
-  #     weekday:
-  #     - mon
-  #     - tue
-  #     - wed
-  #     - thu
-  #     - fri
-    # - condition: state
-    #   entity_id: input_select.ac_mode
-    #   state: Hot Morning
-    # - condition: state
-    #   entity_id: group.family
-    #   state: home
-    # - condition: state
-    #   entity_id: sensor.season
-    #   state: winter
-  # action:
-  # - service: switch.turn_on
-  #   entity_id: switch.air3
-  # - service: notify.hassnico_bot
-  #   data:
-  #     message: AC Morning ON - Heat 30 - Automation
-  # - delay:
-  #     minutes: 45
-  # - service: switch.turn_off
-  #   entity_id: switch.air3
-  # - delay:
-  #     seconds: 10
-  # - service: switch.turn_off
-  #   entity_id: switch.air3
-  # - delay:
-  #     seconds: 10
-  # - service: switch.turn_off
-  #   entity_id: switch.air3
-
-# - id: ac-cold-morning-on
-#   alias: AC - Cold Morning - ON
-#   initial_state: 'on'
-#   trigger:
-#     platform: state
-#     entity_id: input_select.ac_mode
-#     to: Cold Morning
-#   condition:
-#     condition: and
-#     conditions:
-#     - condition: time
-#       weekday:
-#       - mon
-#       - tue
-#       - wed
-#       - thu
-#       - fri
-#     - condition: state
-#       entity_id: group.family
-#       state: home
-#   action:
-#   - service: switch.turn_on
-#     entity_id: switch.air1
-#   - service: notify.hassnico_bot
-#     data:
-#       message: 'AC Morning ON - Cold 18 - Automation  {{ trigger.entity_id }} '
-#   - delay:
-#       minutes: 30
-#   - service: switch.turn_off
-#     entity_id: switch.air1
-#   - delay:
-#       seconds: 10
-#   - service: switch.turn_off
-#     entity_id: switch.air1
-#   - delay:
-#       seconds: 10
-#   - service: switch.turn_off
-#     entity_id: switch.air1
-
-# - id: ac-morning-off
-#   alias: AC - Morning - OFF
-#   trigger:
-#     platform: time
-#     at: 08:00:00
-#   condition:
-#   - condition: time
-#     weekday:
-#     - mon
-#     - tue
-#     - wed
-#     - thu
-#     - fri
-#   action:
-#   - service: switch.turn_off
-#     entity_id: switch.air1
-#   - service: switch.turn_off
-#     entity_id: switch.air2
-#   - service: switch.turn_off
-#     entity_id: switch.air3
-#   - service: notify.hassnico_bot
-#     data:
-#       message: AC Morning OFF - Automation. {{ trigger.entity_id }}
-
-
-### Air Conditioner ###
-
-# - id: scene-ac-mode-off
-#   alias: AC Mode OFF - Automation
-#   trigger:
-#     platform: state
-#     entity_id: input_select.ac_mode
-#     to: Power Off
-#   action:
-#   - service: switch.turn_off
-#     entity_id: switch.air3
-#   - service: notify.hassnico_bot
-#     data_template:
-#       message: 'AC Mode changed to: {{ trigger.to_state.state }}'
-
-# - id: scene-ac-mode-hot
-#   alias: AC Mode - Hot
-#   trigger:
-#     platform: state
-#     entity_id: input_select.ac_mode
-#     to: Hot
-#   action:
-#   - service: switch.turn_on
-#     entity_id: switch.air3
-#   - service: notify.hassnico_bot
-#     data_template:
-#       message: 'AC Mode changed to: {{ trigger.to_state.state }}'
-
-# - id: scene-ac-mode-hot-morning
-#   alias: AC Mode - Hot Morning
-#   trigger:
-#     platform: state
-#     entity_id: input_select.ac_mode
-#     to: Hot Morning
-#   action:
-#   - service: notify.hassnico_bot
-#     data_template:
-#       message: 'AC Mode changed to: {{ trigger.to_state.state }}'
-
-# - id: scene-ac-mode-cold
-#   alias: AC Mode - Cold
-#   trigger:
-#     platform: state
-#     entity_id: input_select.ac_mode
-#     to: Cold
-#   action:
-#   - service: switch.turn_on
-#     entity_id: switch.air1
-#   - service: notify.hassnico_bot
-#     data_template:
-#       message: 'AC Mode changed to: {{ trigger.to_state.state }}'
-
-# - id: scene-ac-mode-cold-morning
-#   alias: AC Mode - Cold Morning
-#   trigger:
-#     platform: state
-#     entity_id: input_select.ac_mode
-#     to: Cold Morning
-#   action:
-#   - service: notify.hassnico_bot
-#     data_template:
-#       message: 'AC Mode changed to: {{ trigger.to_state.state }}'
-
-# - id: scene-ac-mode-humidity
-#   alias: AC Mode - Humidity
-#   trigger:
-#     platform: state
-#     entity_id: input_select.ac_mode
-#     to: Himidity
-#   action:
-#   - service: switch.turn_on
-#     entity_id: switch.air2
-#   - service: notify.hassnico_bot
-#     data_template:
-#       message: 'AC Mode changed to: {{ trigger.to_state.state }}'
-
-# - id: scene-ac-mode-humidity-morning
-#   alias: AC Mode - Humidity Morning
-#   trigger:
-#     platform: state
-#     entity_id: input_select.ac_mode
-#     to: Humidity Morning
-#   action:
-#   - service: notify.hassnico_bot
-#     data_template:
-#       message: 'AC Mode changed to: {{ trigger.to_state.state }}'
-
-
-
 ### Google cast ###
 
 
@@ -2834,11 +2510,6 @@
       to: 'idle'
       for:
         minutes: 1
-    # - platform: state
-    #   entity_id: media_player.nest_hub_media_player_name
-    #   to: 'off'
-    #   for:
-    #     minutes: 1
   action:
     - service: script.cast_on_kitchen
 
@@ -2850,11 +2521,6 @@
       to: 'on'
       for:
         minutes: 1
-    # - platform: state
-    #   entity_id: media_player.nest_hub_media_player_name
-    #   to: 'off'
-    #   for:
-    #     minutes: 1
   action:
     - service: script.cast_on_kitchen
 
@@ -2873,212 +2539,102 @@
       entity_id: utility_meter.monthly_energy
 
 
-# ############### Summer ####################
+# ###################################
+# #### Air conditioner Routines #####
+# ###################################
 
-# - id: summer-ac-on-on-hight-temperature-at-home
-#   alias: Summer AC ON High Temperature at Home
-#   trigger:
-#     platform: numeric_state
-#     entity_id: 'sensor.termosifone_salone_temperature'
-#     above: 26
-#   condition:
-#     - condition: template
-#       value_template: "{{ is_state('sensor.season', 'summer') }}"
-#     - condition: state
-#       entity_id: group.family
-#       state: home
-#     - condition: time
-#       after: 09:00:00
-#       before: '22:00:00'
-#       weekday:
-#       - mon
-#       - tue
-#       - wed
-#       - thu
-#       - fri
-#       - sat
-#       - sun
-#     - condition: numeric_state
-#       entity_id: 'sensor.shelly_shem_b9ee2d_1_current_consumption'
-#       below: 2000
-#   action:
-#     - service: switch.turn_on
-#       entity_id: switch.air2
-#     - delay:
-#         seconds: 10
-#     - service: switch.turn_on
-#       entity_id: switch.air2
-#     - delay:
-#         seconds: 10
-#     - service: notify.hassnico_bot
-#       data_template:
-#         message: 'Aria condizionata accessa perchè la temperatura in salotto è troppo calda'
-#     - service: notify.alexa_media
-#       data:
-#         target:
-#         - media_player.nicolo_s_2nd_bose_home_speaker_500
-#         data:
-#           type: tts
-#         message: >
-#            {{ [
-#            "Ho notato che a casa fa troppo caldo accendo l'aria condizionata per rinfrascarre l'aria",
-#            "Mamma mia che caldo, accendo l'aria condizionata",       
-#            ] | random }}
+# ### AC Power Off Routine and Self Shutdown
 
-# - id: summer-ac-off-low-temperature-at-home
-#   alias: Summer AC OFF low Temperature at Home
-#   trigger:
-#     platform: numeric_state
-#     entity_id: 'sensor.termosifone_salone_temperature'
-#     below: 25
-#   condition:
-#     - condition: template
-#       value_template: "{{ is_state('sensor.season', 'summer') }}"
-#     - condition: state
-#       entity_id: group.family
-#       state: home
-#     - condition: time
-#       after: 09:00:00
-#       before: '22:00:00'
-#       weekday:
-#       - mon
-#       - tue
-#       - wed
-#       - thu
-#       - fri
-#       - sat
-#       - sun
-#   action:
-#     - service: switch.turn_off
-#       entity_id: switch.air2
-#     - delay:
-#         seconds: 10
-#     - service: switch.turn_off
-#       entity_id: switch.air2
-#     - delay:
-#         seconds: 10
-#     - service: switch.turn_off
-#       entity_id: switch.air2
-#     - service: notify.hassnico_bot
-#       data_template:
-#         message: 'Aria condizionata spenta perchè la temperatura è troppo fredda'
-#     - service: notify.alexa_media
-#       data:
-#         target:
-#         - media_player.nicolo_s_2nd_bose_home_speaker_500
-#         data:
-#           type: tts
-#         message: >
-#            {{ [
-#            "Risparmio Energetico attivato, ora spengo il condizionatore",
-#            "L'aria condizionata è stata spenta automaticamente",
-#            "Risparmio energetico attivo, spengo il condizonatore",       
-#            ] | random }}
+- id: ac-self-shutdown
+  alias: AC Self Shutdown
+  initial_state: 'on'
+  trigger:
+  - platform: state
+    entity_id:
+    - switch.air
+    - switch.air2
+    to: 'on'
+    for: 02:00:00
+  - platform: state
+    entity_id:
+    - switch.air3
+    to: 'on'
+    for: 00:45:00
+  action:
+  - service: input_select.select_option
+    data:
+      entity_id: input_select.ac_state
+      option: Power Off
+  - service: switch.turn_off
+    data_template:
+      entity_id: ' {{ trigger.entity_id }} '
+  - service: notify.hassnico_bot
+    data_template:
+      message: "{{ trigger.to_state.attributes.friendly_name }} just changed from {{ trigger.to_state.state }} to {{ trigger.from_state.state }} - AC Self shutdown Notify"
+  - delay: 00:00:03
+  - service: notify.alexa_media
+    data:
+      target:
+      - media_player.nicolo_s_2nd_bose_home_speaker_500
+      data:
+        type: tts
+      message: >
+         {{ [
+         "Risparmio Energetico attivato, ora spengo il condizionatore",
+         "L'aria condizionata è stata spenta automaticamente",
+         "Risparmio energetico attivo, spengo il condizonatore",       
+         ] | random }}
 
-############### Spring ####################
+- id: scene-ac-power-off
+  alias: AC Scene Power Off - Notification
+  trigger:
+    platform: state
+    entity_id: input_select.ac_state
+    to: Power Off
+  action:
+  - service: switch.turn_off
+    entity_id: switch.air2
+  - delay:
+      seconds: 10
+  - service: switch.turn_off
+    entity_id: switch.air1
+  - delay:
+      seconds: 10
+  - service: switch.turn_off
+    entity_id: switch.air3
+  - service: notify.hassnico_bot
+    data_template:
+      message: 'AC is on Mode: {{ trigger.to_state.state }}'
+  - service: notify.hassnico_bot
+    data:
+      message: L'aria condizionata è stata Spenta (Power Off)
+  - service: notify.alexa_media
+    data:
+      target:
+      # - media_player.nicolo_s_bose_home_speaker_500
+      - media_player.nicolo_s_2nd_bose_home_speaker_500
+      data:
+        type: tts
+        message: >
+           {{ [
+           "Aria condizionata spenta",
+           "Aria condizionata spenta",
+           ] | random }}
 
-# - id: Spring-ac-on-on-hight-temperature-at-home
-#   alias: Spring AC ON High Temperature at Home
-#   trigger:
-#     platform: numeric_state
-#     entity_id: 'sensor.termosifone_salone_temperature'
-#     above: 25
-#   condition:
-#     - condition: template
-#       value_template: "{{ is_state('sensor.season', 'spring') }}"
-#     - condition: state
-#       entity_id: group.family
-#       state: home
-#     - condition: time
-#       after: 09:00:00
-#       before: '22:00:00'
-#       weekday:
-#       - mon
-#       - tue
-#       - wed
-#       - thu
-#       - fri
-#       - sat
-#       - sun
-#     - condition: numeric_state
-#       entity_id: 'sensor.shelly_shem_b9ee2d_1_current_consumption'
-#       below: 2000
-#   action:
-#     - service: switch.turn_on
-#       entity_id: switch.air2
-#     - delay:
-#         seconds: 10
-#     - service: switch.turn_on
-#       entity_id: switch.air2
-#     - delay:
-#         seconds: 10
-#     - service: notify.hassnico_bot
-#       data_template:
-#         message: 'Aria condizionata accessa perchè la temperatura in salotto è troppo calda'
-#     - service: notify.alexa_media
-#       data:
-#         target:
-#         - media_player.nicolo_s_2nd_bose_home_speaker_500
-#         data:
-#           type: tts
-#         message: >
-#            {{ [
-#            "Ho notato che a casa fa troppo caldo accendo l'aria condizionata per rinfrascarre l'aria",
-#            "Mamma mia che caldo, accendo l'aria condizionata",       
-#            ] | random }}
-
-
-# - id: spring-ac-off-low-temperature-at-home
-#   alias: Spring AC OFF low Temperature at Home
-#   trigger:
-#     platform: numeric_state
-#     entity_id: 'sensor.termosifone_salone_temperature'
-#     below: 24
-#   condition:
-#     - condition: template
-#       value_template: "{{ is_state('sensor.season', 'spring') }}"
-#     - condition: state
-#       entity_id: group.family
-#       state: home
-#     - condition: time
-#       after: 09:00:00
-#       before: '22:00:00'
-#       weekday:
-#       - mon
-#       - tue
-#       - wed
-#       - thu
-#       - fri
-#       - sat
-#       - sun
-#   action:
-#     - service: switch.turn_off
-#       entity_id: switch.air2
-#     - delay:
-#         seconds: 10
-#     - service: switch.turn_off
-#       entity_id: switch.air2
-#     - delay:
-#         seconds: 10
-#     - service: switch.turn_off
-#       entity_id: switch.air2
-#     - service: notify.hassnico_bot
-#       data_template:
-#         message: 'Aria condizionata spenta perchè la temperatura è troppo fredda'
-#     - service: notify.alexa_media
-#       data:
-#         target:
-#         - media_player.nicolo_s_2nd_bose_home_speaker_500
-#         data:
-#           type: tts
-#         message: >
-#            {{ [
-#            "Risparmio Energetico attivato, ora spengo il condizionatore",
-#            "L'aria condizionata è stata spenta automaticamente",
-#            "Risparmio energetico attivo, spengo il condizonatore",       
-#            ] | random }}
-
-
+- id: ac-status-change-to--off
+  alias: AC Status Change to OFF
+  trigger:
+    platform: state
+    entity_id:
+    - switch.air1
+    - switch.air2
+    - switch.air3
+    to: 'off'
+  action:
+  - service: input_select.select_option
+    data:
+      entity_id: input_select.ac_state
+      option: Power Off
 
 
 #### AC Spring Routine ###
@@ -3183,29 +2739,94 @@
            ] | random }}
 
 
-- id: scene-ac-power-off
-  alias: AC Scene Power Off - Notification
+#### AC Summer Routine ###
+
+- id: scene-summer-high-temperature-notify
+  alias: AC Summer High temperature - Notification
+  initial_state: 'on'
+  trigger:
+    platform: numeric_state
+    entity_id: 'sensor.termosifone_cucina_temperature'
+    above: 26
+  condition:
+    # - condition: template
+    #   value_template: "{{ is_state('sensor.season', 'summer') }}"
+    - condition: state
+      entity_id: sensor.season
+      state: 'summer'
+    - condition: numeric_state
+      entity_id: 'sensor.shelly_shem_b9ee2d_1_current_consumption'
+      below: 2000
+    - condition: state
+      entity_id: group.family
+      state: home
+    - condition: time
+      after: 09:00:00
+      before: '22:00:00'
+      weekday:
+      - mon
+      - tue
+      - wed
+      - thu
+      - fri
+      - sat
+      - sun
+  action:
+  - service: input_select.select_option
+    data:
+      entity_id: input_select.ac_state
+      option: Summer
+
+- id: scene-summer-low-temperature-notify
+  alias: AC Summer low temperature - Notification
+  initial_state: 'on'
+  trigger:
+    platform: numeric_state
+    entity_id: 'sensor.termosifone_cucina_temperature'
+    below: 25
+  condition:
+    - condition: template
+      value_template: "{{ is_state('sensor.season', 'summer') }}"
+    - condition: state
+      entity_id: group.family
+      state: home
+    - condition: time
+      after: 09:00:00
+      before: '22:00:00'
+      weekday:
+      - mon
+      - tue
+      - wed
+      - thu
+      - fri
+      - sat
+      - sun
+  action:
+  - service: input_select.select_option
+    data:
+      entity_id: input_select.ac_state
+      option: Power Off
+
+
+- id: scene-ac-summer
+  alias: AC Scene Summer - Notification
   trigger:
     platform: state
     entity_id: input_select.ac_state
-    to: Power Off
+    to: summer
   action:
-  - service: switch.turn_off
-    entity_id: switch.air2
-  - delay:
-      seconds: 10
-  - service: switch.turn_off
+  - service: switch.turn_on
     entity_id: switch.air1
   - delay:
       seconds: 10
-  - service: switch.turn_off
-    entity_id: switch.air3
+  - service: switch.turn_on
+    entity_id: switch.air1
   - service: notify.hassnico_bot
     data_template:
-      message: 'AC is on Mode: {{ trigger.to_state.state }}'
+      message: 'AC is on summer Mode: {{ trigger.to_state.state }}'
   - service: notify.hassnico_bot
     data:
-      message: L'aria condizionata è stata Spenta (Power Off)
+      message: L'aria condizionata è stata attiva in Salotto (summer Mode)
   - service: notify.alexa_media
     data:
       target:
@@ -3215,6 +2836,6 @@
         type: tts
         message: >
            {{ [
-           "Aria condizionata spenta",
-           "Aria condizionata spenta",       
+           "Ho notato che in Salone fa troppo caldo. Accendo l'aria condizionata per rinfrascarre l'aria",
+           "Mamma mia che caldo, accendo l'aria condizionata",       
            ] | random }}
