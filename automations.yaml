@@ -1,308 +1,367 @@
-####################################################
-#                                                  #
-#             Let's Encrypt Renewal                #
-#                                                  #
-####################################################
-- id: letsencrypt-renewal
-  alias: "Let's Encrypt Renewal"
+# - id: letsencrypt-renewal-30d-before-expiry
+#   alias: Let's Encrypt Renewal at 15 Days before expiration
+#   initial_state: 'on'
+#   trigger:
+#   - platform: numeric_state
+#     entity_id: sensor.ssl_certificate_expiry
+#     below: 15
+#     for:
+#       minutes: 20
+#   action:
+#   - service: notify.hassnico_bot
+#     data_template:
+#       message: '"Let's Encrypt CA must be Renewed. Expiry date is at 30 Days from
+#         now"'
+#   - service: hassio.addon_restart
+#     data:
+#       addon: core_letsencrypt
+#   - service: notify.hassnico_bot
+#     data_template:
+#       message: '"Let's Encrypt CA was Renewed"'
+#   - delay: 00:10:00
+#   - service: script.restart_ha
+#   - service: notify.hassnico_bot
+#     data:
+#       message: HA - Restart - Triggered - After CA Renew
+
+- alias: Coffe Greetings - Notification 
+  id: coffe-greetings-notify
   initial_state: 'on'
   trigger:
-  - platform: time
-    at: '00:00:00'
-  action:
-  - service: hassio.addon_restart
-    data:
-      addon: core_letsencrypt
-  - service: notify.hassnico_bot
-    data_template:
-      message: >
-        "Let's Encrypt CA was Renewed"
-
-####################################################
-#                                                  #
-#                   Greetings                      #
-#                                                  #
-####################################################
-
-#- id: People-gretting
-  #alias: 'People Greeting'
-  #initial_state: 'on'
-  #trigger:
-    #- platform: state
-      #entity_id:
-        #- device_tracker.nico_nico
-        #- device_tracker.mamma_mamma
-        #- device_tracker.iphone
-      #from: 'not_home'
-      #to: 'home'
-      #for:
-        #minutes: 10
-  #action:
-    #- service: notify.alexa_media
-      #data:
-        #entity_id: media_player.nicolos_bose_home_speaker_500
-        #data_template:
-          #data:
-            #type: tts
-        #message: >
-          #{% set person = trigger.entity_id.split('.')[1]|replace('_', ' ')%}
-          #{%- macro greeting_sentence(person) -%}
-          #{{ [
-          #"Ben Tornato a casa " ~ person,
-          #"Chi è tornato a casa? "  ~ person +" è tornata a casa!",
-          #"Attenzione: " ~ person + " è a casa.",
-          #"Ben tornato a casa " ~ person + ".  Ci sei mancato molto.. forse.",
-          #"Ora la nostra casa è al completo, Riposati e rilassati.. Bentornato!" ~ person,
-          #"La vita è come una canzone, sei tornato a casa tua. Benvenuto a casa " ~ person,
-          #"Ehilà " ~ person + " bentornato!",
-          #person ~ "! Sei a casa!"
-          #] | random }}
-          #{%- endmacro -%}
-          #"{{greeting_sentence(person)}}"
-
-- alias: Coffe Greetings - Notification
-  initial_state: 'on'
-  trigger:
-    platform: template
-    value_template: "{{ state_attr('sensor.shelly_shplg_s_04169c_consumption', 'consumption')| int > 1000 }}"    
+    # platform: template
+    # value_template: "{{ state_attr('sensor.shelly_shplg_s_04169c_current_consumption', 'consumption')|int > 1000 }}"
+    platform: numeric_state
+    entity_id: sensor.shelly_shplg_s_04169c_current_consumption
+    above: 1000
     for:
-      #hours: 1
-      #minutes: 10
       seconds: 6
   action:
-    - service: notify.hassnico_bot
+  - service: notify.hassnico_bot
+    data:
+      message: Qualcuno sta facendo il Caffè
+  # - service: media_player.volume_set
+  #   data:
+  #     entity_id: media_player.nicolo_s_bose_home_speaker_500
+  #     volume_level: 0.25
+  - delay: 00:00:20
+  #- service: script.cucinacoffe
+  - service: script.cast_on_kitchen
+  - service: notify.alexa_media
+    data:
+      target:
+      # - media_player.nicolo_s_bose_home_speaker_500
+      - media_player.nicolo_s_2nd_bose_home_speaker_500
       data:
-        message: "Qualcuno sta facendo il Caffè"
-    - service: media_player.volume_set
-      data:
-        entity_id: media_player.nicolo_s_bose_home_speaker_500
-        volume_level: 0.3
-    - delay: 00:00:20
-    - service: notify.alexa_media
-      data:
-        target: 
-          - media_player.nicolo_s_bose_home_speaker_500
-        data:
-          type: tts
-        message: >
-         {{ [
+        type: tts
+      message: >
+        {{ [ 
          "Spero che il Caffè sia buono",
          "Spero che il Caffè sia di tuo gradimento",
          "Nespresso o Borbone, questo è il problema!",
          "Oh che bello caffè",
-         "Ci vuole proprio una bella pausa caffè",         
-         "Divino caffè il cui gusto rimane tutto il giorno in bocca",
-         "Non esiste buongiorno che non porti con sé il profumo dell’espresso.",
-         "Non c’è niente di meglio di una tazza di caffè per stimolare il cervello.",
-         "All you need is Coffee.",
-         "Il caffè è il balsamo del cuore e dello spirito.",
-         "Tutti devono credere in qualcosa. Io credo che mi farò un altro caffè",
-         "Un giorno insegnerò alla tazzina di caffè come venire a letto da sola.",
-         "Non c’è niente di più dolce di una tazza di caffè amaro.",
-         ] | random }}
+         "Ci vuole proprio una bella pausa caffè",
+         "Non c’è niente di meglio di una tazza di caffè",
+         "All you need is Coffee",
+        ] | random }}
 
 
-### Nico is Driving ###
+- id: scene-washing-machine-working-notify
+  alias: Washing Machine is Working - Notification
+  initial_state: 'on'
+  trigger:
+    # platform: template
+    # value_template: "{{ state_attr('sensor.shelly_shplg_s_5b2502_current_consumption', 'consumption')|int > 200 }}"
+    platform: numeric_state
+    entity_id: sensor.shelly_shplg_s_5b2502_current_consumption
+    above: 250
+    for:
+      seconds: 6
+  action:
+  - service: input_select.select_option
+    data:
+      entity_id: input_select.washing_machine_state
+      option: Working
+
+
+- id: scene-washing-machine-working
+  alias: Washing Machine is Working - Notification
+  trigger:
+    platform: state
+    entity_id: input_select.washing_machine_state
+    to: Working
+  action:
+  - service: notify.hassnico_bot
+    data_template:
+      message: 'Washing Machine is : {{ trigger.to_state.state }}'
+  - service: notify.hassnico_bot
+    data:
+      message: La Lavatrice è in Funzione
+  - service: notify.alexa_media
+    data:
+      target:
+      # - media_player.nicolo_s_bose_home_speaker_500
+      - media_player.nicolo_s_2nd_bose_home_speaker_500
+      data:
+        type: tts
+      message: >
+        {{ [ 
+        "La Lavatrice è in funzione, Ricordati di verificare se ci sono altri elettrodomestici accesi",
+        "Si avverte la gentile clientela che la lavatrice è iniziata, si prega di verificare che altri elettrodomestici ad alto consumo non siano attivi",
+        "La Lavatrice è in funzione, verifica anche se ci sono altri elettrodomestici in funzione",
+        "Era proprio l'ora di fare la lavatrice, ti volevo ricordare di fare un controllo se anche altri elettrodomestici sono attivi.",
+        ] | random }}
+  - service: script.cast_on_kitchen
+
+- id: scene-washing-machine-off-notify
+  alias: Washing Machine Scene Power Off - Notification
+  initial_state: 'on'
+  trigger:
+    # platform: template
+    # value_template: "{{ state_attr('sensor.shelly_shplg_s_5b2502_current_consumption', 'consumption')|int < 25 }}"
+    platform: numeric_state
+    entity_id: sensor.shelly_shplg_s_5b2502_current_consumption
+    below: 26
+    for:
+      minutes: 1
+      seconds: 10
+  action:
+  - service: input_select.select_option
+    data:
+      entity_id: input_select.washing_machine_state
+      option: Power Off
+
+- id: scene-washing-machine-poweroff
+  alias: Washing Machine Power off- Notification
+  trigger:
+    platform: state
+    entity_id: input_select.washing_machine_state
+    to: Power Off
+  action:
+  - service: notify.hassnico_bot
+    data_template:
+      message: 'Washing Machine is : {{ trigger.to_state.state }}'
+  - service: notify.hassnico_bot
+    data:
+      message: La Lavatrice è finita
+  - service: notify.alexa_media
+    data:
+      target:
+      # - media_player.nicolo_s_bose_home_speaker_500
+      - media_player.nicolo_s_2nd_bose_home_speaker_500
+      data:
+        type: tts
+      message: >
+        '{{ [ 
+        "La Lavatrice è finita, ora bisogna stendere i panni",
+        "La lavatrice ha terminato il lavaggio",
+        "La lavatrice è finita, chi stende i panni?",
+        "I panni li stende Nico o li stende Maria? Questo è il problema",
+        ] | random }}'
+  - service: script.cast_on_kitchen
+
+- alias: Energy Alarm - Notification
+  id: 12181a719f5f4473916149f7ce20502b
+  initial_state: 'on'
+  trigger:
+    # platform: template
+    # value_template: "{{ state_attr('sensor.shelly_shem_b9ee2d_1_current_consumption', 'consumption')|int > 100 }}"
+    platform: numeric_state
+    entity_id: sensor.shelly_shem_b9ee2d_1_current_consumption
+    above: 3200
+    # below: 25
+  action:
+  - service: notify.hassnico_bot
+    data:
+      message: Sta per scattare la corrente a casa
+  - service: media_player.volume_set
+    data:
+      entity_id: media_player.nicolo_s_bose_home_speaker_500
+      volume_level: 0.35
+  - service: notify.alexa_media
+    data:
+      target:
+      - media_player.nicolo_s_bose_home_speaker_500
+      data:
+        type: tts
+      message: >
+         '{{ [ 
+         "Il consumo energetico sta per superare il limite consentito, verificare se sono accesi troppi elettrodomestici prima che scatti la corrente perfavore",
+         "Perfavore controllate i consumi energetici, si sta superando la soglia consentita, potrebbe scattare la corrente",
+         "Sta per scattare la corrente, perfavore controllare i dispositivi accesi in casa",
+         ] | random }}'
+
 - alias: Nico is Driving - Notification
   initial_state: 'on'
   trigger:
     platform: template
-    value_template: "{{ state_attr('device_tracker.nico_nico', 'velocity')| int >= 50 }}"
+    value_template: "{{ state_attr('device_tracker.nico_nico', 'velocity')|int >= 50 }}"
     for:
-      #hours: 1
-      #minutes: 10
       seconds: 20
   action:
-    - service: notify.hassnico_bot
-      data:
-        message: "Nico is Driving"
-    - service: script.alexatraffic2
-
-
-
-
-####################################################
-#                                                  #
-#                   Lights                         #
-#                                                  #
-####################################################
-
-####################################################
-#               Lights Self Shutdown               #
-####################################################
+  - service: notify.hassnico_bot
+    data:
+      message: Nico is Driving
+  - service: script.alexatraffic2
+  id: f5d2b6ae95cc4cb893b890b3ff4cc0ce
 
 - id: light-self-shutdown
   alias: Lights Self Shutdown
   initial_state: 'on'
   trigger:
-    - platform: state
-      entity_id:
-        - switch.shelly_shsw_25_687269_1  # notte
-        - switch.shelly_shsw_25_687269_2  # notte
-      to: 'on'
-      for: '00:30:00'
-    - platform: state
-      entity_id:
-        - switch.shelly_shsw_25_e5e601_1    # bagno
-        - switch.shelly_shsw_25_e5e601_2    # bagno
-      to: 'on'
-      for: '01:15:00'
-    - platform: state
-      entity_id:
-        - switch.shelly_shsw_25_686d62_1    # cucina
-        - switch.shelly_shsw_25_686d62_2    # cucina
-        - switch.shelly_shsw_25_68796e_1   # salone
-        - switch.shelly_shsw_25_68796e_2   # slaone
-      to: 'on'
-      for: '02:00:00'
+  - platform: state
+    entity_id:
+    - switch.shelly_shsw_25_687269_1
+    - switch.shelly_shsw_25_687269_2
+    to: 'on'
+    for: 00:30:00
+  - platform: state
+    entity_id:
+    - switch.shelly_shsw_25_e5e601_1
+    - switch.shelly_shsw_25_e5e601_2
+    to: 'on'
+    for: 01:15:00
+  - platform: state
+    entity_id:
+    - switch.shelly_shsw_25_686d62_1
+    - switch.shelly_shsw_25_686d62_2
+    - switch.shelly_shsw_25_68796e_1
+    - light.shelly_shsw_25_68796e_1
+    - switch.shelly_shsw_25_68796e_2
+    - light.shelly_shsw_25_68796e_2
+
+    to: 'on'
+    for: 02:00:00
   action:
-    - service: switch.turn_off
-      data_template:
-        entity_id: " {{ trigger.entity_id }} "
-    - service: notify.hassnico_bot
-      data_template:
-        message: >
-          "{{ trigger.to_state.attributes.friendly_name }} just changed from {{ trigger.to_state.state }}
-          to {{ trigger.from_state.state }}. Self Shutdown!"
-    - service: media_player.volume_set
+  - service: switch.turn_off
+    data_template:
+      entity_id: ' {{ trigger.entity_id }} '
+  - service: notify.hassnico_bot
+    data_template:
+      message: '"{{ trigger.to_state.attributes.friendly_name }} just changed from
+        {{ trigger.to_state.state }} to {{ trigger.from_state.state }}. Self Shutdown!"'
+  # - service: media_player.volume_set
+  #   data:
+  #     entity_id: media_player.nicolo_s_bose_home_speaker_500
+  #     volume_level: 0.3
+  - service: notify.alexa_media
+    data:
+      target:
+      - media_player.nicolo_s_2nd_bose_home_speaker_500
       data:
-        entity_id: media_player.nicolo_s_bose_home_speaker_500
-        volume_level: 0.3
-    #- delay: 00:00:20
-    - service: notify.alexa_media
-      data:
-        target: 
-          - media_player.nicolo_s_bose_home_speaker_500
-        data:
-          type: tts
-        message: >
-         {{ [
-         "La Luce si è spenta automaticamente",
-         "Risparmio Energetico Attivato da Home Assistant, la luce si è spenta",
-         "La luce si è spenta piccole bibbi",
-         "La luce si è spenta",
-         "E luce non fù"
-         ] | random }}
+        type: tts
+      message: >
+        '{{ [
+        "La Luce si è spenta automaticamente",
+        "Risparmio Energetico Attivato da Home Assistant, la luce si è spenta",
+        "La luce si è spenta",        
+        ] | random }}'
 
-
-
-
-####################################################
-#            Lights Midnight Shutdown              #
-####################################################
-- id: light-midnight-shutdown
-  alias: 'Turn off Light at Midnight'
+- id: midnight-routine-shutdown
+  alias: Turn off Light and Nesthub at Midnight
   initial_state: 'on'
   trigger:
     platform: time
     at: '23:59:00'
   action:
-   service: homeassistant.turn_off
-   entity_id: group.lights
+    - service: homeassistant.turn_off
+      entity_id: group.lights
+    - service: media_player.turn_off
+      entity_id: media_player.cucina
 
-####################################################
-#            Lights Turn On Nico                   #
-####################################################
-
-- id: light-on-room-nico
-  alias: 'Turn on Light - WeekDays - Morning - Nicos Room '
+- id: light-on-at-entrance-after-sunset
+  alias: Turn on Light After Sunset - All Days - when Family group at Home
   initial_state: 'on'
   trigger:
-    platform: state
-    entity_id: device_tracker.nicogalaxys8
-    to: 'home'
+  - platform: state
+    entity_id: group.family
+    to: home
   condition:
-    condition: time
-    after: '07:00:00'
-    before: '10:00:00'
-    weekday:
-      - mon
-      - tue
-      - wed
-      - thu
-      - fri
+    condition: or
+    conditions:
+    - condition: sun
+      after: sunset
+    - condition: sun
+      before: sunrise
   action:
-   service: homeassistant.turn_on
-   entity_id: light.room_nico_rgb
+  - service: switch.turn_on
+    entity_id: light.shelly_shsw_25_68796e_1  #luci salone 1
+  - service: switch.turn_on
+    entity_id: light.shelly_shsw_25_68796e_2 #luci cucina 2
+  - service: notify.alexa_media
+    data:
+      target:
+      - media_player.nicolo_s_2nd_bose_home_speaker_500
+      data:
+        type: tts
+      message: >
+        '{{ [ 
+        "Luci di benvenuto attivate",
+        "Luci di benvenuto attive",
+        "Luci di cortesia attive",
+        ] | random }}'
+  - service: notify.hassnico_bot
+    data_template:
+      message: '"Qualcuno è tornato/a a casa e sono state accese le luci di benvenuto"'
 
-####################################################
-#              Lights ON Sunset                    #
-####################################################
 - id: light-on-sunset
-  alias: 'Light on Sunset'  
+  alias: Light on Sunset
   initial_state: 'on'
   trigger:
     platform: sun
     event: sunset
-    offset: "+00:15:00"
+    offset: "-00:59:00"
   condition:
     condition: state
     entity_id: group.family
     state: home
   action:
-   - service: homeassistant.turn_on
-     entity_id: group.living
-   - service: notify.hassnico_bot
-     data:
-       message: "Sunset - Lights ON at {{ states('sensor.date_time') }}"
-   - service: media_player.volume_set
-     data:
-       entity_id: media_player.nicolo_s_bose_home_speaker_500
-       volume_level: 0.3
-   - delay: 00:00:02
-   - service: notify.alexa_media
-     data:
-       target: 
-         - media_player.nicolo_s_bose_home_speaker_500
-       data:
-         type: tts
-       message: >
-        {{ [
-        "Le luci sono state accese al tramonto",
-        "Casa era poco illuminata ed ho pensato di accendere le luci",
-        "Le luci sono state accese perchè era poco illuminato",
-        ] | random }}
-####################################################
-#                                                  #
-#                   Notify                         #
-#                                                  #
-####################################################
-####################################################
-#                  Update Notify                   #
-####################################################
+  - service: homeassistant.turn_on
+    entity_id: switch.shelly_shsw_25_686d62_2
+  - service: notify.hassnico_bot
+    data:
+      message: Sunset - Lights ON at {{ states('sensor.date_time') }}
+  # - service: media_player.volume_set
+  #   data:
+  #     entity_id: media_player.nicolo_s_bose_home_speaker_500
+  #     volume_level: 0.3
+  - delay: 00:00:02
+  - service: notify.alexa_media
+    data:
+      target:
+      - media_player.nicolo_s_2nd_bose_home_speaker_500
+      data:
+        type: tts
+      message: >
+       '{{ [
+       "Le luci sono state accese al tramonto",
+       "Casa era poco illuminata ed ho pensato di accendere le luci",
+       "Le luci sono state accese perchè era poco illuminato",
+        ] | random }}'
 
 - id: notify-update
   alias: Update Available Notifications
   initial_state: 'on'
   trigger:
-    - platform: state
-      entity_id: binary_sensor.updater
-      from: 'off'
-      to: 'on'
+  - platform: state
+    entity_id: binary_sensor.updater
+    from: 'off'
+    to: 'on'
   action:
     service: notify.hassnico_bot
     data:
-      message: "Home Assistant {{ state_attr('binary_sensor.updater', 'newest_version') }} is available."
-
-####################################################
-#                  Bad Logins                      #
-####################################################
+      message: Home Assistant {{ state_attr('binary_sensor.updater', 'newest_version') }} is available.
 
 - id: bad-logins
   alias: Login Failure
   initial_state: 'on'
-  hide_entity: True
   trigger:
     platform: template
     value_template: "{{ states('persistent_notification.httplogin') != 'authentication' }}"
   action:
-   service: notify.hassnico_bot
-   data:
-     message: 'Bad Login.. There was a Hack attempt! Go Check the GUI for details.'
+    service: notify.hassnico_bot
+    data:
+      message: Bad Login.. There was a Hack attempt! Go Check the GUI for details.
 
-####################################################
-#                  Today's Chef                    #
-####################################################
 - id: notify-today-chef
   alias: Who Cook
   initial_state: 'on'
@@ -310,42 +369,9 @@
     platform: state
     entity_id: input_select.who_cooks
   action:
-    - service: notify.hassnico_bot
-      data_template:
-        message: >
-           "Today Cook {{ trigger.to_state.state }}"
-
-####################################################
-#                  Battery                         #
-#                Notifications                     #
-####################################################
-
-####################################################
-#                  Nico Battery                    #
-####################################################
-
-# - id: notify-nico-battery-low
-#   alias: Nico Battery Low - Notification
-#   initial_state: 'on'
-#   trigger:
-#      platform: time_pattern    
-#      # You can also match on interval. This will match every 45 minutes
-#      #minutes: '/45'
-#      seconds: 10
-
-#   condition:
-#      condition: or
-#      conditions:
-#       - condition: template
-#         value_template: "{{ (state_attr('device_tracker.nico_nico', 'battery')|int) < 35 }}"
-#   action:
-#     - service: notify.hassnico_bot
-#       data:
-#         message: "Nico's Telephone is on low Battery at {{ states('sensor.date_time') }}"
-#     - service: notify.hassnico_bot
-#       data:
-#         message: "Nico's Telephone Battery Level is {{ states('sensor.batteria_telefono_nico') }}%"
-
+  - service: notify.hassnico_bot
+    data_template:
+      message: "Today Cook {{ trigger.to_state.state }}"
 
 - id: notify-nico-battery-low
   alias: Nico Battery Low - Notification
@@ -357,17 +383,14 @@
     above: 0
     below: 36
   action:
-    - service: notify.hassnico_bot
-      data:
-        message: "Nico's Telephone is on low Battery at {{ states('sensor.date_time') }}"
-    - service: notify.hassnico_bot
-      data:
-        message: "Nico's Telephone Battery Level is {{ states('sensor.batteria_telefono_nico') }}%"
-
-
-####################################################
-#                  Mom Battery                     #
-####################################################
+  - service: notify.hassnico_bot
+    data:
+      message: Nico's Telephone is on low Battery at {{ states('sensor.date_time')
+        }}
+  - service: notify.hassnico_bot
+    data:
+      message: Nico's Telephone Battery Level is {{ states('sensor.batteria_telefono_nico')
+        }}%
 
 - id: notify-mamma-battery-low
   alias: Mamma Battery Low - Notification
@@ -379,16 +402,14 @@
     above: 0
     below: 36
   action:
-    - service: notify.hassnico_bot
-      data:
-        message: "Mom's Telephone is on low Battery at {{ states('sensor.date_time') }}"
-    - service: notify.hassnico_bot
-      data:
-        message: "Mom's Telephone Battery Level is {{ states('sensor.batteria_telefono_mamma') }}%"
-
-####################################################
-#                  Hass Start                      #
-####################################################
+  - service: notify.hassnico_bot
+    data:
+      message: Mom's Telephone is on low Battery at {{ states('sensor.date_time')
+        }}
+  - service: notify.hassnico_bot
+    data:
+      message: Mom's Telephone Battery Level is {{ states('sensor.batteria_telefono_mamma')
+        }}%
 
 - id: notify-hass-start
   alias: Home Assistant Start - Notify
@@ -399,31 +420,37 @@
   action:
   - service: notify.hassnico_bot
     data:
-      message: "Home Assistant Start at {{ states('sensor.date_time') }}"
-  - service: media_player.volume_set
-    data:
-      entity_id: media_player.nicolo_s_bose_home_speaker_500
-      volume_level: 0.3
+      message: Home Assistant Start at {{ states('sensor.date_time') }}
+  # - service: media_player.volume_set
+  #   data:
+  #     entity_id: media_player.nicolo_s_bose_home_speaker_500
+  #     volume_level: 0.3
   - delay: 00:00:02
   - service: notify.alexa_media
     data:
-      target: 
-        - media_player.nicolo_s_bose_home_speaker_500
+      target:
+      - media_player.nicolo_s_2nd_bose_home_speaker_500
       data:
         type: tts
       message: >
-       {{ [
-       "Home Assistant è nuovamente disponibile",
-       "Home Assistant è operativo",
-       "Home assistant is back piccole bibbi",
-       "Sono nuovamente operativa",
-       "Signori e Signore Ladies and Gentlement Home assistant è nuovamente operativo",
-       "Home assistant è avviato",
-       ] | random }}
+        '{{ [
+        "Home Assistant è nuovamente disponibile",
+        "Home Assistant è operativo",
+        "Home assistant is back piccole bibbi",
+        "Sono nuovamente operativa",
+        "Signori e Signore Ladies and Gentlement Home assistant è nuovamente operativo",
+        "Home assistant è avviato",
+        ] | random }}'
+  - service: recorder.purge
+    data:
+      keep_days: 7
+      repack: true
+  # - service: google_assistant.request_sync
+  # - service: notify.hassnico_bot
+  #   data:
+  #     message: Google Assistant Sync at {{ states('sensor.date_time') }}
+  - service: script.cast_on_kitchen
 
-####################################################
-#                  Hass Stop                       #
-####################################################
 
 - id: notify-hass-stop
   alias: Home Assistant Stop - Notify
@@ -434,377 +461,330 @@
   action:
     service: notify.hassnico_bot
     data:
-      message: "Home Assistant Stop at {{ states('sensor.date_time') }}"
-
-####################################################
-#                   Zone                           #
-#                Notifications                     #
-####################################################
-
-####################################################
-#                   Mom  Home                      #
-####################################################
+      message: Home Assistant Stop at {{ states('sensor.date_time') }}
 
 - id: zone-mamma-home
   alias: Mamma at Home - Notification
   initial_state: 'on'
   trigger:
-     platform: zone
-     event: enter
-     zone: zone.home
-     entity_id: device_tracker.mamma_mamma
+    platform: zone
+    event: enter
+    zone: zone.home
+    entity_id: device_tracker.mamma_mamma
   action:
-   service: notify.hassnico_bot
-   data:
-     message: "Mamma is at Home at {{ states('sensor.date_time') }}"
-
-####################################################
-#                   Mom Out Home                   #
-####################################################
+    service: notify.hassnico_bot
+    data:
+      message: Mamma is at Home at {{ states('sensor.date_time') }}
 
 - id: zone-mamma-out-home
   alias: Mamma Outside Home - Notification
   initial_state: 'on'
   trigger:
-     platform: zone
-     event: leave
-     zone: zone.home
-     entity_id: device_tracker.mamma_mamma
+    platform: zone
+    event: leave
+    zone: zone.home
+    entity_id: device_tracker.mamma_mamma
   action:
-   service: notify.hassnico_bot
-   data:
-     message: "Mamma is going out at {{ states('sensor.date_time') }}"
-
-####################################################
-#                   Maria  Home                    #
-####################################################
+    service: notify.hassnico_bot
+    data:
+      message: Mamma is going out at {{ states('sensor.date_time') }}
 
 - id: zone-maria-home
   alias: Maria at Home - Notification
   initial_state: 'on'
   trigger:
-     platform: state
-     entity_id: device_tracker.iphone
-     from: 'not_home'
-     to: 'home'
+    platform: state
+    entity_id: person.maria
+    from: not_home
+    to: home
   action:
   - service: notify.hassnico_bot
     data:
-      message: "Maria is at Home {{ states('sensor.date_time') }}"
-  - delay: 
-       seconds: 30
-  - service: media_player.volume_set
-    data:
-      entity_id: media_player.nicolo_s_bose_home_speaker_500
-      volume_level: 0.35
+      message: Maria is at Home {{ states('sensor.date_time') }}
+  - delay:
+      seconds: 30
+  # - service: media_player.volume_set
+  #   data:
+  #     entity_id: media_player.nicolo_s_bose_home_speaker_500
+  #     volume_level: 0.35
   - delay: 00:00:02
   - service: notify.alexa_media
     data:
-      target: 
-        - media_player.nicolo_s_bose_home_speaker_500
+      target:
+      - media_player.nicolo_s_2nd_bose_home_speaker_500
       data:
         type: tts
       message: >
-       {{ [
-       "Bentornata a casa Maria",
-       "Mascia finalmente sei a casa",
-       "Ci sei mancata Mascia, spero che la giornata sia andata bene",
-       "Sono felicissima di vederti Mascia, come stai?",
-       "La regina Mascia è a casa",
-       "Sua Maestà sono felicissima di rivederla",
-       "Mascia, stare qui non aveva senso senza di te. Ben Tornata!",
-       "Se gli abbracci fossero acqua, ti darei il mare… Se le coccole fossero foglie, ti darei la foresta… E se l’amicizia fosse la vita ti darei la mia… Bentornata!",
-       ] | random }}
-  - service: rest_command.ss_home_on
-  - service: rest_command.ss_preset_home
-  - delay: 
-      seconds: 10
-  - service: rest_command.ss_preset_living
-  - delay: 
-      seconds: 10
-  - service: rest_command.ss_preset_bedroom
-  - delay: 
-      seconds: 10
-  - service: rest_command.ss_preset_home
-
-####################################################
-#               Maria out Home                     #
-####################################################
+        '{{ [ 
+        "Bentornata a casa Maria",
+        "Bentornata",
+        "Ciao Mascia",
+        "Sei bellissima oggi, è un piacere rivederti",
+        "Sono felice di rivederti",
+        "è un piacere averti qui",
+        "Un membro della gang è a casa",
+        "Welcome to the candy shop",
+        "Mascia finalmente sei a casa",
+        "Ci sei mancata Mascia, spero che la giornata sia andata bene",
+        "Sono felicissima di vederti Mascia, come stai?",
+        "La regina Mascia è a casa",
+        "Sua Maestà sono felicissima di rivederla",
+        "Mascia, stare qui non aveva senso senza di te. Ben Tornata!",
+        ] | random }}'
+  # - service: rest_command.ss_home_on
+  # - service: rest_command.ss_preset_home
+  # - delay:
+  #     seconds: 10
+  # - service: rest_command.ss_preset_living
+  # - delay:
+  #     seconds: 10
+  # - service: rest_command.ss_preset_bedroom
+  # - delay:
+  #     seconds: 10
+  # - service: rest_command.ss_preset_home
 
 - id: zone-maria-out-home
   alias: Maria Outside Home - Notification
   initial_state: 'on'
   trigger:
-     platform: state
-     entity_id: device_tracker.iphone  #device_tracker.iphonemarie_2
-     #from: 'home'
-     to: 'not_home'
-     for: '00:05:00'
+    platform: state
+    entity_id: device_tracker.iphone
+    to: not_home
+    for: 00:05:00
   action:
-   - service: notify.hassnico_bot
-     data:
-       message: "Maria is going out at {{ states('sensor.date_time') }}"
-   - service: rest_command.ss_home_off
+  - service: notify.hassnico_bot
+    data:
+      message: Maria is going out at {{ states('sensor.date_time') }}
 
-####################################################
-#                  Nico Mom Home                   #
-####################################################
+- id: zone-konstantin-home
+  alias: Konstantin at Home - Notification
+  initial_state: 'on'
+  trigger:
+    platform: state
+    entity_id: device_tracker.galaxy_s10e
+    from: not_home
+    to: home
+  action:
+  - service: notify.hassnico_bot
+    data:
+      message: Konstantin is at Home {{ states('sensor.date_time') }}
+  - delay:
+      seconds: 30
+  # - service: media_player.volume_set
+  #   data:
+  #     entity_id: media_player.nicolo_s_bose_home_speaker_500
+  #     volume_level: 0.35
+  - delay: 00:00:02
+  - service: notify.alexa_media
+    data:
+      target:
+      - media_player.nicolo_s_2nd_bose_home_speaker_500
+      data:
+        type: tts
+      message: >
+        '{{ [ 
+        "Ciao Konstantin",
+        "Bentornato Konstantin",
+        "Ciao Konstantin",
+        "Ciao Costantino",
+        ] | random }}'
+
+- id: zone-natascia-home
+  alias: Natascia at Home - Notification
+  initial_state: 'on'
+  trigger:
+    platform: state
+    entity_id: device_tracker.galaxy_note10
+    from: not_home
+    to: home
+  action:
+  - service: notify.hassnico_bot
+    data:
+      message: Konstantin is at Home {{ states('sensor.date_time') }}
+  - delay:
+      seconds: 30
+  # - service: media_player.volume_set
+  #   data:
+  #     entity_id: media_player.nicolo_s_bose_home_speaker_500
+  #     volume_level: 0.35
+  - delay: 00:00:02
+  - service: notify.alexa_media
+    data:
+      target:
+      - media_player.nicolo_s_2nd_bose_home_speaker_500
+      data:
+        type: tts
+      message: >
+        '{{ [ 
+        "Ciao Natascia",
+        "Bentornata Natascia",
+        ] | random }}'
 
 - id: zone-nico-home
   alias: Nico at Home - Notification
   initial_state: 'on'
   trigger:
-     platform: zone
-     entity_id: device_tracker.nico_nico
-     zone: zone.home
-     event: enter
+    platform: zone
+    entity_id: device_tracker.nico_nico
+    zone: zone.home
+    event: enter
   condition:
-     condition: time
-     after: '07:00:00'
-     before: '23:59:00'
+    condition: time
+    after: 07:00:00
+    before: '23:59:00'
   action:
   - service: notify.hassnico_bot
     data:
-      message: "Nico is at Home at {{ states('sensor.date_time') }}"
-  - service: media_player.volume_set
-    data:
-      entity_id: media_player.echo_dot_di_nicolo
-      volume_level: 0.35
+      message: Nico is at Home at {{ states('sensor.date_time') }}
+  # - service: media_player.volume_set
+  #   data:
+  #     entity_id: media_player.echo_dot_di_nicolo
+  #     volume_level: 0.35
   - delay: 00:00:03
   - service: notify.alexa_media
     data:
-      target: 
-        - media_player.echo_dot_di_nicolo
+      target:
+      - media_player.echo_dot_di_nicolo
       data:
         type: tts
-      message: >
-       {{ [
-       "Nico è a casa di Mamma",       
-       "Nico è arrivato da Mamma",
-       "Nico è andato a trovare la Mamma",
-       "Wooow, Rossella è felicissima di vedere Nico",
-       "Il boss è dalla mamma",
-       ] | random }}
-
-####################################################
-#               Nico Out Mom Home                  #
-####################################################
+      message: > 
+        '{{ [ 
+        "Nico è a casa di Mamma",
+        "Nico è arrivato da Mamma",
+        "Nico è andato a trovare la Mamma",
+        "Wooow, Rossella è felicissima di vedere Nico",
+        "Il boss è dalla mamma",
+        ] | random }}'
 
 - id: zone-nico-out-home
-  alias: Nico is going out - Notificationù
+  alias: Nico is going out - Notification
   initial_state: 'on'
   trigger:
-     platform: zone
-     entity_id: device_tracker.nico_nico     
-     zone: zone.home
-     event: leave
+    platform: zone
+    entity_id: device_tracker.nico_nico
+    zone: zone.home
+    event: leave
   condition:
-     condition: time
-     after: '07:00:00'
-     before: '23:59:00'         
+    condition: time
+    after: 07:00:00
+    before: '23:59:00'
   action:
   - service: notify.hassnico_bot
     data:
-      message: "Nico is going out from Home at {{ states('sensor.date_time') }}"
-
-####################################################
-#                  Nico Casetta GPS                #
-####################################################
+      message: Nico is going out from Home at {{ states('sensor.date_time') }}
 
 - id: zone-nico-casetta
   alias: Nico at Home - Notification
   initial_state: 'on'
   trigger:
-     platform: zone
-     entity_id: device_tracker.nico_nico
-     zone: zone.casetta
-     event: enter
+    platform: zone
+    entity_id: device_tracker.nico_nico
+    zone: zone.casetta
+    event: enter
   condition:
-     condition: time
-     after: '07:00:00'
-     before: '23:59:00'
+    condition: time
+    after: 07:00:00
+    before: '23:59:00'
   action:
   - service: notify.hassnico_bot
     data:
-      message: "Nico is at Casetta at {{ states('sensor.date_time') }}" 
-#   - delay: 
-#       minutes: 10
-#   - service: media_player.volume_set
-#     data:
-#       entity_id: media_player.nicolo_s_bose_home_speaker_500
-#       volume_level: 0.3
-#   - delay: 00:00:02
-#   - service: notify.alexa_media
-#     data:
-#       target: 
-#         - media_player.nicolo_s_bose_home_speaker_500
-#       data:
-#         type: tts
-#       message: >
-#        {{ [
-#        "Bentornato a casa Nico",
-#        "Bella zii, come te butta oggi?",
-#        "Nico sei finalmente a casa",
-#        "Ci sei mancato tantissimo Nico, sopratutto a Mascia",
-#        "Quant'è bello tornare da lavoro e trovare Mascia a casa?",
-#        "Wooow, Mascia è felicissima di vederti",
-#        "Ladies and Gentlement, Signori e Signore, Il boss è a casa",
-#        ] | random }}
+      message: Nico is at Casetta at {{ states('sensor.date_time') }}
 
-####################################################
-#                  Nico Casetta 2                  #
-####################################################
 - id: zone-nico-casetta
   alias: Nico at Home 2 - Notification
   initial_state: 'on'
   trigger:
-     platform: state
-     entity_id: device_tracker.nicogalaxys8
-     from: 'not_home'
-     to: 'home'
-  #condition:
-     #condition: time
-     #after: '07:00:00'
-     #before: '23:59:00'
+    platform: state
+    entity_id: device_tracker.nico_nico
+    from: not_home
+    to: home
   action:
-  #- service: notify.hassnico_bot
-    #data:
-      #message: "Nico is at Casetta at {{ states('sensor.date_time') }}" 
-  #- delay: 
-      #minutes: 10
-  - service: media_player.volume_set
-    data:
-      entity_id: media_player.nicolo_s_bose_home_speaker_500
-      volume_level: 0.3
+  # - service: media_player.volume_set
+  #   data:
+  #     entity_id: media_player.nicolo_s_bose_home_speaker_500
+  #     volume_level: 0.3
   - delay: 00:00:02
   - service: notify.alexa_media
     data:
-      target: 
-        - media_player.nicolo_s_bose_home_speaker_500
+      target:
+      - media_player.nicolo_s_2nd_bose_home_speaker_500
       data:
         type: tts
       message: >
-       {{ [
-       "Bentornato a casa Nico",       
-       "Nico sei finalmente a casa",
-       "Si sente la differenza senza di te. Mi sei mancato",
-       "Ci sei mancato",
-       "Che gioia riaverti tra noi e vederti sorridere in giro per casa. Bentornato",
-       "Ci sei mancato tantissimo Nico, sopratutto a Mascia",
-       "Quant'è bello tornare da lavoro e trovare Mascia a casa?",
-       "Wooow, Mascia è felicissima di vederti",
-       "Ladies and Gentlement, Signori e Signore, Il boss è a casa",
-       "Se gli abbracci fossero acqua, ti darei il mare… Se le coccole fossero foglie, ti darei la foresta… E se l’amicizia fosse la vita ti darei la mia… Bentornato!",
-       ] | random }}
+        '{{ [
+        "Bentornato a casa Nico",
+        "Nico sei finalmente a casa",
+        "Si sente la differenza senza di te. Mi sei mancato",
+        "Ci sei mancato",
+        "Nico, ci sei mancato tantissimo",
+        "Nico, Siamo felicissimi di vederti",
+        "Ladies and Gentlement, Signori e Signore, Il boss è a casa",
+         ] | random }}'
   - service: rest_command.ss_home_on
   - service: rest_command.ss_preset_home
-  - delay: 
+  - delay:
       seconds: 10
   - service: rest_command.ss_preset_living
-  - delay: 
+  - delay:
       seconds: 10
   - service: rest_command.ss_preset_bedroom
-  - delay: 
+  - delay:
       seconds: 10
   - service: rest_command.ss_preset_home
-
-
-
-
-# - id: nico-casetta
-#   alias: Nico Device at Casetta - Notification
-#   initial_state: 'on'
-#   trigger:
-#      platform: state
-#      entity_id: device_tracker.nicogalaxys8
-#      from: 'not_home'
-#      to: 'home'
-#   action:
-#   - service: notify.alexa_media
-#     data:
-#       target: 
-#         - media_player.nicolo_s_bose_home_speaker_500
-#       data:
-#         type: tts
-#       message: >
-#        {{ [
-#        "Bentornato a casa Nico",
-#        "Bellaaaa ziiiiiii, come te butta oggi?",
-#        "Nico sei finalmente a casa",
-#        "Ci sei mancato tantissimo Nico, sopratutto a Mascia",
-#        "Quant'è bello tornare da lavoro e trovare Mascia a casa?",
-#        "Wooow, Mascia è felicissima di vederti",
-#        "Ladies and Gentlement, Signori e Signore, Il boss è a casa",
-#        ] | random }}
-####################################################
-#               Nico Out Casetta                   #
-####################################################
 
 - id: zone-nico-out-casetta
   alias: Nico is going out - Notification
   initial_state: 'on'
   trigger:
-     platform: zone
-     entity_id: device_tracker.nico_nico
-     zone: zone.casetta
-     event: leave
+    platform: zone
+    entity_id: device_tracker.nico_nico
+    zone: zone.casetta
+    event: leave
   condition:
-     condition: time
-     after: '07:00:00'
-     before: '23:59:00'         
+    condition: time
+    after: 07:00:00
+    before: '23:59:00'
   action:
-   - service: notify.hassnico_bot
-     data:
-       message: "Nico is going out from Casetta at {{ states('sensor.date_time') }}"
-   - service: script.alexatraffic2
-   - service: rest_command.ss_home_off
-   - service: rest_command.ss_preset_home
-   - delay: 
-       seconds: 10
-   - service: rest_command.ss_preset_living
-   - delay: 
-       seconds: 10
-   - service: rest_command.ss_preset_bedroom
-   - delay: 
-       seconds: 10
-   - service: rest_command.ss_preset_home
-####################################################
-#                  Nico Dad                        #
-####################################################
+  - service: notify.hassnico_bot
+    data:
+      message: Nico is going out from Casetta at {{ states('sensor.date_time') }}
+  - service: script.alexatraffic2
+  - service: rest_command.ss_preset_home
+  - delay:
+      seconds: 10
+  - service: rest_command.ss_preset_living
+  - delay:
+      seconds: 10
+  - service: rest_command.ss_preset_bedroom
+  - delay:
+      seconds: 10
+  - service: rest_command.ss_preset_home
 
 - id: zone-nico-dad-home
   alias: Nico at Papa's Home - Notification
   initial_state: 'on'
   trigger:
-     platform: zone
-     event: enter
-     zone: zone.papa
-     entity_id: device_tracker.nico_nico
+    platform: zone
+    event: enter
+    zone: zone.papa
+    entity_id: device_tracker.nico_nico
   action:
-   service: notify.hassnico_bot
-   data:
-     message: "Nico is at Papa's Home at {{ states('sensor.date_time') }}"
-
-####################################################
-#                  Nico Out Dad                    #
-####################################################
+    service: notify.hassnico_bot
+    data:
+      message: Nico is at Papa's Home at {{ states('sensor.date_time') }}
 
 - id: zone-nico-out-dad-home
   alias: Nico leaving Papa's Home - Notification
   initial_state: 'on'
   trigger:
-      platform: zone
-      event: leave
-      zone: zone.papa
-      entity_id: device_tracker.nico_nico
+    platform: zone
+    event: leave
+    zone: zone.papa
+    entity_id: device_tracker.nico_nico
   action:
     service: notify.hassnico_bot
     data:
-      message: "Nico is going out from Papa's Home {{ states('sensor.date_time') }}"
-
-####################################################
-#                  Nico Work                       #
-####################################################
+      message: Nico is going out from Papa's Home {{ states('sensor.date_time') }}
 
 - id: zone-nico-work
   alias: Nico at Work - Notification
@@ -816,22 +796,18 @@
     entity_id: device_tracker.nico_nico
   condition:
     condition: time
-    after: '07:00:00'
+    after: 07:00:00
     before: '20:00:00'
     weekday:
-      - mon
-      - tue
-      - wed
-      - thu
-      - fri
+    - mon
+    - tue
+    - wed
+    - thu
+    - fri
   action:
-  -  service: notify.hassnico_bot
-     data:
-       message: "Nico at Work at {{ states('sensor.date_time') }}"
-       
-####################################################
-#                Nico Work tigre                   #
-####################################################
+  - service: notify.hassnico_bot
+    data:
+      message: Nico at Work at {{ states('sensor.date_time') }}
 
 - id: zone-nico-work-tigre
   alias: Nico at Work (Tigre) - Notification
@@ -843,23 +819,18 @@
     entity_id: device_tracker.nico_nico
   condition:
     condition: time
-    after: '07:00:00'
+    after: 07:00:00
     before: '20:00:00'
     weekday:
-      - mon
-      - tue
-      - wed
-      - thu
-      - fri
+    - mon
+    - tue
+    - wed
+    - thu
+    - fri
   action:
-  -  service: notify.hassnico_bot
-     data:
-       message: "Nico at Work at {{ states('sensor.date_time') }}"
-       
-
-####################################################
-#                Nico out Work                     #
-####################################################
+  - service: notify.hassnico_bot
+    data:
+      message: Nico at Work at {{ states('sensor.date_time') }}
 
 - id: zone-nico-out-work
   alias: Nico out from Work - Notification
@@ -871,22 +842,18 @@
     entity_id: device_tracker.nico_nico
   condition:
     condition: time
-    after: '07:00:00'
+    after: 07:00:00
     before: '20:00:00'
     weekday:
-      - mon
-      - tue
-      - wed
-      - thu
-      - fri
+    - mon
+    - tue
+    - wed
+    - thu
+    - fri
   action:
-   - service: notify.hassnico_bot
-     data:
-       message: "Nico is going out from Work at {{ states('sensor.date_time') }}"
-
-####################################################
-#                Nico out Tigre                    #
-####################################################
+  - service: notify.hassnico_bot
+    data:
+      message: Nico is going out from Work at {{ states('sensor.date_time') }}
 
 - id: zone-nico-out-tigre
   alias: Nico out from Work (Tigre)) - Notification
@@ -898,23 +865,18 @@
     entity_id: device_tracker.nico_nico
   condition:
     condition: time
-    after: '07:00:00'
+    after: 07:00:00
     before: '20:00:00'
     weekday:
-      - mon
-      - tue
-      - wed
-      - thu
-      - fri
+    - mon
+    - tue
+    - wed
+    - thu
+    - fri
   action:
-   - service: notify.hassnico_bot
-     data:
-       message: "Nico is going out from Work at {{ states('sensor.date_time') }}"
-
-
-####################################################
-#                Notify Sunrise                    #
-####################################################
+  - service: notify.hassnico_bot
+    data:
+      message: Nico is going out from Work at {{ states('sensor.date_time') }}
 
 - id: notify-sunrise
   alias: Notify on sunrise
@@ -922,19 +884,15 @@
   trigger:
     platform: sun
     event: sunrise
-    offset: '+00:00:00'
+    offset: "+00:00:00"
   action:
-    # Actions are scripts so can also be a list of actions
-    - service: notify.hassnico_bot
-      data:
-        message: "Beautiful sunrise!"
-    - service: notify.hassnico_bot
-      data:
-        message: "The sun is up. Wake Up! {{ states('sensor.date_time') }}"
+  - service: notify.hassnico_bot
+    data:
+      message: Beautiful sunrise!
+  - service: notify.hassnico_bot
+    data:
+      message: The sun is up. Wake Up! {{ states('sensor.date_time') }}
 
-####################################################
-#                Notify Sunset                     #
-####################################################
 
 - id: notify-sunset
   alias: Notify on sunset
@@ -942,398 +900,171 @@
   trigger:
     platform: sun
     event: sunset
-    offset: '+00:00:00'
+    offset: "-00:59:00"
   action:
-    # Actions are scripts so can also be a list of actions
-    - service: notify.hassnico_bot
+  - service: notify.hassnico_bot
+    data:
+      message: Beautiful sunset!
+  - service: notify.hassnico_bot
+    data:
+      message: Oh wow you really missed something great. {{ states('sensor.date_time')
+        }}
+  # - service: media_player.volume_set
+  #   data:
+  #     entity_id: media_player.nicolo_s_bose_home_speaker_500
+  #     volume_level: 0.3
+  - service: notify.alexa_media
+    data:
+      target:
+      - media_player.nicolo_s_2nd_bose_home_speaker_500
       data:
-        message: "Beautiful sunset!"
-    - service: notify.hassnico_bot
-      data:
-        message: "Oh wow you really missed something great. {{ states('sensor.date_time') }}"
-    - service: media_player.volume_set
-      data:
-        entity_id: media_player.nicolo_s_bose_home_speaker_500
-        volume_level: 0.3
-    - service: notify.alexa_media
-      data:
-        target: 
-          - media_player.nicolo_s_bose_home_speaker_500
-        data:
-          type: tts
-        message: >
-         {{ [
-         "C'è un tramonto meraviglioso oggi, affacciati alla finestra",
-         "Che ne pensi del tramonto di oggi? Non è Bellissimo?",
-         "Sai… quando si è molto tristi si amano i tramonti.",
-         "Tutto è imperfetto, non c’è tramonto così bello da non poterlo essere di più.",
-         "Nulla può sostituire la luce del tramonto. La natura è un’orchestra in cui ogni suono è perfettamente bilanciato",
-         "Ancor più dell’alba il tramonto del sole ci sorprende e ci stupisce, con i suoi colori, le sue luci e la sua bellezza unica",
-         "Non si può che rimanere senza fiato di fronte allo spettacolo naturale offerto da un tramonto, dal Sole che piano piano sparisce all’orizzonte",
-         "Tutto è imperfetto, non c’è tramonto così bello da non poterlo essere di più",
-         "Non c’è niente di più musicale che un tramonto",
-         "Quando un’alba o un tramonto non ci danno più emozioni, significa che l’anima è malata",
-         "Che sensibilità il sole: arrossire tutte le sere al momento di tramontare",
-         "Sono molto appassionato di tramonti. Vieni, andiamo a guardare un tramonto",
-         "Tutti meritiamo un tramonto, una birra ghiacciata e tante risate",
-         ] | random }}
-
-####################################################
-#                                                  #
-#                   Scenes                         #
-#                                                  #
-####################################################
-
-
-####################################################
-#                Air Conditioner                   #
-####################################################
-####################################################
-#                Notify Sunset                     #
-####################################################
-- id: scene-ac-mode-off
-  alias: AC Mode OFF - Automation
-  trigger:
-    platform: state
-    entity_id: input_select.ac_mode
-    to: "Power Off"
-  action:
-    - service: switch.turn_off
-      entity_id: switch.air3
-    - service: notify.hassnico_bot
-      data_template:
-        message: >
-           "AC Mode changed to: {{ trigger.to_state.state }}"
-
-- id: scene-ac-mode-hot
-  alias: AC Mode - Hot
-  trigger:
-    platform: state
-    entity_id: input_select.ac_mode
-    to: "Hot"
-  action:
-    - service: switch.turn_on
-      entity_id: switch.air3
-    - service: notify.hassnico_bot
-      data_template:
-        message: >
-           "AC Mode  changed to: {{ trigger.to_state.state }}"
-
-- id: scene-ac-mode-hot-morning
-  alias: AC Mode - Hot Morning
-  trigger:
-    platform: state
-    entity_id: input_select.ac_mode
-    to: "Hot Morning"
-  action:
-    - service: notify.hassnico_bot
-      data_template:
-        message: >
-           "AC Mode  changed to: {{ trigger.to_state.state }}"
-
-- id: scene-ac-mode-cold
-  alias: AC Mode - Cold
-  trigger:
-    platform: state
-    entity_id: input_select.ac_mode
-    to: "Cold"
-  action:
-    - service: switch.turn_on
-      entity_id: switch.air1
-    - service: notify.hassnico_bot
-      data_template:
-        message: >
-           "AC Mode  changed to: {{ trigger.to_state.state }}"
-
-- id: scene-ac-mode-cold-morning
-  alias: AC Mode - Cold Morning
-  trigger:
-    platform: state
-    entity_id: input_select.ac_mode
-    to: "Cold Morning"
-  action:
-    - service: notify.hassnico_bot
-      data_template:
-        message: >
-           "AC Mode  changed to: {{ trigger.to_state.state }}"
-
-- id: scene-ac-mode-humidity
-  alias: AC Mode - Humidity
-  trigger:
-    platform: state
-    entity_id: input_select.ac_mode
-    to: "Himidity"
-  action:
-    - service: switch.turn_on
-      entity_id: switch.air2
-    - service: notify.hassnico_bot
-      data_template:
-        message: >
-           "AC Mode  changed to: {{ trigger.to_state.state }}"
-
-- id: scene-ac-mode-humidity-morning
-  alias: AC Mode - Humidity Morning
-  trigger:
-    platform: state
-    entity_id: input_select.ac_mode
-    to: "Humidity Morning"
-  action:
-    - service: notify.hassnico_bot
-      data_template:
-        message: >
-           "AC Mode  changed to: {{ trigger.to_state.state }}"
-
-####################################################
-#                     Room                         #
-#                    Living                        #
-####################################################
-# - id: living-bright
-#   alias: Living Brightness
-#   initial_state: 'on'
-#   trigger:
-#     platform: state
-#     entity_id: input_number.Living_bright
-#   action:
-#     - service: light.turn_on
-#       data_template:
-#         entity_id: light.living_door_rgb
-#         brightness: '{{ states.input_number.Living_bright.state | int }}'
-
-#     - service: light.turn_on
-#       data_template:
-#         entity_id: light.living_door_rgb
-#         brightness: '{{ states.input_number.Living_bright.state | int }}'
-
-####################################################
-#                                                  #
-#                   PC States                      #
-#                                                  #
-####################################################
-####################################################
-#                   PC restart                     #
-####################################################
+        type: tts
+      message: >
+        '{{ [ 
+        "C'è un tramonto meraviglioso oggi, affacciati alla finestra",
+        "Che ne pensi del tramonto di oggi? Non è Bellissimo?",
+        ] | random }}'
 
 - id: pc-restart
   alias: pc_restart
   trigger:
     platform: state
     entity_id: input_select.pcoptions
-    to: "Restart"
+    to: Restart
   action:
-   - service: shell_command.restart_pc
-   - service: notify.hassnico_bot
-     data:
-       message: "PC Restart at {{ states('sensor.date_time') }}"  
-   - service: media_player.volume_set
-     data:
-       entity_id: media_player.nicolo_s_bose_home_speaker_500
-       volume_level: 0.3
-   - service: notify.alexa_media
-     data:
-       target: 
-         - media_player.nicolo_s_bose_home_speaker_500
-       data:
-         type: tts
-       message: >
-        {{ [
-        "Il Computer è stato riavviato",
-        "Riavvio subito il computer",
-        ] | random }}
-####################################################
-#                   PC Shutdown                    #
-####################################################
+  - service: shell_command.restart_pc
+  - service: notify.hassnico_bot
+    data:
+      message: PC Restart at {{ states('sensor.date_time') }}
+  # - service: media_player.volume_set
+  #   data:
+  #     entity_id: media_player.nicolo_s_bose_home_speaker_500
+  #     volume_level: 0.3
+  - service: script.alexascriptpcrestart
 
 - id: pc-shutdown
   alias: pc_shutdown
   trigger:
     platform: state
     entity_id: input_select.pcoptions
-    to: "Shutdown"
+    to: Shutdown
   action:
-   - service: shell_command.shutdown_pc
-   - service: notify.hassnico_bot
-     data:
-       message: "PC Shutdown at {{ states('sensor.date_time') }}"
-   - service: media_player.volume_set
-     data:
-       entity_id: media_player.nicolo_s_bose_home_speaker_500
-       volume_level: 0.3
-   - service: notify.alexa_media
-     data:
-       target: 
-         - media_player.nicolo_s_bose_home_speaker_500
-       data:
-         type: tts
-       message: >
-        {{ [
-        "Il Computer è stato spento",
-        "Spengo subito il computer",
-        ] | random }}
-####################################################
-#                   PC Sleep                       #
-####################################################
+  - service: shell_command.shutdown_pc
+  - service: notify.hassnico_bot
+    data:
+      message: PC Shutdown at {{ states('sensor.date_time') }}
+  # - service: media_player.volume_set
+  #   data:
+  #     entity_id: media_player.nicolo_s_bose_home_speaker_500
+  #     volume_level: 0.3
+  - service: script.alexascriptpcoff
+
 
 - id: pc-sleep
   alias: pc_sleep
   trigger:
     platform: state
     entity_id: input_select.pcoptions
-    to: "Sleep"
+    to: Sleep
   action:
-   - service: shell_command.sleep_pc
-   - service: notify.hassnico_bot
-     data:
-       message: "PC Sleep at {{ states('sensor.date_time') }}"
-   - service: media_player.volume_set
-     data:
-       entity_id: media_player.nicolo_s_bose_home_speaker_500
-       volume_level: 0.3
-   - service: notify.alexa_media
-     data:
-       target: 
-         - media_player.nicolo_s_bose_home_speaker_500
-       data:
-         type: tts
-       message: >
-        {{ [
-        "Il Computer è entrato in stato sleep",
-        "Metto in modalita sleep il computer",
-        ] | random }}
-####################################################
-#                   PC Hibernate                   #
-####################################################
+  - service: shell_command.sleep_pc
+  - service: notify.hassnico_bot
+    data:
+      message: PC Sleep at {{ states('sensor.date_time') }}
+
 
 - id: pc-hibernate
   alias: pc_hibernate
   trigger:
     platform: state
     entity_id: input_select.pcoptions
-    to: "Hibernate"
+    to: Hibernate
   action:
-   - service: shell_command.hibernate_pc
-   - service: notify.hassnico_bot
-     data:
-       message: "PC Hibernated at {{ states('sensor.date_time') }}"
-   - service: media_player.volume_set
-     data:
-       entity_id: media_player.nicolo_s_bose_home_speaker_500
-       volume_level: 0.3
-   - service: notify.alexa_media
-     data:
-       target: 
-         - media_player.nicolo_s_bose_home_speaker_500
-       data:
-         type: tts
-       message: >
-        {{ [
-        "Il Computer è stato ibernato",
-        "Iberno subito il computer",
-        ] | random }}
-####################################################
-#                                                  #
-#            Home-System Health Check              #
-#                                                  #
-####################################################
-####################################################
-#                A/C Self Shutdown                 #
-####################################################
+  - service: shell_command.hibernate_pc
+  - service: notify.hassnico_bot
+    data:
+      message: PC Hibernated at {{ states('sensor.date_time') }}
+
 
 - id: ac-self-shutdown
   alias: AC Self Shutdown - Heat
   initial_state: 'on'
   trigger:
-    - platform: state
-      entity_id:
-        #- switch.air_conditioner_heat_30
-        #- switch.air_conditioner_cold_18
-        #- switch.air_conditioner_humidity
-        - switch.air  #Aria Fredda
-        - switch.air2 #Deumidificatore
-        - switch.air3 #Aria Calda
-      to: 'on'
-      for: '02:00:00'
+  - platform: state
+    entity_id:
+    - switch.air
+    - switch.air2
+    to: 'on'
+    for: 02:00:00
+  - platform: state
+    entity_id:
+    - switch.air3
+    to: 'on'
+    for: 00:45:00
   action:
-    - service: switch.turn_off
-      data_template:
-        entity_id: " {{ trigger.entity_id }} "
-    - service: notify.hassnico_bot
-      data_template:
-        message: >
-          "{{ trigger.to_state.attributes.friendly_name }} just changed from {{ trigger.to_state.state }}
-          to {{ trigger.from_state.state }} - AC Self shutdown Notify"
-    - service: media_player.volume_set
+  - service: input_select.select_option
+    data:
+      entity_id: input_select.ac_state
+      option: Power Off
+  - service: switch.turn_off
+    data_template:
+      entity_id: ' {{ trigger.entity_id }} '
+  - service: notify.hassnico_bot
+    data_template:
+      message: '"{{ trigger.to_state.attributes.friendly_name }} just changed from
+        {{ trigger.to_state.state }} to {{ trigger.from_state.state }} - AC Self shutdown
+        Notify"'
+  # - service: media_player.volume_set
+  #   data:
+  #     entity_id: media_player.nicolo_s_bose_home_speaker_500
+  #     volume_level: 0.3
+  - delay: 00:00:03
+  - service: notify.alexa_media
+    data:
+      target:
+      - media_player.nicolo_s_2nd_bose_home_speaker_500
       data:
-        entity_id: media_player.nicolo_s_bose_home_speaker_500
-        volume_level: 0.3
-    - delay: 00:00:03
-    - service: notify.alexa_media
-      data:
-        target: 
-          - media_player.nicolo_s_bose_home_speaker_500
-        data:
-          type: tts
-        message: >
+        type: tts
+      message: >
          {{ [
-         "Sto morendo di freddo ragazzi, ora spengo l'aria condizionata",
-         "L'aria fredda si è spenta automaticamente",
-         "Brrrr fa freddissimo, ora spengo l'aria condizionata",
-         "Mancano solo i pinguini in questa casa, sembra di essere al polo nord, ora spengo l'aria condizionata",
-         "Ci son due coccodrilli ed un orango tango due piccoli serpenti e un’aquila reale il gatto il topo l’elefante non manca più nessuno solo non si vedono i due pinguini",
-         "Ragazzi, Vi voglio bene, ma devo spengere l'aria condizionata, sto morendo di freddo",
-         "Qualcuno ha spento l'aria condizionata, chissà chi è stato!"
+         "Risparmio Energetico attivato, ora spengo il condizionatore",
+         "L'aria condizionata è stata spenta automaticamente",
+         "Risparmio energetico attivo, spengo il condizonatore",       
          ] | random }}
-
-####################################################
-#                TTS Clear Cache                   #
-####################################################
 
 - id: TTS-flush-cache
   alias: Flush TTS Cache
   initial_state: 'on'
-  hide_entity: True
   trigger:
     platform: time
     at: '2:35:00'
   action:
-   service: tts.clear_cache
+    service: tts.clear_cache
 
-####################################################
-#                                                  #
-#                   Telegram                       #
-#                   Keyboard                       #
-####################################################
-
-### Start Keyboard ###
 - id: telegram-start
-  alias: 'Telegram Start Command'
+  alias: Telegram Start Command
   initial_state: 'on'
   trigger:
     platform: event
     event_type: telegram_command
     event_data:
-      command: '/start'
+      command: /start
   action:
   - service: notify.hassnico_bot
     data:
-      message: >
-       {{ [
-       "Ciao, sono il tuo assistente di casa.. Ti elenco seguito la lista dei comandi disponibili",
-       "Come posso esserti utile?",
-       "Yes Sir!",
-       "Se proprio insisti, questa è la lista dei comandi",
-       "Aaaaa.. ancora qui?",
-       "E' un piacere rivederti"
-       ] | random }}       
+      message: "{{ [ \"Ciao, sono il tuo assistente di casa.. Ti elenco seguito la\
+        \ lista dei comandi disponibili\", \"Come posso esserti utile?\", \"Yes Sir!\"\
+        , \"Se proprio insisti, questa è la lista dei comandi\", \"Aaaaa.. ancora\
+        \ qui?\", \"E' un piacere rivederti\" ] | random }}       \n"
       data:
         keyboard:
-          - '/nico, /mamma'
-          - '/nicopcon, /nicopcoff, /nicopcreboot'
-          - '/ping, /camera'
-          - '/start, /cp'
+        - /nico, /mamma
+        - /nicopcon, /nicopcoff, /nicopcreboot
+        - /ping, /camera
+        - /start, /cp
 
-### Stop Keyboard ###
 - alias: Telegram_Bot_Stop
-  hide_entity: true
+  id: 26fb96b64f5240eea48a862116bbaf53
   trigger:
   - platform: event
     event_type: telegram_callback
@@ -1345,318 +1076,207 @@
       message: '*Control Panel*'
       data:
         inline_keyboard:
-          - "\U0001F4A1 Lights:/lights, \U0001F6A8 Security:/security"
-          - "\U0001F4BB System:/system, \U0001F4BB Status:/status, Help:/help, Ping:/ping"
-          - "\U0001F4C4 Sommario:/Sommario, \U00002600 Weather:/weather"
-          - "Addons:/addons"
-          #- "Gimme Pizza:/gimmepizza, No thanks:/nopizza"
+        - 💡 Lights:/lights, 🚨 Security:/security
+        - 💻 System:/system, 💻 Status:/status, Help:/help, Ping:/ping
+        - 📄 Sommario:/Sommario, ☀ Weather:/weather
+        - Addons:/addons
 
 
-####################################################
-#                   Camera SS                      #
-####################################################
 - id: telegram-camera-ss
-  alias: 'Camera command'
+  alias: Camera command
   initial_state: 'on'
   trigger:
     platform: event
     event_type: telegram_command
     event_data:
-      command: '/camera'
+      command: /camera
   action:
   - service: notify.hassnico_bot
     data:
-      message: 'E1 Pro - Salone - Snapshot'
+      message: E1 Pro - Salone - Snapshot
   - service: script.camera_snapshot
 
-
-####################################################
-#                   HA restart                     #
-####################################################
 - id: telegram-ha-restart
-  alias: 'Home Assistant restart'
+  alias: Home Assistant restart
   initial_state: 'on'
   trigger:
     platform: event
     event_type: telegram_command
     event_data:
-      command: '/harestart'
+      command: /harestart
   action:
   - service: notify.alexa_media
     data:
-      target: 
-        - media_player.nicolo_s_bose_home_speaker_500
+      target:
+      - media_player.nicolo_s_2nd_bose_home_speaker_500
       data:
         type: tts
-      message: >
-       {{ [
-       "Home Assistant si sta riavviando",
-       "Riavvio Home Assistant",
-       "Sto riavvando Home Assistant",
-       "Riavvio Home Assistant",
-       ] | random }}
+      message: '{{ [ "Home Assistant si sta riavviando", "Riavvio Home Assistant",
+        "Sto riavvando Home Assistant", "Riavvio Home Assistant", ] | random }}'
   - service: script.restart_ha
   - service: notify.hassnico_bot
     data:
-      message: 'HA - Restart - Triggered'
-
-####################################################
-#              Automation reload                   #
-####################################################
-#- id: telegram-automation-reload
-  #alias: 'Automation reload'
-  #initial_state: 'on'
-  #trigger:
-    #platform: event
-    #event_type: telegram_command
-    #event_data:
-      #command: '/automreload'
-  #action:
-  #- service: script.reload_automations
-  #- service: notify.hassnico_bot
-    #data:
-      #message: 'Automation - Reload - Triggered'
-
-####################################################
-#                   SSH Web Start                  #
-####################################################
-#- id: telegram-ssh-start
-  #alias: 'SSH Start'
-  #initial_state: 'on'
-  #trigger:
-    #platform: event
-    #event_type: telegram_command
-    #event_data:
-      #command: '/sshweb'
-  #action:
-  #- service: notify.hassnico_bot
-    #data:
-      #message: 'SSH Enabled... HASSIO is available at https://nico-casetta.dyndns.org:7681'
-  #- service: hassio.addon_start
-    #data:
-      #addon: "a0d7b954_ssh"
-
-####################################################
-#                   SSH Web Stop                  #
-####################################################
-#- id: telegram-ssh-stop
-  #alias: 'SSH OFF'
-  #initial_state: 'on'
-  #trigger:
-    #platform: event
-    #event_type: telegram_command
-    #event_data:
-      #command: '/sshoff'
-  #action:
-  #- service: notify.hassnico_bot
-    #data:
-      #message: 'SSH Stopped'
-  #- service: hassio.addon_stop
-    #data:
-      #addon: "a0d7b954_ssh"
-      
-
-####################################################
-#                   GPS Message                    #
-####################################################
+      message: HA - Restart - Triggered
 
 - id: telegram-nico-gps
-  alias: 'GPS Notify Nico'
+  alias: GPS Notify Nico
   initial_state: 'on'
   trigger:
     platform: event
     event_type: telegram_command
     event_data:
-      command: '/nico'
+      command: /nico
   action:
   - service: notify.hassnico_bot
     data:
-      message: 'Nico GPS Position'
+      message: Nico GPS Position
   - service: script.nico_gps_notify_telegram
 
 - id: telegram-mom-gps
-  alias: 'GPS Notify Mom'
+  alias: GPS Notify Mom
   initial_state: true
   trigger:
     platform: event
     event_type: telegram_command
     event_data:
-      command: '/mamma'
+      command: /mamma
   action:
   - service: notify.hassnico_bot
     data:
-      message: 'Mom GPS Position'  
+      message: Mom GPS Position
   - service: script.mamma_gps_notify_telegram
 
-
-####################################################
-#               Certificate Renew                  #
-####################################################
 - id: telegram-ca-renew
-  alias: 'Certificate Renew'
+  alias: Certificate Renew
   initial_state: 'on'
   trigger:
     platform: event
     event_type: telegram_command
     event_data:
-      command: '/certificate'
+      command: /certificate
   action:
   - service: script.letsencrypt_renew
 
-
-####################################################
-#                   Ping Pong                      #
-####################################################
 - id: telegram-ping-pong
-  alias: 'Telegram bot that reply pong to ping'
+  alias: Telegram bot that reply pong to ping
   initial_state: true
   trigger:
     platform: event
     event_type: telegram_command
     event_data:
-      command: '/ping'
+      command: /ping
   action:
   - service: notify.hassnico_bot
     data:
-      message: 'pong'
-
-####################################################
-#               Nico PC - ON/OFF                   #
-####################################################
+      message: pong
 
 - id: telegram-nico-pc-on
-  alias: 'Telegram - Nico PC ON'
+  alias: Telegram - Nico PC ON
   initial_state: true
   trigger:
     platform: event
     event_type: telegram_command
     event_data:
-      command: '/nicopcon'
+      command: /nicopcon
   action:
   - service: notify.hassnico_bot
     data:
       message: >
-       {{ [
-       "Il PC è stato accesso",
-       "Accendero il tuo PC nel piu breve tempo possibile!",
-       "Yes Sir! Accendo subito il PC",
-       "Aaaaa.. vuoi nuovamente che accendo il PC? Quanto rompi!",
-       "Hmmm.. ok dai ti accendo il PC"
-       "3.. 2.. 1.. ON"
-       ] | random }}
+        '{{ [
+        "Il PC è stato accesso",
+        "Accendero il tuo PC nel piu breve tempo possibile!",
+        "Yes Sir! Accendo subito il PC",
+        "Aaaaa.. vuoi nuovamente che accendo il PC? Quanto rompi!",
+        "Hmmm.. ok dai ti accendo il PC",
+        "3.. 2.. 1.. ON"
+        ] | random }}'
   - service: switch.turn_on
     entity_id: switch.nico_computer
 
-
 - id: telegram-nico-pc-off
-  alias: 'Telegram - Nico PC OFF'
+  alias: Telegram - Nico PC OFF
   initial_state: true
   trigger:
     platform: event
     event_type: telegram_command
     event_data:
-      command: '/nicopcoff'
+      command: /nicopcoff
   action:
   - service: notify.hassnico_bot
     data:
       message: >
-       {{ [
-       "Il PC è stato Spento",
-       "Eddajee te lo spengooo",
-       "Yes Sir! Spengo subito il PC",
-       "Aaaaa.. vuoi nuovamente che spengo il PC? Quanto rompi!",
-       "Hmmm.. ok dai ti spengo il PC"
-       "3.. 2.. 1.. Off"
-       ] | random }}
+        '{{ [
+        "Il PC è stato Spento",
+        "Eddajee te lo spengooo",
+        "Yes Sir! Spengo subito il PC",
+        "Aaaaa.. vuoi nuovamente che spengo il PC? Quanto rompi!",
+        "Hmmm.. ok dai ti spengo il PC",
+        "3.. 2.. 1.. Off",
+        ] | random }}'
   - service: shell_command.shutdown_pc
 
 - id: telegram-nico-pc-reboot
-  alias: 'Telegram - Nico PC Reboot'
+  alias: Telegram - Nico PC Reboot
   initial_state: true
   trigger:
     platform: event
     event_type: telegram_command
     event_data:
-      command: '/nicopcreboot'
+      command: /nicopcreboot
   action:
   - service: notify.hassnico_bot
     data:
-      message: >
-       {{ [
-       "Il PC è stato Riavviato",
-       "Eddajee te lo riavvio",
-       "Yes Sir! Riavvio subito il PC",
-       "Aaaaa.. vuoi nuovamente che riavvio il PC? Quanto rompi!",
-       "Hmmm.. ok dai ti riavvio il PC"
-       "3.. 2.. 1.. Reboott"
-       ] | random }}
+      message: > 
+        '{{ [
+        "Il PC è stato Riavviato",
+        "Eddajee te lo riavvio",
+        "Yes Sir! Riavvio subito il PC",
+        "Aaaaa.. vuoi nuovamente che riavvio il PC? Quanto rompi!",
+        "Hmmm.. ok dai ti riavvio il PC",
+        "3.. 2.. 1.. Reboot"
+        ] | random }}'
   - service: shell_command.restart_pc
 
-####################################################
-#                                                  #
-#                   Telegram                       #
-#                Inline Keyboard                   #
-####################################################
-#############################
-### Start Inline Keyboard ###
-#############################
 - id: telegram-control-pannel-start
-  alias: 'Telegram Control Pannel Command'
+  alias: Telegram Control Pannel Command
   initial_state: 'on'
   trigger:
     platform: event
     event_type: telegram_command
     event_data:
-      command: '/cp'
+      command: /cp
   action:
   - service: notify.hassnico_bot
     data:
-      message: >
-       {{ [
-       "Home Assistant Status",
-       "Control Panel",
-       "Yes Sir!",
-       "Home Assistant Control Panel",
-       "Pannello di controllo"
-       ] | random }}       
+      message: "{{ [ \"Home Assistant Status\", \"Control Panel\", \"Yes Sir!\", \"\
+        Home Assistant Control Panel\", \"Pannello di controllo\" ] | random }}  \
+        \     \n"
       data:
         inline_keyboard:
-          - "\U0001F4A1 Lights:/lights, \U0001F6A8 Security:/security"
-          - "\U0001F4BB System:/system, \U00002139 Status:/status, Help:/help, Ping:/ping"
-          - "\U0001F4C4 Sommario:/Sommario, \U00002600 Weather:/weather"
-          - "Addons:/addons"
-          #- "Gimme Pizza:/gimmepizza, No thanks:/nopizza"
+        - 💡 Lights:/lights, 🚨 Security:/security
+        - 💻 System:/system, ℹ Status:/status, Help:/help, Ping:/ping
+        - 📄 Sommario:/Sommario, ☀ Weather:/weather
+        - Addons:/addons
 
-
-####################
-### IK Ping Pong ###
-####################
 - id: telegram-ik-ping-pong
-  alias: 'telegram ping pong'
-  hide_entity: true
+  alias: telegram ping pong
   trigger:
-    - platform: event
-      event_type: telegram_callback
-      event_data:
-        data: '/ping'
+  - platform: event
+    event_type: telegram_callback
+    event_data:
+      data: /ping
   action:
-    - service: telegram_bot.answer_callback_query
-      data_template:
-        callback_query_id: '{{ trigger.event.data.id }}'
-        message: >-
-          Callback received from {{ trigger.event.data.from_first }}.
-          Message id: {{ trigger.event.data.message.message_id }}.
-          Data: {{ trigger.event.data.data }}
-          {{now().strftime("%H:%M:%S %Y-%m-%d")}} Pong, Message from {{ trigger.event.data["user_id"] }}.
-        show_alert: true
+  - service: telegram_bot.answer_callback_query
+    data_template:
+      callback_query_id: '{{ trigger.event.data.id }}'
+      message: 'Callback received from {{ trigger.event.data.from_first }}. Message
+        id: {{ trigger.event.data.message.message_id }}. Data: {{ trigger.event.data.data
+        }} {{now().strftime("%H:%M:%S %Y-%m-%d")}} Pong, Message from {{ trigger.event.data["user_id"]
+        }}.'
+      show_alert: true
 
-
-####################
-### IK Weather ###
-####################
 - id: telegram-weather-info
   alias: Weather Info
-  hide_entity: true
   trigger:
   - platform: event
     event_type: telegram_callback
@@ -1669,30 +1289,14 @@
       message: Weather
   - service: notify.hassnico_bot
     data_template:
-
-      message: >- 
-        
-        {{ "\U00002600" }} *Weather*:
-        
-        ------------------------------------------------
-        
-        *Tempo*:   {{ states.sensor.dark_sky_summary_tmpl.state}}
-        
-        *Temp. Tomorrow Max/Min*:   {{ states.sensor.dark_sky_daytime_high_temperature_1d.state}}/{{ states.sensor.dark_sky_overnight_low_temperature_1d.state}} °C
-        
-        *Forecasts*:   {{ states.sensor.dark_sky_hourly_summary_tmpl.state}}
-        
+      message: '{{ "\U00002600" }} *Weather*:------------------------------------------------*Tempo*:   {{ states.sensor.dark_sky_summary_tmpl.state}}*Temp. Tomorrow Max/Min*:   {{ states.sensor.dark_sky_daytime_high_temperature_1d.state}}/{{
+        states.sensor.dark_sky_overnight_low_temperature_1d.state}} °C*Forecasts*:   {{ states.sensor.dark_sky_hourly_summary_tmpl.state}}'
       data:
         inline_keyboard:
         - '{{ "\u21a9\ufe0f" }} Control Panel:/stop'
 
-
-#################
-### IK Status ###
-#################
 - id: telegram-system-status
   alias: System status
-  hide_entity: true
   trigger:
   - platform: event
     event_type: telegram_callback
@@ -1705,713 +1309,630 @@
       message: System Status
   - service: notify.hassnico_bot
     data_template:
-      message: >- 
-
-        {{ "\U0001F4BB" }} *System*:
-        
-        ------------------------------------------------        
-        
-        *CPU Usage*:   {{ states.sensor.processor_use.state }} %
-        
-        *CPU Up Time*:   {{ states.sensor.uptime.state }} h
-        
-        *Last Reboot*:   {{ states.sensor.last_boot.state }}
-        
-        *Temp CPU*:   {{ states.sensor.cpu_temp.state }} °C
-        
-        *Free Memory*:   {{ states.sensor.memory_free.state }} Mb
-        
-        *Memory Used*:   {{ states.sensor.memory_usage_real.state }} %
-          
+      message: "\n{{ \"\\U0001F4BB\" }} *System*:\n------------------------------------------------\
+        \        \n*CPU Usage*:   {{ states.sensor.processor_use.state }} %\n*CPU\
+        \ Up Time*:   {{ states.sensor.uptime.state }} h\n*Last Reboot*:   {{ states.sensor.last_boot.state\
+        \ }}\n*Temp CPU*:   {{ states.sensor.cpu_temp.state }} °C\n*Free Memory*:\
+        \   {{ states.sensor.memory_free.state }} Mb\n*Memory Used*:   {{ states.sensor.memory_usage_real.state\
+        \ }} %\n  "
       data:
         inline_keyboard:
         - '{{ "\u21a9\ufe0f" }} Control Panel:/stop'
 
-#########################
-### IK Security Alarm ###
-#########################
 - id: telegram-ik-security-alarm
-  alias: 'Telegram Alarm'
-  hide_entity: true
+  alias: Telegram Alarm
   trigger:
-    - platform: event
-      event_type: telegram_callback
-      event_data:
-        data: '/security'
-  action:
-    - service: telegram_bot.answer_callback_query
-      data_template:
-        callback_query_id: '{{ trigger.event.data.id }}'
-        message: 'Alarm control'
-    - service: telegram_bot.edit_message
-      data_template:
-        message_id: 'last'
-        chat_id: '{{ trigger.event.data.user_id }}'
-        message: >
-            {% if is_state("input_boolean.burglar_alarm_door", "off") %}Alarm is OFF. {% else %}Alarm is ON. {% endif %}
-            {% if is_state("input_boolean.away_scene", "off") %}Presence simulation is OFF. {% else %}Presence simulation is ON. {% endif %}
-        inline_keyboard:
-          - 'Away ON:/away_on, Away OFF:/away_off'
-          - 'Alarm ON:/alarm_on, Alarm OFF:/alarm_off, Cancel:/cancel'
-
-
-#####################
-### IK Pizza Time ###
-#####################
-- alias: 'Want pizza?'
-  hide_entity: true
-  trigger:
-    platform: time
-    at: '18:30:00'    
-  condition:
-    - condition: state
-      entity_id: device_tracker.iphone
-      state: 'home'
-    - condition: state
-      entity_id: device_tracker.nico_nico
-      state: 'not_home'
-  action:
-    - service: telegram_bot.send_message
-      data_template:
-        title: 'Want pizza?'
-        target: -189154344
-        message: 'You look like you are home alone. Should I order you a pizza?'
-        inline_keyboard:
-          - "Gimme Pizza:/gimmepizza"
-          - "No thanks:/nopizza"
-
-- alias: 'No pizza'
-  hide_entity: true
-  trigger:
-    platform: event
+  - platform: event
     event_type: telegram_callback
     event_data:
-      data: '/nopizza'
-  action:
-    - service: telegram_bot.answer_callback_query
-      data_template:
-        callback_query_id: '{{ trigger.event.data.id }}'
-        message: 'Ok, no pizza then'
-
-- alias: 'gimme pizza'
-  hide_entity: true
-  trigger:
-    platform: event
-    event_type: telegram_callback
-    event_data:
-      data: '/gimmepizza'
-  action:
-    - service: telegram_bot.answer_callback_query
-      data_template:
-        callback_query_id: '{{ trigger.event.data.id }}'
-        message: 'PIZZA TIME'
-    - service: dominos.order
-      data:
-        order_entity_id: dominos.medium_pan
-
-
-#################
-### IK Lights ###
-#################
-- alias: 'Lights Actions'
-  hide_entity: true
-  trigger:
-    platform: event
-    event_type: telegram_callback
-    event_data:
-      data: '/lights'
-  action:
-    - service: telegram_bot.answer_callback_query
-      data_template:
-        callback_query_id: '{{ trigger.event.data.id }}'
-        message: 'What you want to do with Lights?'  
-    - service: telegram_bot.send_message
-      data_template:
-        title: 'Lights ON or OFF?'
-        target: -189154344
-        message: 'Look like you want to turn on or off your lights. What you want to do?'
-        inline_keyboard:
-          - "ALL ON:/lighton, Living ON:/Living_on, Bedroom ON:/bedroom_on"
-          - "ALL OFF:/lightoff, Living OFF :/Living_off, Bedroom OFF:/bedroom_off"
-          - "Kitchen ON:/kitchen_on, BathRoom ON:/bath_on"
-          - "Kitchen OFF:/kitchen_off, BathRoom OFF:/bath_off"
-
-### All ligths
-- alias: 'IK - Telegram - Light On'
-  hide_entity: true
-  trigger:
-    platform: event
-    event_type: telegram_callback
-    event_data:
-      data: '/lighton'
-  action:
-    - service: telegram_bot.answer_callback_query
-      data_template:
-        callback_query_id: '{{ trigger.event.data.id }}'
-        message: 'Lights ON'
-    - service: switch.turn_on
-      data:
-        entity_id: group.lights
-        #brightness: 255
-
-- alias: 'IK - Telegram - Light Off'
-  hide_entity: true
-  trigger:
-    platform: event
-    event_type: telegram_callback
-    event_data:
-      data: '/lightoff'
-  action:
-    - service: telegram_bot.answer_callback_query
-      data_template:
-        callback_query_id: '{{ trigger.event.data.id }}'
-        message: 'Lights OFF'
-    - service: switch.turn_off
-      data:
-        entity_id: group.lights
-        #brightness: 0
-
-### Living ###
-- alias: 'IK - Telegram - Living Light On'
-  hide_entity: true
-  trigger:
-    platform: event
-    event_type: telegram_callback
-    event_data:
-      data: '/Living_on'
-  action:
-    - service: telegram_bot.answer_callback_query
-      data_template:
-        callback_query_id: '{{ trigger.event.data.id }}'
-        message: 'Living Lights ON'
-    - service: switch.turn_on
-      data:
-        entity_id: group.living
-        #brightness: 255
-
-- alias: 'IK - Telegram - Living Light OFF'
-  hide_entity: true
-  trigger:
-    platform: event
-    event_type: telegram_callback
-    event_data:
-      data: '/Living_off'
-  action:
-    - service: telegram_bot.answer_callback_query
-      data_template:
-        callback_query_id: '{{ trigger.event.data.id }}'
-        message: 'Living Lights OFF'
-    - service: switch.turn_off
-      data:
-        entity_id: group.living
-        #brightness: 0
-
-### Kitchen
-- alias: 'IK - Telegram - Kitchen Light On'
-  hide_entity: true
-  trigger:
-    platform: event
-    event_type: telegram_callback
-    event_data:
-      data: '/kitchen_on'
-  action:
-    - service: telegram_bot.answer_callback_query
-      data_template:
-        callback_query_id: '{{ trigger.event.data.id }}'
-        message: 'Kitchen Lights ON'
-    - service: switch.turn_on
-      data:
-        entity_id: group.kitchen
-        #brightness: 255
-
-- alias: 'IK - Telegram - Kitchen Light OFF'
-  hide_entity: true
-  trigger:
-    platform: event
-    event_type: telegram_callback
-    event_data:
-      data: '/kitchen_off'
-  action:
-    - service: telegram_bot.answer_callback_query
-      data_template:
-        callback_query_id: '{{ trigger.event.data.id }}'
-        message: 'Kitchen Lights OFF'
-    - service: switch.turn_off
-      data:
-        entity_id: group.kitchen
-        #brightness: 0
-
-
-### Bed Room
-- alias: 'IK - Telegram - BedRoom Light On'
-  hide_entity: true
-  trigger:
-    platform: event
-    event_type: telegram_callback
-    event_data:
-      data: '/bedroom_on'
-  action:
-    - service: telegram_bot.answer_callback_query
-      data_template:
-        callback_query_id: '{{ trigger.event.data.id }}'
-        message: 'BedRoom Lights ON'
-    - service: switch.turn_on
-      data:
-        entity_id: group.bedroom
-        #brightness: 255
-
-- alias: 'IK - Telegram - BedRoom Light OFF'
-  hide_entity: true
-  trigger:
-    platform: event
-    event_type: telegram_callback
-    event_data:
-      data: '/bedroom_off'
-  action:
-    - service: telegram_bot.answer_callback_query
-      data_template:
-        callback_query_id: '{{ trigger.event.data.id }}'
-        message: 'BedRoom Lights OFF'
-    - service: switch.turn_off
-      data:
-        entity_id: group.bedroom
-        #brightness: 0
-
-### Bath Room
-- alias: 'IK - Telegram - BathRoom Light On'
-  hide_entity: true
-  trigger:
-    platform: event
-    event_type: telegram_callback
-    event_data:
-      data: '/bath_on'
-  action:
-    - service: telegram_bot.answer_callback_query
-      data_template:
-        callback_query_id: '{{ trigger.event.data.id }}'
-        message: 'BathRoom Lights ON'
-    - service: switch.turn_on
-      data:
-        entity_id: group.bathroom
-        ##brightness: 255
-
-- alias: 'IK - Telegram - BathRoom Light OFF'
-  hide_entity: true
-  trigger:
-    platform: event
-    event_type: telegram_callback
-    event_data:
-      data: '/bath_off'
-  action:
-    - service: telegram_bot.answer_callback_query
-      data_template:
-        callback_query_id: '{{ trigger.event.data.id }}'
-        message: 'BathRoom Lights OFF'
-    - service: switch.turn_off
-      data:
-        entity_id: group.bathroom
-        #brightness: 0
-
-
-#################
-### IK System ###
-#################
-- alias: 'HA System Actions'
-  hide_entity: true
-  trigger:
-    platform: event
-    event_type: telegram_callback
-    event_data:
-      data: '/system'
-  action:
-    - service: telegram_bot.answer_callback_query
-      data_template:
-        callback_query_id: '{{ trigger.event.data.id }}'
-        message: 'What actions you want to do on HA?'  
-    - service: telegram_bot.send_message
-      data_template:
-        title: 'HA System Actions'
-        target: -189154344
-        message: 'Look like you want to do something about your Home Assistant istance.. What you want to do?'
-        inline_keyboard:
-          - "Check Config:/config, Automation Reload:/automreload"
-          - "SSL certificate:/ssl, SSL Renew:/sslrenew"
-          - "HA Restart:/harestart, Host Reboot:/hassioreboot"
-          
-
-
-### Automation reload
-- alias: 'IK - Telegram - Automation reload'
-  hide_entity: true
-  trigger:
-    platform: event
-    event_type: telegram_callback
-    event_data:
-      data: '/automreload'
-  action:
-    - service: telegram_bot.answer_callback_query
-      data_template:
-        callback_query_id: '{{ trigger.event.data.id }}'
-        message: 'Automation Reload'
-    - service: script.reload_automations
-    - service: notify.hassnico_bot
-      data:
-        message: 'Automation - Reload - Triggered'
-
-### HA Restart
-- alias: 'IK - Telegram - HA Restart'
-  hide_entity: true
-  trigger:
-    platform: event
-    event_type: telegram_callback
-    event_data:
-      data: '/harestart'
-  action:
-    - service: telegram_bot.answer_callback_query
-      data_template:
-        callback_query_id: '{{ trigger.event.data.id }}'
-        message: 'HA restart'
-    - service: script.restart_ha
-    - service: notify.hassnico_bot
-      data:
-        message: 'HA - Restart - Triggered'
-
-### SSL Renew
-- alias: 'IK - Telegram - SSL Renew'
-  hide_entity: true
-  trigger:
-    platform: event
-    event_type: telegram_callback
-    event_data:
-      data: '/sslrenew'
-  action:
-    - service: telegram_bot.answer_callback_query
-      data_template:
-        callback_query_id: '{{ trigger.event.data.id }}'
-        message: 'SSL Renew'
-    - service: script.letsencrypt_renew
-    - service: notify.hassnico_bot
-      data:
-        message: 'SSL - Renew - Triggered'
-
-
-### Host Reboot
-- alias: 'IK - Telegram - Host Reboot'
-  hide_entity: true
-  trigger:
-    platform: event
-    event_type: telegram_callback
-    event_data:
-      data: '/hassioreboot'
-  action:
-    - service: telegram_bot.answer_callback_query
-      data_template:
-        callback_query_id: '{{ trigger.event.data.id }}'
-        message: 'Host Reboot'
-    - service: hassio.host_reboot
-    - service: notify.hassnico_bot
-      data:
-        message: 'Host - Reboot - Triggered'
-
-
-#################
-### IK Addons ###
-#################
-- alias: 'Addons Actions'
-  hide_entity: true
-  trigger:
-    platform: event
-    event_type: telegram_callback
-    event_data:
-      data: '/addons'
-  action:
-    - service: telegram_bot.answer_callback_query
-      data_template:
-        callback_query_id: '{{ trigger.event.data.id }}'
-        message: 'What you want to do with these addons?'  
-    - service: telegram_bot.send_message
-      data_template:
-        title: 'Addons'
-        target: -189154344
-        message: 'Look like you want to turn on or off your Addons. What you want to do?'
-        inline_keyboard:
-          - "Web SSH ON:/webssh_on, Pi-Hole ON:/pihole_on"
-          - "Web SSH OFF:/webssh_off, Pi-Hole OFF:/pihole_off"
-          - "IDE ON:/ide_on, LogViewer ON:/logview_on"
-          - "IDE OFF:/ide_off, LogViewer OFF:/logview_off"
-          - "NodeRed ON:/nodered_on, NodeRed OFF:/nodered__off"
-
-
-### Addon SSH Web Start
-- alias: 'IK - Telegram - Addon SSH Web Start'
-  hide_entity: true
-  trigger:
-    platform: event
-    event_type: telegram_callback
-    event_data:
-      data: '/webssh_on'
-  action:
-    - service: telegram_bot.answer_callback_query
-      data_template:
-        callback_query_id: '{{ trigger.event.data.id }}'
-        message: 'Addon SSH Web Start - Triggered'
-    - service: hassio.addon_start
-      data:
-        addon: "a0d7b954_ssh"
-    - service: notify.hassnico_bot
-      data:
-        message: 'SSH Enabled... Web SSH is available at https://nico-casetta.dyndns.org:7681'
-
-### Addon SSH Web Stop
-- alias: 'IK - Telegram - Addon SSH Web Stop'
-  hide_entity: true
-  trigger:
-    platform: event
-    event_type: telegram_callback
-    event_data:
-      data: '/webssh_off'
-  action:
-    - service: telegram_bot.answer_callback_query
-      data_template:
-        callback_query_id: '{{ trigger.event.data.id }}'
-        message: 'Addon SSH Web Stop - Triggered'
-    - service: hassio.addon_stop
-      data:
-        addon: "a0d7b954_ssh"
-    - service: notify.hassnico_bot
-      data:
-        message: 'Addon SSH Web Stopped'
-
-### Addon Log Viewer Start
-- alias: 'IK - Telegram - Addon  Log Viewer Start'
-  hide_entity: true
-  trigger:
-    platform: event
-    event_type: telegram_callback
-    event_data:
-      data: '/logview_on'
-  action:
-    - service: telegram_bot.answer_callback_query
-      data_template:
-        callback_query_id: '{{ trigger.event.data.id }}'
-        message: 'Addon  Log Viewer Start - Triggered'
-    - service: hassio.addon_start
-      data:
-        addon: "a0d7b954_logviewer"
-    - service: notify.hassnico_bot
-      data:
-        message: ' Log Viewer... Log Viewer is available at https://nico-casetta.dyndns.org:4277'
-
-### Addon Log Viewer Stop
-- alias: 'IK - Telegram - Addon  Log Viewer Stop'
-  hide_entity: true
-  trigger:
-    platform: event
-    event_type: telegram_callback
-    event_data:
-      data: '/logview_off'
-  action:
-    - service: telegram_bot.answer_callback_query
-      data_template:
-        callback_query_id: '{{ trigger.event.data.id }}'
-        message: 'Addon  Log Viewer Stop - Triggered'
-    - service: hassio.addon_stop
-      data:
-        addon: "a0d7b954_logviewer"
-    - service: notify.hassnico_bot
-      data:
-        message: 'Addon  Log ViewerStopped'
-
-### Addon Pi-Hole Start
-- alias: 'IK - Telegram - Addon  Pi-Hole Start'
-  hide_entity: true
-  trigger:
-    platform: event
-    event_type: telegram_callback
-    event_data:
-      data: '/logview_on'
-  action:
-    - service: telegram_bot.answer_callback_query
-      data_template:
-        callback_query_id: '{{ trigger.event.data.id }}'
-        message: 'Addon  Pi-Hole Start - Triggered'
-    - service: hassio.addon_start
-      data:
-        addon: "a0d7b954_pi-hole"
-    - service: notify.hassnico_bot
-      data:
-        message: 'Pi-Hole is available at https://nico-casetta.dyndns.org:4277'
-
-### Addon Pi-Hole Stop
-- alias: 'IK - Telegram - Addon  Pi-Hole Stop'
-  hide_entity: true
-  trigger:
-    platform: event
-    event_type: telegram_callback
-    event_data:
-      data: '/logview_off'
-  action:
-    - service: telegram_bot.answer_callback_query
-      data_template:
-        callback_query_id: '{{ trigger.event.data.id }}'
-        message: 'Addon  Pi-Hole Stop - Triggered'
-    - service: hassio.addon_stop
-      data:
-        addon: "a0d7b954_pi-hole"
-    - service: notify.hassnico_bot
-      data:
-        message: 'Addon  Pi-Hole Stopped'
-
-### Addon IDE Start
-- alias: 'IK - Telegram - Addon  IDE Start'
-  hide_entity: true
-  trigger:
-    platform: event
-    event_type: telegram_callback
-    event_data:
-      data: '/ide_on'
-  action:
-    - service: telegram_bot.answer_callback_query
-      data_template:
-        callback_query_id: '{{ trigger.event.data.id }}'
-        message: 'Addon  IDE Start - Triggered'
-    - service: hassio.addon_start
-      data:
-        addon: "a0d7b954_ide"
-    - service: notify.hassnico_bot
-      data:
-        message: 'IDE is available at https://nico-casetta.dyndns.org:4277'
-
-### Addon IDE Stop
-- alias: 'IK - Telegram - Addon  IDE Stop'
-  hide_entity: true
-  trigger:
-    platform: event
-    event_type: telegram_callback
-    event_data:
-      data: '/ide_off'
-  action:
-    - service: telegram_bot.answer_callback_query
-      data_template:
-        callback_query_id: '{{ trigger.event.data.id }}'
-        message: 'Addon  IDE Stop - Triggered'
-    - service: hassio.addon_stop
-      data:
-        addon: "a0d7b954_ide"
-    - service: notify.hassnico_bot
-      data:
-        message: 'Addon  IDE Stopped'
-
-### Addon NodeRed Start
-- alias: 'IK - Telegram - Addon  NodeRed Start'
-  hide_entity: true
-  trigger:
-    platform: event
-    event_type: telegram_callback
-    event_data:
-      data: '/nodered_on'
-  action:
-    - service: telegram_bot.answer_callback_query
-      data_template:
-        callback_query_id: '{{ trigger.event.data.id }}'
-        message: 'Addon  NodeRed Start - Triggered'
-    - service: hassio.addon_start
-      data:
-        addon: "a0d7b954_nodered"
-    - service: notify.hassnico_bot
-      data:
-        message: 'NodeRed is available at https://nico-casetta.dyndns.org:1880'
-
-### Addon NodeRed Stop
-- alias: 'IK - Telegram - Addon  NodeRed Stop'
-  hide_entity: true
-  trigger:
-    platform: event
-    event_type: telegram_callback
-    event_data:
-      data: '/nodered_off'
-  action:
-    - service: telegram_bot.answer_callback_query
-      data_template:
-        callback_query_id: '{{ trigger.event.data.id }}'
-        message: 'Addon  NodeRed Stop - Triggered'
-    - service: hassio.addon_stop
-      data:
-        addon: "a0d7b954_nodered"
-    - service: notify.hassnico_bot
-      data:
-        message: 'Addon  NodeRed Stopped'
-
-
-#################
-### IK Help ###
-#################
-- alias: 'Help'
-  hide_entity: true
-  trigger:
-    platform: event
-    event_type: telegram_callback
-    event_data:
-      data: '/help'
-  action:
-    - service: telegram_bot.answer_callback_query
-      data_template:
-        callback_query_id: '{{ trigger.event.data.id }}'
-        message: 'Help sections'  
-    - service: telegram_bot.send_message
-      data_template:
-        title: 'Help'
-        target: -189154344
-        message: 'Look like you want to turn on or off your Addons. What you want to do?'
-        inline_keyboard:
-          - "Info Service Port:/info"
-
-### help info
-- alias: 'IK - Telegram - Help Info'
-  hide_entity: true
-  trigger:
-    platform: event
-    event_type: telegram_callback
-    event_data:
-      data: '/info'
+      data: /security
   action:
   - service: telegram_bot.answer_callback_query
     data_template:
       callback_query_id: '{{ trigger.event.data.id }}'
-      message: "Help info - Triggered"
+      message: Alarm control
+  - service: telegram_bot.edit_message
+    data_template:
+      message_id: last
+      chat_id: '{{ trigger.event.data.user_id }}'
+      message: '{% if is_state("input_boolean.burglar_alarm_door", "off") %}Alarm
+        is OFF. {% else %}Alarm is ON. {% endif %} {% if is_state("input_boolean.away_scene",
+        "off") %}Presence simulation is OFF. {% else %}Presence simulation is ON.
+        {% endif %}'
+      inline_keyboard:
+      - Away ON:/away_on, Away OFF:/away_off
+      - Alarm ON:/alarm_on, Alarm OFF:/alarm_off, Cancel:/cancel
+
+- alias: Want pizza?
+  id: e16c9ed3708b4ed988bd3768f1d6505b
+  trigger:
+    platform: time
+    at: '18:30:00'
+  condition:
+  - condition: state
+    entity_id: person.maria
+    state: home
+  - condition: state
+    entity_id: person.nico
+    state: not_home
+  action:
+  - service: telegram_bot.send_message
+    data_template:
+      title: Want pizza?
+      target: '{{ trigger.event.data.user_id }}'
+      #-189154344
+      message: You look like you are home alone. Should I order you a pizza?
+      inline_keyboard:
+      - Gimme Pizza:/gimmepizza
+      - No thanks:/nopizza
+
+
+- alias: No pizza
+  id: 00aea60bf4df41ea873af5bb00914bf9
+  trigger:
+    platform: event
+    event_type: telegram_callback
+    event_data:
+      data: /nopizza
+  action:
+  - service: telegram_bot.answer_callback_query
+    data_template:
+      callback_query_id: '{{ trigger.event.data.id }}'
+      message: Ok, no pizza then
+
+
+- alias: gimme pizza
+  id: 2664ed6ab9d04317a20914ac195ea623
+  trigger:
+    platform: event
+    event_type: telegram_callback
+    event_data:
+      data: /gimmepizza
+  action:
+  - service: telegram_bot.answer_callback_query
+    data_template:
+      callback_query_id: '{{ trigger.event.data.id }}'
+      message: PIZZA TIME
+  - service: dominos.order
+    data:
+      order_entity_id: dominos.medium_pan
+
+
+- alias: Lights Actions
+  id: 395856c12a51458a8fcba2801af89a87
+  trigger:
+    platform: event
+    event_type: telegram_callback
+    event_data:
+      data: /lights
+  action:
+  - service: telegram_bot.answer_callback_query
+    data_template:
+      callback_query_id: '{{ trigger.event.data.id }}'
+      message: What you want to do with Lights?
+  - service: telegram_bot.send_message
+    data_template:
+      title: Lights ON or OFF?
+      target: -189154344
+      message: Look like you want to turn on or off your lights. What you want to
+        do?
+      inline_keyboard:
+      - ALL ON:/lighton, Living ON:/Living_on, Bedroom ON:/bedroom_on
+      - ALL OFF:/lightoff, Living OFF :/Living_off, Bedroom OFF:/bedroom_off
+      - Kitchen ON:/kitchen_on, BathRoom ON:/bath_on
+      - Kitchen OFF:/kitchen_off, BathRoom OFF:/bath_off
+
+
+- alias: IK - Telegram - Light On
+  id: de9c96983e0249dca7ff6a383cf3fee5
+  trigger:
+    platform: event
+    event_type: telegram_callback
+    event_data:
+      data: /lighton
+  action:
+  - service: telegram_bot.answer_callback_query
+    data_template:
+      callback_query_id: '{{ trigger.event.data.id }}'
+      message: Lights ON
+  - service: switch.turn_on
+    data:
+      entity_id: group.lights
+
+
+- alias: IK - Telegram - Light Off
+  id: a385f2a51e974e7087abced292444f08
+  trigger:
+    platform: event
+    event_type: telegram_callback
+    event_data:
+      data: /lightoff
+  action:
+  - service: telegram_bot.answer_callback_query
+    data_template:
+      callback_query_id: '{{ trigger.event.data.id }}'
+      message: Lights OFF
+  - service: switch.turn_off
+    data:
+      entity_id: group.lights
+
+
+- alias: IK - Telegram - Living Light On
+  trigger:
+    platform: event
+    event_type: telegram_callback
+    event_data:
+      data: /Living_on
+  action:
+  - service: telegram_bot.answer_callback_query
+    data_template:
+      callback_query_id: '{{ trigger.event.data.id }}'
+      message: Living Lights ON
+  - service: switch.turn_on
+    data:
+      entity_id: group.living
+  id: 93819def968a4138a042b2c9914cdcab
+
+- alias: IK - Telegram - Living Light OFF
+  trigger:
+    platform: event
+    event_type: telegram_callback
+    event_data:
+      data: /Living_off
+  action:
+  - service: telegram_bot.answer_callback_query
+    data_template:
+      callback_query_id: '{{ trigger.event.data.id }}'
+      message: Living Lights OFF
+  - service: switch.turn_off
+    data:
+      entity_id: group.living
+  id: 4a791d4879af458caa18cdaf07396fb4
+
+- alias: IK - Telegram - Kitchen Light On
+  trigger:
+    platform: event
+    event_type: telegram_callback
+    event_data:
+      data: /kitchen_on
+  action:
+  - service: telegram_bot.answer_callback_query
+    data_template:
+      callback_query_id: '{{ trigger.event.data.id }}'
+      message: Kitchen Lights ON
+  - service: switch.turn_on
+    data:
+      entity_id: group.kitchen
+  id: d0db7a6136df4543a9cec7e48d3755e2
+
+- alias: IK - Telegram - Kitchen Light OFF
+  trigger:
+    platform: event
+    event_type: telegram_callback
+    event_data:
+      data: /kitchen_off
+  action:
+  - service: telegram_bot.answer_callback_query
+    data_template:
+      callback_query_id: '{{ trigger.event.data.id }}'
+      message: Kitchen Lights OFF
+  - service: switch.turn_off
+    data:
+      entity_id: group.kitchen  
+  id: c9d0f4d9d33e46eeb08bd93e09d79b51
+
+- alias: IK - Telegram - BedRoom Light On
+  trigger:
+    platform: event
+    event_type: telegram_callback
+    event_data:
+      data: /bedroom_on
+  action:
+  - service: telegram_bot.answer_callback_query
+    data_template:
+      callback_query_id: '{{ trigger.event.data.id }}'
+      message: BedRoom Lights ON
+  - service: switch.turn_on
+    data:
+      entity_id: group.bedroom
+  id: a663b90a49864dfbb8e427077d0e7d38
+
+- alias: IK - Telegram - BedRoom Light OFF
+  trigger:
+    platform: event
+    event_type: telegram_callback
+    event_data:
+      data: /bedroom_off
+  action:
+  - service: telegram_bot.answer_callback_query
+    data_template:
+      callback_query_id: '{{ trigger.event.data.id }}'
+      message: BedRoom Lights OFF
+  - service: switch.turn_off
+    data:
+      entity_id: group.bedroom
+  id: a73bc62c02204d9a9dc2acc57fb30f98
+
+- alias: IK - Telegram - BathRoom Light On
+  trigger:
+    platform: event
+    event_type: telegram_callback
+    event_data:
+      data: /bath_on
+  action:
+  - service: telegram_bot.answer_callback_query
+    data_template:
+      callback_query_id: '{{ trigger.event.data.id }}'
+      message: BathRoom Lights ON
+  - service: switch.turn_on
+    data:
+      entity_id: group.bathroom
+  id: 84bbf8fc552e44b1841dd2d557baf6b1
+
+- alias: IK - Telegram - BathRoom Light OFF
+  trigger:
+    platform: event
+    event_type: telegram_callback
+    event_data:
+      data: /bath_off
+  action:
+  - service: telegram_bot.answer_callback_query
+    data_template:
+      callback_query_id: '{{ trigger.event.data.id }}'
+      message: BathRoom Lights OFF
+  - service: switch.turn_off
+    data:
+      entity_id: group.bathroom
+  id: 82c1eddb9a694237bf7fbc5ee6581843
+
+- alias: HA System Actions
+  trigger:
+    platform: event
+    event_type: telegram_callback
+    event_data:
+      data: /system
+  action:
+  - service: telegram_bot.answer_callback_query
+    data_template:
+      callback_query_id: '{{ trigger.event.data.id }}'
+      message: What actions you want to do on HA?
+  - service: telegram_bot.send_message
+    data_template:
+      title: HA System Actions
+      target: -189154344
+      message: Look like you want to do something about your Home Assistant istance..
+        What you want to do?
+      inline_keyboard:
+      - Check Config:/config, Automation Reload:/automreload
+      - SSL certificate:/ssl, SSL Renew:/sslrenew
+      - HA Restart:/harestart, Host Reboot:/hassioreboot
+  id: cd77f15bdc134091bb724ff88c2209f2
+
+- alias: IK - Telegram - Automation reload
+  trigger:
+    platform: event
+    event_type: telegram_callback
+    event_data:
+      data: /automreload
+  action:
+  - service: telegram_bot.answer_callback_query
+    data_template:
+      callback_query_id: '{{ trigger.event.data.id }}'
+      message: Automation Reload
+  - service: script.reload_automations
+  - service: notify.hassnico_bot
+    data:
+      message: Automation - Reload - Triggered
+  id: fe7953d2058449c3ac8151413c59c52d
+
+- alias: IK - Telegram - HA Restart
+  trigger:
+    platform: event
+    event_type: telegram_callback
+    event_data:
+      data: /harestart
+  action:
+  - service: telegram_bot.answer_callback_query
+    data_template:
+      callback_query_id: '{{ trigger.event.data.id }}'
+      message: HA restart
+  - service: script.restart_ha
+  - service: notify.hassnico_bot
+    data:
+      message: HA - Restart - Triggered
+  id: 21923d7d73e64125b52f19622304c15e
+
+- alias: IK - Telegram - SSL Renew
+  trigger:
+    platform: event
+    event_type: telegram_callback
+    event_data:
+      data: /sslrenew
+  action:
+  - service: telegram_bot.answer_callback_query
+    data_template:
+      callback_query_id: '{{ trigger.event.data.id }}'
+      message: SSL Renew
+  - service: script.letsencrypt_renew
+  - service: notify.hassnico_bot
+    data:
+      message: SSL - Renew - Triggered
+  id: 5023c18fd0cb4ec2bd4ab9b40b270bdd
+
+- alias: IK - Telegram - Host Reboot
+  trigger:
+    platform: event
+    event_type: telegram_callback
+    event_data:
+      data: /hassioreboot
+  action:
+  - service: telegram_bot.answer_callback_query
+    data_template:
+      callback_query_id: '{{ trigger.event.data.id }}'
+      message: Host Reboot
+  - service: hassio.host_reboot
+  - service: notify.hassnico_bot
+    data:
+      message: Host - Reboot - Triggered
+  id: 4095dcaa857646dda279642d3af178c3
+
+- alias: Addons Actions
+  trigger:
+    platform: event
+    event_type: telegram_callback
+    event_data:
+      data: /addons
+  action:
+  - service: telegram_bot.answer_callback_query
+    data_template:
+      callback_query_id: '{{ trigger.event.data.id }}'
+      message: What you want to do with these addons?
+  - service: telegram_bot.send_message
+    data_template:
+      title: Addons
+      target: -189154344
+      message: Look like you want to turn on or off your Addons. What you want to
+        do?
+      inline_keyboard:
+      - Web SSH ON:/webssh_on, Pi-Hole ON:/pihole_on
+      - Web SSH OFF:/webssh_off, Pi-Hole OFF:/pihole_off
+      - IDE ON:/ide_on, LogViewer ON:/logview_on
+      - IDE OFF:/ide_off, LogViewer OFF:/logview_off
+      - NodeRed ON:/nodered_on, NodeRed OFF:/nodered__off
+  id: 881d4f591f03455e94096c5dd98a4318
+
+- alias: IK - Telegram - Addon SSH Web Start
+  trigger:
+    platform: event
+    event_type: telegram_callback
+    event_data:
+      data: /webssh_on
+  action:
+  - service: telegram_bot.answer_callback_query
+    data_template:
+      callback_query_id: '{{ trigger.event.data.id }}'
+      message: Addon SSH Web Start - Triggered
+  - service: hassio.addon_start
+    data:
+      addon: a0d7b954_ssh
+  - service: notify.hassnico_bot
+    data:
+      message: SSH Enabled... Web SSH is available at https://nico-casetta.duckdns.org:7681
+  id: 2bb0cd84615945419aaed0a414f64dd5
+
+- alias: IK - Telegram - Addon SSH Web Stop
+  trigger:
+    platform: event
+    event_type: telegram_callback
+    event_data:
+      data: /webssh_off
+  action:
+  - service: telegram_bot.answer_callback_query
+    data_template:
+      callback_query_id: '{{ trigger.event.data.id }}'
+      message: Addon SSH Web Stop - Triggered
+  - service: hassio.addon_stop
+    data:
+      addon: a0d7b954_ssh
+  - service: notify.hassnico_bot
+    data:
+      message: Addon SSH Web Stopped
+  id: 2c66fce6802d4be28ec41fe08123d8f0
+
+- alias: IK - Telegram - Addon  Log Viewer Start
+  trigger:
+    platform: event
+    event_type: telegram_callback
+    event_data:
+      data: /logview_on
+  action:
+  - service: telegram_bot.answer_callback_query
+    data_template:
+      callback_query_id: '{{ trigger.event.data.id }}'
+      message: Addon  Log Viewer Start - Triggered
+  - service: hassio.addon_start
+    data:
+      addon: a0d7b954_logviewer
+  - service: notify.hassnico_bot
+    data:
+      message: ' Log Viewer... Log Viewer is available at https://nico-casetta.duckdns.org:4277'
+  id: 417fccccf3ba4d4eafa4b8a23724689a
+
+- alias: IK - Telegram - Addon  Log Viewer Stop
+  trigger:
+    platform: event
+    event_type: telegram_callback
+    event_data:
+      data: /logview_off
+  action:
+  - service: telegram_bot.answer_callback_query
+    data_template:
+      callback_query_id: '{{ trigger.event.data.id }}'
+      message: Addon  Log Viewer Stop - Triggered
+  - service: hassio.addon_stop
+    data:
+      addon: a0d7b954_logviewer
+  - service: notify.hassnico_bot
+    data:
+      message: Addon  Log ViewerStopped
+  id: ea7b80b540ed4c5c8d0b2c7208ca8509
+
+- alias: IK - Telegram - Addon  Pi-Hole Start
+  trigger:
+    platform: event
+    event_type: telegram_callback
+    event_data:
+      data: /logview_on
+  action:
+  - service: telegram_bot.answer_callback_query
+    data_template:
+      callback_query_id: '{{ trigger.event.data.id }}'
+      message: Addon  Pi-Hole Start - Triggered
+  - service: hassio.addon_start
+    data:
+      addon: a0d7b954_pi-hole
+  - service: notify.hassnico_bot
+    data:
+      message: Pi-Hole is available at https://nico-casetta.duckdns.org:4277
+  
+  id: 42d79f34480347ada179654f3fd48eca
+- alias: IK - Telegram - Addon  Pi-Hole Stop
+  trigger:
+    platform: event
+    event_type: telegram_callback
+    event_data:
+      data: /logview_off
+  action:
+  - service: telegram_bot.answer_callback_query
+    data_template:
+      callback_query_id: '{{ trigger.event.data.id }}'
+      message: Addon  Pi-Hole Stop - Triggered
+  - service: hassio.addon_stop
+    data:
+      addon: a0d7b954_pi-hole
+  - service: notify.hassnico_bot
+    data:
+      message: Addon  Pi-Hole Stopped
+  
+  id: 7d27cedd571942178b4e3fad4dd99c3e
+- alias: IK - Telegram - Addon  IDE Start
+  trigger:
+    platform: event
+    event_type: telegram_callback
+    event_data:
+      data: /ide_on
+  action:
+  - service: telegram_bot.answer_callback_query
+    data_template:
+      callback_query_id: '{{ trigger.event.data.id }}'
+      message: Addon  IDE Start - Triggered
+  - service: hassio.addon_start
+    data:
+      addon: a0d7b954_ide
+  - service: notify.hassnico_bot
+    data:
+      message: IDE is available at https://nico-casetta.duckdns.org:4277
+  id: 093c013d0af544709a9dc40b406243ed
+
+- alias: IK - Telegram - Addon  IDE Stop
+  trigger:
+    platform: event
+    event_type: telegram_callback
+    event_data:
+      data: /ide_off
+  action:
+  - service: telegram_bot.answer_callback_query
+    data_template:
+      callback_query_id: '{{ trigger.event.data.id }}'
+      message: Addon  IDE Stop - Triggered
+  - service: hassio.addon_stop
+    data:
+      addon: a0d7b954_ide
+  - service: notify.hassnico_bot
+    data:
+      message: Addon  IDE Stopped
+  
+  id: e17e1bf050034ad789250d6c110ee881
+- alias: IK - Telegram - Addon  NodeRed Start
+  trigger:
+    platform: event
+    event_type: telegram_callback
+    event_data:
+      data: /nodered_on
+  action:
+  - service: telegram_bot.answer_callback_query
+    data_template:
+      callback_query_id: '{{ trigger.event.data.id }}'
+      message: Addon  NodeRed Start - Triggered
+  - service: hassio.addon_start
+    data:
+      addon: a0d7b954_nodered
+  - service: notify.hassnico_bot
+    data:
+      message: NodeRed is available at https://nico-casetta.duckdns.org:1880
+  
+  id: 74c5248c98f14ed0820ffe11bc3783a6
+- alias: IK - Telegram - Addon  NodeRed Stop
+  trigger:
+    platform: event
+    event_type: telegram_callback
+    event_data:
+      data: /nodered_off
+  action:
+  - service: telegram_bot.answer_callback_query
+    data_template:
+      callback_query_id: '{{ trigger.event.data.id }}'
+      message: Addon  NodeRed Stop - Triggered
+  - service: hassio.addon_stop
+    data:
+      addon: a0d7b954_nodered
+  - service: notify.hassnico_bot
+    data:
+      message: Addon  NodeRed Stopped
+  id: e15198a590af4101ac923b3787eb7d6c
+
+- alias: Help
+  trigger:
+    platform: event
+    event_type: telegram_callback
+    event_data:
+      data: /help
+  action:
+  - service: telegram_bot.answer_callback_query
+    data_template:
+      callback_query_id: '{{ trigger.event.data.id }}'
+      message: Help sections
+  - service: telegram_bot.send_message
+    data_template:
+      title: Help
+      target: -189154344
+      message: Look like you want to turn on or off your Addons. What you want to
+        do?
+      inline_keyboard:
+      - Info Service Port:/info
+  id: ef3df648d7f4471a820c96c0b31fb6f5
+
+- alias: IK - Telegram - Help Info
+  trigger:
+    platform: event
+    event_type: telegram_callback
+    event_data:
+      data: /info
+  action:
+  - service: telegram_bot.answer_callback_query
+    data_template:
+      callback_query_id: '{{ trigger.event.data.id }}'
+      message: Help info - Triggered
   - service: notify.hassnico_bot
     data_template:
-
-      message: >-
-
-         {{ "\U0001F4BB" }} *Info*:
-
-         ------------------------------------------------
-          
-         *HA*:   https://nico-casetta.dyndns.org:8123
-          
-         *SSH Web*:   https://nico-casetta.dyndns.org:7681
-          
-         *Log Viewer*:   https://nico-casetta.dyndns.org:4277
-          
-         *Node Red*:   https://nico-casetta.dyndns.org:1880
-          
-         *Pi-Hole*:    https://nico-casetta.dyndns.org:4865
-
+      message: "\n{{ \"\\U0001F4BB\" }} *Info*:\n------------------------------------------------\n\
+        \ \n*HA*:   https://nico-casetta.duckdns.org:8123\n \n*SSH Web*:   https://nico-casetta.duckdns.org:7681\n\
+        \ \n*Log Viewer*:   https://nico-casetta.duckdns.org:4277\n \n*Node Red*: \
+        \  https://nico-casetta.duckdns.org:1880\n \n*Pi-Hole*:    https://nico-casetta.duckdns.org:4865"
       data:
         inline_keyboard:
         - '{{ "\u21a9\ufe0f" }} Control Panel:/stop'
-
-
-
-####################################################
-#                                                  #
-#                   Themes                         #
-#                                                  #
-####################################################
-####################################################
-#                   Sunset                         #
-####################################################
+  id: 6da100a00b0c42f1ba097145a470185f
 
 - id: themes-sunset
   alias: Random Darker Theme At Sunset
@@ -2420,13 +1941,10 @@
     platform: sun
     event: sunset
   action:
-    - service: frontend.set_theme
-      data_template:
-        name: '{{ ["darkcyan", "darkred", "midnight", "darkorange", "darkblue", "slate"] | random  }}'
-
-####################################################
-#                   Sunrise                        #
-####################################################
+  - service: frontend.set_theme
+    data_template:
+      name: '{{ ["darkcyan", "darkred", "midnight", "darkorange", "darkblue", "slate",
+        "amoled", "material_dark_green", "material_dark_pink", "ios-dark-mode", "noctis"] | random  }}'
 
 - id: themes-sunrise
   alias: Random Lighter Theme At Sunrise
@@ -2435,15 +1953,9 @@
     platform: sun
     event: sunrise
   action:
-    - service: frontend.set_theme
-      data_template:
-        name: '{{ ["default", "slate"] | random  }}'
-
-####################################################
-#                                                  #
-#                   Log Level                      #
-#                                                  #
-####################################################
+  - service: frontend.set_theme
+    data_template:
+      name: '{{ ["default", "slate", "amoled", "clear", "oxfordblue"] | random  }}'
 
 - id: log-level
   alias: Log Level
@@ -2453,314 +1965,222 @@
   action:
     service: logger.set_level
     data_template:
-      homeassistant.components: "{{ trigger.to_state.state }}"
-
-####################################################
-#                                                  #
-#                   Owntracks                      #
-#                                                  #
-####################################################
+      homeassistant.components: '{{ trigger.to_state.state }}'
 
 - id: owntracks-refresh
   alias: Owntracks Refresh
   trigger:
-    - platform: time_pattern
-      minutes: '/5'
-      seconds: 0
+  - platform: time_pattern
+    minutes: /5
+    seconds: 0
   action:
     service: script.owntracks_update
 
-####################################################
-#                                                  #
-#             Time Based Automation                #
-#                                                  #
-####################################################
-####################################################
-#            A/C Time Based Automations            #
-####################################################
-- id: ac-hot-morning-on
-  alias: AC - Hot Morning - ON
-  trigger:
-    platform: time
-    at: '07:30:00'
-  condition:
-   - condition: time
-     weekday:
-       - mon
-       - tue
-       - wed
-       - thu
-       - fri
-   - condition: state
-     entity_id: input_select.ac_mode
-     state: "Hot Morning"
-  action:
-    - service: switch.turn_on
-      entity_id: switch.air_conditioner_heat_30
-    - service: notify.hassnico_bot
-      data:
-        message: "AC Morning ON - Heat 30 - Automation"
-
-- id: ac-cold-morning-on
-  alias: AC - Cold Morning - ON
-  trigger:
-    platform: time
-    at: '07:30:00'
-  condition:
-   - condition: time
-     weekday:
-       - mon
-       - tue
-       - wed
-       - thu
-       - fri
-   - condition: state
-     entity_id: input_select.ac_mode
-     state: "Cold Morning"
-  action:
-    - service: switch.turn_on
-      entity_id: switch.air_conditioner_cold_18
-    - service: notify.hassnico_bot
-      data:
-        message: "AC Morning ON - Cold 18 - Automation  {{ trigger.entity_id }} "
-
-- id: ac-morning-off
-  alias: AC - Morning - OFF
-  trigger:
-    platform: time
-    at: '08:00:00'
-  condition:
-   - condition: time
-     weekday:
-       - mon
-       - tue
-       - wed
-       - thu
-       - fri
-  action:
-    - service: switch.turn_off
-      entity_id: switch.air_conditioner_heat_30
-    - service: switch.turn_off
-      entity_id: switch.air_conditioner_cold_18
-    - service: switch.turn_off
-      entity_id: switch.air_conditioner_humidity            
-    - service: notify.hassnico_bot
-      data:
-        message: "AC Morning OFF - Automation. {{ trigger.entity_id }}"
-
-####################################################
-#                                                  #
-#                   Test Space                     #
-#                                                  #
-####################################################
-####################################################
-#                      Zoning                      #
-####################################################
-
-- alias: "Ritorno a casa"
+- id: family-coming-back
+  alias: Family Coming Back to Home
   trigger:
     platform: state
     entity_id: group.family
-    #from: 'not_home'
-    to: 'home'
-  #condition: []
+    to: home
   action:
-    - delay:
-        seconds: 5
-    - service: notify.alexa_media
+  - delay:
+      seconds: 5
+  - service: notify.alexa_media
+    data:
+      target:
+      - media_player.nicolo_s_2nd_bose_home_speaker_500
       data:
-        target:
-          - media_player.nicolo_s_bose_home_speaker_500
-        data:
-          type: tts
-        message: >
-         {{ [
-         "Sono felice di rivedervi",
-         "Bentornati a casa.",
-         ] | random }}
-    - service: rest_command.ss_home_on
+        type: tts
+      message: '{{ [ "Sono felice di rivedervi", "Bentornati a casa.", ] | random
+        }}'
+  - service: rest_command.ss_home_on
+  - service: notify.hassnico_bot
+    data:
+      message: >
+       '{{ [
+       "Qualcuno è tornato a casa",
+       "Un Membro della gang è tornato a casa",
+       "Un Membro della famiglia è tornato a casa",
+        ] | random }}'
 
-- alias: "Uscita da casa"
+- id: family-going-out
+  alias: Family Going Out
   trigger:
     platform: state
     entity_id: group.family
-    #from: 'home'
-    to: 'not_home'
-  #condition: []
+    to: not_home
   action:
-    - delay:
-        seconds: 5
-    - service: notify.alexa_media
+  - delay:
+      seconds: 5
+  - service: notify.alexa_media
+    data:
+      target:
+      - media_player.nicolo_s_2nd_bose_home_speaker_500
       data:
-        target:
-          - media_player.nicolo_s_bose_home_speaker_500
-        data:
-          type: tts
-        message: >
-         {{ [
-         "Mi Dispiace che ve ne andate",
-         "Spero di rivedervi presto",
-         ] | random }}
-    - service: rest_command.ss_home_off
+        type: tts
+      message: '{{ [ "Mi Dispiace che ve ne andate", "Spero di rivedervi presto",
+        ] | random }}'
+  - service: rest_command.ss_home_off
+  - service: notify.hassnico_bot
+    data:
+      message: >
+        '{{ [
+        "Qualcuno è uscito da casa",
+        "Qualcuno è uscito da casa",
+        ] | random }}'
+  - service: cover.set_cover_position
+    data:
+      entity_id: cover.shelly_shsw_25_e6704f
+      position: 22
+  - service: switch.turn_off
+    data:
+      entity_id: group.lights
 
-####################################################
-#                                                  #
-#                    IFTTT                         #
-#                                                  #
-####################################################        
-        
-        
-- alias: IFTTT - Test Notification Received 
-  initial_state: 'on'
-  trigger:        
-    platform: event
-    event_type: ifttt_webhook_received
-    event_data:
-      action: call_service
-  action:
-    service_template: '{{ trigger.event.data.service }}'
-    data_template:
-      entity_id: '{{ trigger.event.data.entity_id }}'
+#   id: 1ed32739e4b649659834ec85f0b01aa5
+# - alias: IFTTT - Test Notification Received
+#   initial_state: 'on'
+#   trigger:
+#     platform: event
+#     event_type: ifttt_webhook_received
+#     event_data:
+#       action: call_service
+#   action:
+#     service_template: '{{ trigger.event.data.service }}'
+#     data_template:
+#       entity_id: '{{ trigger.event.data.entity_id }}'
+  
+#   id: f467e5667918486eb2b4168be00e7151
+# - alias: IFTTT - Startup Notification
+#   initial_state: 'on'
+#   trigger:
+#     platform: homeassistant
+#     event: start
+#   action:
+#     service: ifttt.trigger
+#     data:
+#       event: HA_Start
+#       value1: Hello World!
+#   id: 8b228639aca84a4c8cfb52a558e78c45
 
+# - alias: IFTTT - Startup Notification two
+#   trigger:
+#     platform: homeassistant
+#     event: start
+#   action:
+#     service: script.ifttt_notify
+#     data_template:
+#       value1: 'HA Status:'
+#       value2: '{{ trigger.event.data.entity_id.split('_')[1] }} is '
+#       value3: '{{ trigger.event.data.to_state.state }}'
 
-- alias: IFTTT - Startup Notification
-  initial_state: 'on'
+- alias: Trigger alarm while armed away
   trigger:
-    platform: homeassistant
-    event: start
-  action:
-    service: ifttt.trigger
-    data: {"event":"HA_Start", "value1":"Hello World!"}
-
-- alias: IFTTT - Startup Notification two
-  trigger:
-    platform: homeassistant
-    event: start
-  action:
-    service: script.ifttt_notify
-    data_template:
-      value1: 'HA Status:'
-      value2: "{{ trigger.event.data.entity_id.split('_')[1] }} is "
-      value3: "{{ trigger.event.data.to_state.state }}"
-
-####################################################
-#                                                  #
-#                    Alarm                         #
-#                                                  #
-####################################################        
-
-
-- alias: 'Trigger alarm while armed away'
-  trigger:
-    - platform: state
-      entity_id: sensor.pir1
-      to: 'active'
-    - platform: state
-      entity_id: sensor.pir2
-      to: 'active'
-    - platform: state
-      entity_id: sensor.door
-      to: 'open'
-    - platform: state
-      entity_id: sensor.window
-      to: 'open'
+  - platform: state
+    entity_id: sensor.pir1
+    to: active
+  - platform: state
+    entity_id: sensor.pir2
+    to: active
+  - platform: state
+    entity_id: sensor.door
+    to: open
+  - platform: state
+    entity_id: sensor.window
+    to: open
   condition:
-    - condition: state
-      entity_id: alarm_control_panel.ha_alarm
-      state: armed_away
+  - condition: state
+    entity_id: alarm_control_panel.ha_alarm
+    state: armed_away
   action:
-    - service: alarm_control_panel.alarm_trigger
-      entity_id: alarm_control_panel.ha_alarm
+  - service: alarm_control_panel.alarm_trigger
+    entity_id: alarm_control_panel.ha_alarm
+  id: 7c7986eba7f94410b400ad0045ccbdfd
 
-
-
-- alias: 'Send notification when alarm triggered'
+- alias: Send notification when alarm triggered
   trigger:
-    - platform: state
-      entity_id: alarm_control_panel.ha_alarm
-      to: 'triggered'
+  - platform: state
+    entity_id: alarm_control_panel.ha_alarm
+    to: triggered
   action:
-    - service: notify.hassnico_bot
-      data:
-        message: "ALARM! The alarm has been triggered"
+  - service: notify.hassnico_bot
+    data:
+      message: ALARM! The alarm has been triggered
+  id: e3c9600df6f343e4ad010a7f900b49ab
 
-
-- alias: 'Disarm alarm when door unlocked by keypad'
+- alias: Disarm alarm when door unlocked by keypad
   trigger:
-    - platform: state
-      entity_id: sensor.front_door_lock_alarm_type
-      to: '19'
-      # many z-wave locks use Alarm Type 19 for 'Unlocked by Keypad'
+  - platform: state
+    entity_id: sensor.front_door_lock_alarm_type
+    to: '19'
   action:
-    - service: alarm_control_panel.alarm_disarm
-      entity_id: alarm_control_panel.house_alarm
+  - service: alarm_control_panel.alarm_disarm
+    entity_id: alarm_control_panel.house_alarm
+  id: 57977b7dd37745728b3c4152539729ac
 
-
-####Alarm Mode Notify ###
-
-- alias: 'Send notification when alarm is Disarmed'
+- alias: Send notification when alarm is Disarmed
   initial_state: 'on'
   trigger:
-    - platform: state
-      entity_id: alarm_control_panel.home_alarm
-      to: 'disarmed'
+  - platform: state
+    entity_id: alarm_control_panel.home_alarm
+    to: disarmed
   action:
-    - service: notify.hassnico_bot
-      data:
-        message: "ALARM! The alarm is Disarmed at {{ states('sensor.date_time') }}"
+  - service: notify.hassnico_bot
+    data:
+      message: ALARM! The alarm is Disarmed at {{ states('sensor.date_time') }}
+  id: 00f3f26d34f44c50abbd18593c3bf3c3
 
-- alias: 'Send notification when alarm is in pending status'
+- alias: Send notification when alarm is in pending status
   initial_state: 'on'
   trigger:
-    - platform: state
-      entity_id: alarm_control_panel.home_alarm
-      to: 'pending'
+  - platform: state
+    entity_id: alarm_control_panel.home_alarm
+    to: pending
   action:
-    - service: notify.hassnico_bot
-      data:
-        message: "ALARM! The alarm is in pending status at {{ states('sensor.date_time') }}"
+  - service: notify.hassnico_bot
+    data:
+      message: ALARM! The alarm is in pending status at {{ states('sensor.date_time')
+        }}
+  id: 1e98346fd2a54596bf1dfbf642589a30
 
-- alias: 'Send notification when alarm is Armed in Away mode'
+- alias: Send notification when alarm is Armed in Away mode
   initial_state: 'on'
   trigger:
-    - platform: state
-      entity_id: alarm_control_panel.home_alarm
-      to: 'armed_away'
+  - platform: state
+    entity_id: alarm_control_panel.home_alarm
+    to: armed_away
   action:
-    - service: notify.hassnico_bot
-      data:
-        message: "ALARM! The alarm is armed in Away mode {{ states('sensor.date_time') }}"
+  - service: notify.hassnico_bot
+    data:
+      message: ALARM! The alarm is armed in Away mode {{ states('sensor.date_time')
+        }}
+  id: 838cf4d3b1c843e1a04b9faada033e85
 
-- alias: 'Send notification when alarm is Armed in Home mode'
+- alias: Send notification when alarm is Armed in Home mode
   initial_state: 'on'
   trigger:
-    - platform: state
-      entity_id: alarm_control_panel.home_alarm
-      to: 'armed_home'
+  - platform: state
+    entity_id: alarm_control_panel.home_alarm
+    to: armed_home
   action:
-    - service: notify.hassnico_bot
-      data:
-        message: "ALARM! The alarm is armed in Home mode {{ states('sensor.date_time') }}"
-      
-####################################################
-#                                                  #
-#                    Backups                       #
-#                                                  #
-####################################################          
+  - service: notify.hassnico_bot
+    data:
+      message: ALARM! The alarm is armed in Home mode {{ states('sensor.date_time')
+        }}
+  id: d624aa68bbde45bcaa2c11c7a6ef40ed
 
 - alias: Weekly Backup Friday at 3 AM
   initial_state: 'on'
   trigger:
     platform: time
-    at: '03:00:00'
+    at: 03:00:00
   condition:
   - condition: time
     weekday:
-      - mon
-      - tue
-      - wed
-      - thu
-      - fri
+    - mon
+    - tue
+    - wed
+    - thu
+    - fri
   action:
   - service: hassio.snapshot_full
     data_template:
@@ -2768,100 +2188,26 @@
   - service: notify.hassnico_bot
     data_template:
       message: Creating backup named "Automated Backup {{ now().strftime('%Y-%m-%d') }}"
-
+  id: d316d840e9fd4ebdbc748b2419853558
 
 - alias: Weekly Backup to Google Friday at 3:30 AM
   initial_state: 'on'
   trigger:
     platform: time
-    at: '03:30:00'
+    at: 03:30:00
   condition:
   - condition: time
     weekday:
-      - mon
-      - tue
-      - wed
-      - thu
-      - fri
+    - mon
+    - tue
+    - wed
+    - thu
+    - fri
   action:
   - service: rest_command.google_backup
+  id: 4df385d2bced4f73adb6b7e872261e8f
 
-
-####################################################
-#                                                  #
-#               Security Breaches                  #
-#                                                  #
-####################################################  
-####################################################
-#                     Email                        #
-####################################################
-
-- alias: Notify - Emailbreach
-  initial_state: 'on'
-  trigger:
-  - platform: state
-    entity_id: group.security
-    to: 'on'
-  condition: []
-  action:
-  - service: notify.hassnico_bot
-    data_template:
-      title: 'Security issue:'
-      message: "Email address {{ trigger.to_state.attributes.friendly_name }} has been found in a compromised database: {{ trigger.to_state.attributes.breach }}."
-      who: 'everyone'
-
-####################################################
-#                                                  #
-#                  Earthquakes                     #
-#                                                  #
-####################################################  
-  # - alias: 'Earth Quake Alert'
-  #   trigger:
-  #     platform: geo_location
-  #     source: usgs_earthquakes_feed
-  #     zone: zone.earth_quake_alert_zone
-  #     event: enter
-  #   condition:
-  #     condition: template
-  #     value_template: "{{ trigger.event.data.entity_id.startswith('geo_location.m') and
-  #          distance('device_tracker.nico_nico')|int <= 50 }}"
-  #   action:
-  #    - service: notify.hassnico_bot
-  #      data_template:
-  #      message: >
-  #         message: "ALARM! Earth Quake Detected {{ states('sensor.date_time') }}"
-  #    - service: hassio.addon_stdin
-  #      data_template:
-  #        addon: 89275b70_dss_voip
-  #        input: {"call_sip_uri":"sip:+393402703738@sip.voipcheap.com","message_tts":"E' stato registrato un Terremoto"}
-
-####################################################
-#                                                  #
-#                  Earthquakes 2                   #
-#                                                  #
-####################################################  
-# - alias: Lightning Timer Start
-#   initial_state: 'on'
-#   trigger:
-#      platform: event
-#      event_type: state_changed
-#   condition:
-#   - condition: template
-#     value_template: >
-#       {{ trigger.event.data.old_state is none and
-#          trigger.event.data.entity_id.startswith('geo_location.m_') }}
-#   action:
-#   - service: input_text.set_value
-#     data_template:
-#       entity_id: input_text.last_strike
-#       value: "{{ trigger.event.data.new_state.state }}"
-#   # This will start, or restart, the timer.
-#   - service: timer.start
-#     data:
-#       entity_id: timer.lightning_timer
-#       duration: '00:30:00'
-
-- alias: 'Earth Quake Alert'
+- alias: Earth Quake Alert
   trigger:
     platform: geo_location
     source: usgs_earthquakes_feed
@@ -2871,72 +2217,1004 @@
     condition: template
     value_template: "{{ trigger.to_state.attributes.type == 'earthquake' }}"
   action:
-    - service: persistent_notification.create
-      data_template:
-        message: "{{ trigger.to_state.name }} - {{ trigger.to_state.attributes.status }}"
-        title: "Earth Quake Alert"
-        
-    - service: notify.hassnico_bot
-      data_template:
-        message: "ALARM! Earth Quake Detected {{ states('sensor.date_time') }}"
-        
-    - service: hassio.addon_stdin
-      data_template:
-        addon: 89275b70_dss_voip
-        input: {"call_sip_uri":"sip:+393402703738@sip.voipcheap.com","message_tts":"Allerta, E' stato registrato un Terremoto con intensità superiore a 4"}
+  - service: persistent_notification.create
+    data_template:
+      message: "{{ trigger.to_state.name }} - {{ trigger.to_state.attributes.status }}"
+      title: Earth Quake Alert
+  - service: notify.hassnico_bot
+    data_template:
+      message: ALARM! Earth Quake Detected {{ states('sensor.date_time') }}
+  - service: hassio.addon_stdin
+    data_template:
+      addon: 89275b70_dss_voip
+      input:
+        call_sip_uri: sip:+393402703738@sip.voipcheap.com
+        message_tts: Allerta, E' stato registrato un Terremoto con intensità superiore a 4
+  id: 098391ffd0574f8babccb9fcb4083568
 
-####################################################
-#                                                  #
-#                  Covers                          #
-#                                                  #
-####################################################  
-- alias: 'Set Living Room Cover position'
+- alias: Set Living Room Cover position
   initial_state: 'on'
   trigger:
-    - platform: state
-      entity_id: input_number.living_room_cover
+  - platform: state
+    entity_id: input_number.living_room_cover
   action:
-    # - delay: '00:00:3'
-    - service: cover.set_cover_position
-      entity_id: cover.shelly_shsw_25_e6704f
-      data:
-        position: "{{ states('input_number.living_room_cover') | int }}"
-
-
-####################################################
-#                                                  #
-#                Shelly Notifications              #
-#                                                  #
-####################################################  
-
+  - service: cover.set_cover_position
+    entity_id: cover.shelly_shsw_25_e6704f
+    data:
+      position: "{{ states('input_number.living_room_cover') | int }}"
+  id: 140b23ad91dc4fb599916029df40042a
 
 - alias: Flood Sensor - Notification
+  id: e495de65acc84b3abad35bf92a9505fb
   initial_state: 'on'
   trigger:
     platform: template
     value_template: "{{ is_state_attr('sensor.shelly_shwt_1_694834_flood', 'flood', 'true') }}"
   action:
-    - service: notify.hassnico_bot
+  - service: notify.hassnico_bot
+    data:
+      message: C'è una perdita d'acqua in magazzino
+  - service: media_player.volume_set
+    data:
+      entity_id: media_player.nicolo_s_2nd_bose_home_speaker_500
+      volume_level: 0.3
+  - delay: 00:00:20
+  - service: notify.alexa_media
+    data:
+      target:
+      - media_player.nicolo_s_2nd_bose_home_speaker_500
       data:
-        message: "C'è una perdita d'acqua in magazzino"
-    - service: media_player.volume_set
+        type: tts
+      message: >
+        {{ [ 
+        "C'è una perdita d'acqua in magazzino controllare per terra vicino alla lavatrice",
+        "C'è una perdita d'acqua in magazzino controllare per terra vicino alla lavatrice",
+        ] | random }}
+
+- id: nico-birthday-tomorrow
+  alias: Birthday Nico Tomorrow
+  initial_state: 'on'
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.nico
+    above: 0
+    below: 2
+  action:
+  - service: notify.hassnico_bot
+    data_template:
+      message: "Domani è il compleanno di Nico"
+  - service: notify.alexa_media
+    data:
+      target:
+      - media_player.nicolo_s_2nd_bose_home_speaker_500
       data:
-        entity_id: media_player.nicolo_s_bose_home_speaker_500
-        volume_level: 0.3
-    - delay: 00:00:20
+        type: tts
+      message: >
+               {{ [
+                "Domani è il compleanno di Nico",
+                "Domani è il compleanno di Nico",
+                "Domani è il compleanno di Nico",
+                "Domani è il compleanno di Nico",
+                "Domani è il compleanno di Nico",
+               ] | random }}
+
+- id: nico-birthday-today
+  alias: Birthday Nico Today
+  initial_state: 'on'
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.nico
+    below: 1
+  - platform: time_pattern
+    hours: 08
+    minutes: /55
+    seconds: '00'
+  condition:
+    condition: and
+    conditions:
+    - condition: sun
+      before: sunset
+    - condition: sun
+      after: sunrise
+    - condition: numeric_state
+      entity_id: sensor.nico
+      below: 1
+  action:
+  - service: notify.hassnico_bot
+    data_template:
+      message: 'Oggi è il compleanno di Nico'
+  - service: script.alexascriptbirthday_ita
+
+- id: maria-birthday-tomorrow
+  alias: Birthday Maria Tomorrow
+  initial_state: 'on'
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.maria
+    above: 0
+    below: 2
+  action:
+  - service: notify.hassnico_bot
+    data_template:
+      message: 'Domani è il compleanno di Nico'
+  - service: notify.alexa_media
+    data:
+      target:
+      - media_player.nicolo_s_2nd_bose_home_speaker_500
+      data:
+        type: tts
+      message: '{{ [ 
+                "Domani è il compleanno di Maria",
+                "Domani è il compleanno di Maria",
+                ] | random }}'
+
+- id: maria-birthday-today
+  alias: Birthday Maria Today
+  initial_state: 'on'
+  trigger:
+  - platform: time_pattern
+    hours: 08
+    minutes: /55
+    seconds: '00'
+  condition:
+    condition: and
+    conditions:
+    - condition: sun
+      before: sunset
+    - condition: sun
+      after: sunrise
+    - condition: numeric_state
+      entity_id: sensor.maria
+      below: 1
+  action:
+  - service: notify.hassnico_bot
+    data_template:
+      message: 'Oggi è il compleanno di Maria'
+  - service: script.alexascriptbirthday_ita
+
+- id: '157606988564489'
+  alias: Notification Test Weekly TTS
+  initial_state: 'on'
+  trigger:
+    platform: time
+    at: '20:00:00'
+  condition:
+    condition: time
+    weekday:
+    - mon
+    - tue
+    - wed
+    - thu
+    - fri
+  action:
     - service: notify.alexa_media
       data:
         target: 
-          - media_player.nicolo_s_bose_home_speaker_500
+          - media_player.nicolo_s_2nd_bose_home_speaker_500
+          - media_player.echo_dot_di_nicolo
+        #title: "My title for Echo show"
         data:
-          type: tts
+          type: announce
+          #method: all
+        message: "Questo è un test settimanale per il sistema di annunci Alexa."
+
+- id: '1576069885644898'
+  alias: Alexa Volume Quiet
+  initial_state: 'on'
+  trigger:
+    platform: time
+    at: '00:45:00'
+  condition:
+    condition: time
+    weekday:
+    - mon
+    - tue
+    - wed
+    - thu
+    - fri
+    - sat
+    - sun
+  action:
+    # - service: media_player.volume_set
+    #   data:
+    #     entity_id: media_player.nicolo_s_bose_home_speaker_500
+    #     volume_level: 0.1
+    - service: input_select.select_option
+      data:
+        entity_id: input_select.alexa_volume
+        option: Quiet
+
+- id: '1576069885644890'
+  alias: Alexa Volume Normal
+  initial_state: 'on'
+  trigger:
+    platform: time
+    at: '09:00:00'
+  condition:
+    condition: time
+    weekday:
+    - mon
+    - tue
+    - wed
+    - thu
+    - fri
+    - sat
+    - sun
+  action:
+    # - service: media_player.volume_set
+    #   data:
+    #     entity_id: media_player.nicolo_s_bose_home_speaker_500
+    #     volume_level: 0.2
+    - service: input_select.select_option
+      data:
+        entity_id: input_select.alexa_volume
+        option: Normal
+
+- id: '1576069885644899'
+  alias: Alexa Volume Movie
+  initial_state: 'on'
+  trigger:
+    platform: time
+    at: '20:00:00'
+  condition:
+    condition: time
+    weekday:
+    - mon
+    - tue
+    - wed
+    - thu
+    - fri
+    - sat
+    - sun
+  action:
+    # - service: media_player.volume_set
+    #   data:
+    #     entity_id: media_player.nicolo_s_bose_home_speaker_500
+    #     volume_level: 0.3
+    - service: input_select.select_option
+      data:
+        entity_id: input_select.alexa_volume
+        option: Movie
+
+- id: alexa-volume-quiet
+  alias: Alexa Volume Quiet - Notification
+  trigger:
+    platform: state
+    entity_id: input_select.alexa_volume
+    to: Quiet
+  action:
+  - service: media_player.volume_set
+    data:
+      entity_id: media_player.nicolo_s_bose_home_speaker_500
+      volume_level: 0.1
+  - service: media_player.volume_set
+    data:
+      entity_id: media_player.nicolo_s_2nd_bose_home_speaker_500
+      volume_level: 0.1
+  - service: media_player.volume_set
+    data:
+      entity_id: media_player.echo_dot_di_nicolo
+      volume_level: 0.2
+
+  - service: notify.hassnico_bot
+    data_template:
+      message: 'Alexa Volume is {{ trigger.to_state.state }}'
+
+- id: alexa-volume-normal
+  alias: Alexa Volume Normal - Notification
+  trigger:
+    platform: state
+    entity_id: input_select.alexa_volume
+    to: Normal
+  action:
+  - service: media_player.volume_set
+    data:
+      entity_id: media_player.nicolo_s_bose_home_speaker_500
+      volume_level: 0.2
+  - service: media_player.volume_set
+    data:
+      entity_id: media_player.nicolo_s_2nd_bose_home_speaker_500
+      volume_level: 0.2
+  - service: media_player.volume_set
+    data:
+      entity_id: media_player.echo_dot_di_nicolo
+      volume_level: 0.4
+  - service: notify.hassnico_bot
+    data_template:
+      message: 'Alexa Volume is {{ trigger.to_state.state }}'
+
+- id: alexa-volume-Movie
+  alias: Alexa Volume Movie - Notification
+  trigger:
+    platform: state
+    entity_id: input_select.alexa_volume
+    to: Movie
+  action:
+  - service: media_player.volume_set
+    data:
+      entity_id: media_player.nicolo_s_bose_home_speaker_500
+      volume_level: 0.3
+  - service: media_player.volume_set
+    data:
+      entity_id: media_player.nicolo_s_2nd_bose_home_speaker_500
+      volume_level: 0.3
+  - service: media_player.volume_set
+    data:
+      entity_id: media_player.echo_dot_di_nicolo
+      volume_level: 0.5
+  - service: notify.hassnico_bot
+    data_template:
+      message: 'Alexa Volume is {{ trigger.to_state.state }}'
+
+
+### Season Automation ###
+
+# - id: autumn-notify
+#   alias: Autumn notification
+#   trigger:
+#     platform: template
+#     value_template: "{{ is_state('sensor.season', 'autumn') }}"
+#   action:
+#   - service: input_select.select_option
+#     data:
+#       entity_id: input_select.ac_mode
+#       option: Power Off
+#   - service: notify.hassnico_bot
+#     data:
+#       message: Autumn is coming
+
+# - id: winter-notify
+#   alias: Winter Notification
+#   trigger:
+#     - platform: template
+#       value_template: "{{ is_state('sensor.season', 'winter') }}"
+#     - platform: time
+#       at: "06:45:00"
+#   condition:
+#     condition: and
+#     conditions:
+#     - condition: time
+#       # after: 05:00
+#       # before: 08:00
+#       weekday:
+#       - mon
+#       - tue
+#       - wed
+#       - thu
+#       - fri
+#     - condition: state
+#       entity_id: group.family
+#       state: home
+#     - condition: numeric_state
+#       entity_id: sensor.termosifone_salone_temperature
+#       below: 18
+#   action:
+#   - service: input_select.select_option
+#     data:
+#       entity_id: input_select.ac_mode
+#       option: Hot Morning
+#   - service: notify.hassnico_bot
+#     data:
+#       message: E' inverno e fa freddo, riscaldo un po l'aria
+
+# - id: spring-notify
+#   alias: Spring notification
+#   trigger:
+#     platform: template
+#     value_template: "{{ is_state('sensor.season', 'spring') }}"
+#   action:
+#   - service: input_select.select_option
+#     data:
+#       entity_id: input_select.ac_mode
+#       option: Power Off
+#   - service: notify.hassnico_bot
+#     data:
+#       message: Spring is coming
+
+# - id: summer-notify
+#   alias: Summer notification
+#   trigger:
+#     platform: template
+#     value_template: "{{ is_state('sensor.season', 'summer') }}"
+#   action:
+#   - service: input_select.select_option
+#     data:
+#       entity_id: input_select.ac_mode
+#       option: Cold Morning
+#   - service: notify.hassnico_bot
+#     data:
+#       message: Summer is Coming
+
+# - id: ac-hot-morning-on
+#   alias: AC - Hot Morning - ON
+#   initial_state: 'on'
+#   trigger:
+#     platform: state
+#     entity_id: input_select.ac_mode
+#     to: Hot Morning
+  # condition:
+  #   condition: and
+  #   conditions:
+  #   - condition: time
+  #     weekday:
+  #     - mon
+  #     - tue
+  #     - wed
+  #     - thu
+  #     - fri
+    # - condition: state
+    #   entity_id: input_select.ac_mode
+    #   state: Hot Morning
+    # - condition: state
+    #   entity_id: group.family
+    #   state: home
+    # - condition: state
+    #   entity_id: sensor.season
+    #   state: winter
+  # action:
+  # - service: switch.turn_on
+  #   entity_id: switch.air3
+  # - service: notify.hassnico_bot
+  #   data:
+  #     message: AC Morning ON - Heat 30 - Automation
+  # - delay:
+  #     minutes: 45
+  # - service: switch.turn_off
+  #   entity_id: switch.air3
+  # - delay:
+  #     seconds: 10
+  # - service: switch.turn_off
+  #   entity_id: switch.air3
+  # - delay:
+  #     seconds: 10
+  # - service: switch.turn_off
+  #   entity_id: switch.air3
+
+# - id: ac-cold-morning-on
+#   alias: AC - Cold Morning - ON
+#   initial_state: 'on'
+#   trigger:
+#     platform: state
+#     entity_id: input_select.ac_mode
+#     to: Cold Morning
+#   condition:
+#     condition: and
+#     conditions:
+#     - condition: time
+#       weekday:
+#       - mon
+#       - tue
+#       - wed
+#       - thu
+#       - fri
+#     - condition: state
+#       entity_id: group.family
+#       state: home
+#   action:
+#   - service: switch.turn_on
+#     entity_id: switch.air1
+#   - service: notify.hassnico_bot
+#     data:
+#       message: 'AC Morning ON - Cold 18 - Automation  {{ trigger.entity_id }} '
+#   - delay:
+#       minutes: 30
+#   - service: switch.turn_off
+#     entity_id: switch.air1
+#   - delay:
+#       seconds: 10
+#   - service: switch.turn_off
+#     entity_id: switch.air1
+#   - delay:
+#       seconds: 10
+#   - service: switch.turn_off
+#     entity_id: switch.air1
+
+# - id: ac-morning-off
+#   alias: AC - Morning - OFF
+#   trigger:
+#     platform: time
+#     at: 08:00:00
+#   condition:
+#   - condition: time
+#     weekday:
+#     - mon
+#     - tue
+#     - wed
+#     - thu
+#     - fri
+#   action:
+#   - service: switch.turn_off
+#     entity_id: switch.air1
+#   - service: switch.turn_off
+#     entity_id: switch.air2
+#   - service: switch.turn_off
+#     entity_id: switch.air3
+#   - service: notify.hassnico_bot
+#     data:
+#       message: AC Morning OFF - Automation. {{ trigger.entity_id }}
+
+
+### Air Conditioner ###
+
+# - id: scene-ac-mode-off
+#   alias: AC Mode OFF - Automation
+#   trigger:
+#     platform: state
+#     entity_id: input_select.ac_mode
+#     to: Power Off
+#   action:
+#   - service: switch.turn_off
+#     entity_id: switch.air3
+#   - service: notify.hassnico_bot
+#     data_template:
+#       message: 'AC Mode changed to: {{ trigger.to_state.state }}'
+
+# - id: scene-ac-mode-hot
+#   alias: AC Mode - Hot
+#   trigger:
+#     platform: state
+#     entity_id: input_select.ac_mode
+#     to: Hot
+#   action:
+#   - service: switch.turn_on
+#     entity_id: switch.air3
+#   - service: notify.hassnico_bot
+#     data_template:
+#       message: 'AC Mode changed to: {{ trigger.to_state.state }}'
+
+# - id: scene-ac-mode-hot-morning
+#   alias: AC Mode - Hot Morning
+#   trigger:
+#     platform: state
+#     entity_id: input_select.ac_mode
+#     to: Hot Morning
+#   action:
+#   - service: notify.hassnico_bot
+#     data_template:
+#       message: 'AC Mode changed to: {{ trigger.to_state.state }}'
+
+# - id: scene-ac-mode-cold
+#   alias: AC Mode - Cold
+#   trigger:
+#     platform: state
+#     entity_id: input_select.ac_mode
+#     to: Cold
+#   action:
+#   - service: switch.turn_on
+#     entity_id: switch.air1
+#   - service: notify.hassnico_bot
+#     data_template:
+#       message: 'AC Mode changed to: {{ trigger.to_state.state }}'
+
+# - id: scene-ac-mode-cold-morning
+#   alias: AC Mode - Cold Morning
+#   trigger:
+#     platform: state
+#     entity_id: input_select.ac_mode
+#     to: Cold Morning
+#   action:
+#   - service: notify.hassnico_bot
+#     data_template:
+#       message: 'AC Mode changed to: {{ trigger.to_state.state }}'
+
+# - id: scene-ac-mode-humidity
+#   alias: AC Mode - Humidity
+#   trigger:
+#     platform: state
+#     entity_id: input_select.ac_mode
+#     to: Himidity
+#   action:
+#   - service: switch.turn_on
+#     entity_id: switch.air2
+#   - service: notify.hassnico_bot
+#     data_template:
+#       message: 'AC Mode changed to: {{ trigger.to_state.state }}'
+
+# - id: scene-ac-mode-humidity-morning
+#   alias: AC Mode - Humidity Morning
+#   trigger:
+#     platform: state
+#     entity_id: input_select.ac_mode
+#     to: Humidity Morning
+#   action:
+#   - service: notify.hassnico_bot
+#     data_template:
+#       message: 'AC Mode changed to: {{ trigger.to_state.state }}'
+
+
+
+### Google cast ###
+
+
+- id: cast-to-hub
+  alias: Cast to Hub
+  trigger: 
+    - platform: state
+      entity_id: media_player.cucina
+      to: 'idle'
+      for:
+        minutes: 1
+    # - platform: state
+    #   entity_id: media_player.nest_hub_media_player_name
+    #   to: 'off'
+    #   for:
+    #     minutes: 1
+  action:
+    - service: script.cast_on_kitchen
+
+- id: cast-to-hub
+  alias: Cast to Hub
+  trigger: 
+    - platform: state
+      entity_id: media_player.cucina
+      to: 'on'
+      for:
+        minutes: 1
+    # - platform: state
+    #   entity_id: media_player.nest_hub_media_player_name
+    #   to: 'off'
+    #   for:
+    #     minutes: 1
+  action:
+    - service: script.cast_on_kitchen
+
+
+- id: energy-tarrif
+  alias: Tariff Energy
+  trigger:
+    - platform: time
+      at: '07:00:00'
+    - platform: time
+      at: '19:00:00'
+  action:
+    - service: utility_meter.next_tariff
+      entity_id: utility_meter.daily_energy
+    - service: utility_meter.next_tariff
+      entity_id: utility_meter.monthly_energy
+
+
+# ############### Summer ####################
+
+# - id: summer-ac-on-on-hight-temperature-at-home
+#   alias: Summer AC ON High Temperature at Home
+#   trigger:
+#     platform: numeric_state
+#     entity_id: 'sensor.termosifone_salone_temperature'
+#     above: 26
+#   condition:
+#     - condition: template
+#       value_template: "{{ is_state('sensor.season', 'summer') }}"
+#     - condition: state
+#       entity_id: group.family
+#       state: home
+#     - condition: time
+#       after: 09:00:00
+#       before: '22:00:00'
+#       weekday:
+#       - mon
+#       - tue
+#       - wed
+#       - thu
+#       - fri
+#       - sat
+#       - sun
+#     - condition: numeric_state
+#       entity_id: 'sensor.shelly_shem_b9ee2d_1_current_consumption'
+#       below: 2000
+#   action:
+#     - service: switch.turn_on
+#       entity_id: switch.air2
+#     - delay:
+#         seconds: 10
+#     - service: switch.turn_on
+#       entity_id: switch.air2
+#     - delay:
+#         seconds: 10
+#     - service: notify.hassnico_bot
+#       data_template:
+#         message: 'Aria condizionata accessa perchè la temperatura in salotto è troppo calda'
+#     - service: notify.alexa_media
+#       data:
+#         target:
+#         - media_player.nicolo_s_2nd_bose_home_speaker_500
+#         data:
+#           type: tts
+#         message: >
+#            {{ [
+#            "Ho notato che a casa fa troppo caldo accendo l'aria condizionata per rinfrascarre l'aria",
+#            "Mamma mia che caldo, accendo l'aria condizionata",       
+#            ] | random }}
+
+# - id: summer-ac-off-low-temperature-at-home
+#   alias: Summer AC OFF low Temperature at Home
+#   trigger:
+#     platform: numeric_state
+#     entity_id: 'sensor.termosifone_salone_temperature'
+#     below: 25
+#   condition:
+#     - condition: template
+#       value_template: "{{ is_state('sensor.season', 'summer') }}"
+#     - condition: state
+#       entity_id: group.family
+#       state: home
+#     - condition: time
+#       after: 09:00:00
+#       before: '22:00:00'
+#       weekday:
+#       - mon
+#       - tue
+#       - wed
+#       - thu
+#       - fri
+#       - sat
+#       - sun
+#   action:
+#     - service: switch.turn_off
+#       entity_id: switch.air2
+#     - delay:
+#         seconds: 10
+#     - service: switch.turn_off
+#       entity_id: switch.air2
+#     - delay:
+#         seconds: 10
+#     - service: switch.turn_off
+#       entity_id: switch.air2
+#     - service: notify.hassnico_bot
+#       data_template:
+#         message: 'Aria condizionata spenta perchè la temperatura è troppo fredda'
+#     - service: notify.alexa_media
+#       data:
+#         target:
+#         - media_player.nicolo_s_2nd_bose_home_speaker_500
+#         data:
+#           type: tts
+#         message: >
+#            {{ [
+#            "Risparmio Energetico attivato, ora spengo il condizionatore",
+#            "L'aria condizionata è stata spenta automaticamente",
+#            "Risparmio energetico attivo, spengo il condizonatore",       
+#            ] | random }}
+
+############### Spring ####################
+
+# - id: Spring-ac-on-on-hight-temperature-at-home
+#   alias: Spring AC ON High Temperature at Home
+#   trigger:
+#     platform: numeric_state
+#     entity_id: 'sensor.termosifone_salone_temperature'
+#     above: 25
+#   condition:
+#     - condition: template
+#       value_template: "{{ is_state('sensor.season', 'spring') }}"
+#     - condition: state
+#       entity_id: group.family
+#       state: home
+#     - condition: time
+#       after: 09:00:00
+#       before: '22:00:00'
+#       weekday:
+#       - mon
+#       - tue
+#       - wed
+#       - thu
+#       - fri
+#       - sat
+#       - sun
+#     - condition: numeric_state
+#       entity_id: 'sensor.shelly_shem_b9ee2d_1_current_consumption'
+#       below: 2000
+#   action:
+#     - service: switch.turn_on
+#       entity_id: switch.air2
+#     - delay:
+#         seconds: 10
+#     - service: switch.turn_on
+#       entity_id: switch.air2
+#     - delay:
+#         seconds: 10
+#     - service: notify.hassnico_bot
+#       data_template:
+#         message: 'Aria condizionata accessa perchè la temperatura in salotto è troppo calda'
+#     - service: notify.alexa_media
+#       data:
+#         target:
+#         - media_player.nicolo_s_2nd_bose_home_speaker_500
+#         data:
+#           type: tts
+#         message: >
+#            {{ [
+#            "Ho notato che a casa fa troppo caldo accendo l'aria condizionata per rinfrascarre l'aria",
+#            "Mamma mia che caldo, accendo l'aria condizionata",       
+#            ] | random }}
+
+
+# - id: spring-ac-off-low-temperature-at-home
+#   alias: Spring AC OFF low Temperature at Home
+#   trigger:
+#     platform: numeric_state
+#     entity_id: 'sensor.termosifone_salone_temperature'
+#     below: 24
+#   condition:
+#     - condition: template
+#       value_template: "{{ is_state('sensor.season', 'spring') }}"
+#     - condition: state
+#       entity_id: group.family
+#       state: home
+#     - condition: time
+#       after: 09:00:00
+#       before: '22:00:00'
+#       weekday:
+#       - mon
+#       - tue
+#       - wed
+#       - thu
+#       - fri
+#       - sat
+#       - sun
+#   action:
+#     - service: switch.turn_off
+#       entity_id: switch.air2
+#     - delay:
+#         seconds: 10
+#     - service: switch.turn_off
+#       entity_id: switch.air2
+#     - delay:
+#         seconds: 10
+#     - service: switch.turn_off
+#       entity_id: switch.air2
+#     - service: notify.hassnico_bot
+#       data_template:
+#         message: 'Aria condizionata spenta perchè la temperatura è troppo fredda'
+#     - service: notify.alexa_media
+#       data:
+#         target:
+#         - media_player.nicolo_s_2nd_bose_home_speaker_500
+#         data:
+#           type: tts
+#         message: >
+#            {{ [
+#            "Risparmio Energetico attivato, ora spengo il condizionatore",
+#            "L'aria condizionata è stata spenta automaticamente",
+#            "Risparmio energetico attivo, spengo il condizonatore",       
+#            ] | random }}
+
+
+
+
+#### AC Spring Routine ###
+
+- id: scene-spring-high-temperature-notify
+  alias: AC Spring High temperature - Notification
+  initial_state: 'on'
+  trigger:
+    platform: numeric_state
+    entity_id: 'sensor.termosifone_cucina_temperature'
+    above: 26
+  condition:
+    # - condition: template
+    #   value_template: "{{ is_state('sensor.season', 'spring') }}"
+    - condition: state
+      entity_id: sensor.season
+      state: 'spring'
+    - condition: numeric_state
+      entity_id: 'sensor.shelly_shem_b9ee2d_1_current_consumption'
+      below: 2000
+    - condition: state
+      entity_id: group.family
+      state: home
+    - condition: time
+      after: 09:00:00
+      before: '22:00:00'
+      weekday:
+      - mon
+      - tue
+      - wed
+      - thu
+      - fri
+      - sat
+      - sun
+  action:
+  - service: input_select.select_option
+    data:
+      entity_id: input_select.ac_state
+      option: Spring
+
+- id: scene-spring-low-temperature-notify
+  alias: AC Spring low temperature - Notification
+  initial_state: 'on'
+  trigger:
+    platform: numeric_state
+    entity_id: 'sensor.termosifone_cucina_temperature'
+    below: 25
+  condition:
+    - condition: template
+      value_template: "{{ is_state('sensor.season', 'spring') }}"
+    - condition: state
+      entity_id: group.family
+      state: home
+    - condition: time
+      after: 09:00:00
+      before: '22:00:00'
+      weekday:
+      - mon
+      - tue
+      - wed
+      - thu
+      - fri
+      - sat
+      - sun
+  action:
+  - service: input_select.select_option
+    data:
+      entity_id: input_select.ac_state
+      option: Power Off
+
+
+- id: scene-ac-spring
+  alias: AC Scene Spring - Notification
+  trigger:
+    platform: state
+    entity_id: input_select.ac_state
+    to: Spring
+  action:
+  - service: switch.turn_on
+    entity_id: switch.air2
+  - delay:
+      seconds: 10
+  - service: switch.turn_on
+    entity_id: switch.air2
+  - service: notify.hassnico_bot
+    data_template:
+      message: 'AC is on Spring Mode: {{ trigger.to_state.state }}'
+  - service: notify.hassnico_bot
+    data:
+      message: L'aria condizionata è stata attiva in Salotto (Spring Mode)
+  - service: notify.alexa_media
+    data:
+      target:
+      # - media_player.nicolo_s_bose_home_speaker_500
+      - media_player.nicolo_s_2nd_bose_home_speaker_500
+      data:
+        type: tts
         message: >
-         {{ [
-         "C'è una perdita d'acqua in magazzino, controllare per terra vicino alla lavatrice", 
-         "C'è una perdita d'acqua in magazzino, controllare per terra vicino alla lavatrice", 
-         "C'è una perdita d'acqua in magazzino, controllare per terra vicino alla lavatrice", 
-         "C'è una perdita d'acqua in magazzino, controllare per terra vicino alla lavatrice", 
-         "C'è una perdita d'acqua in magazzino, controllare per terra vicino alla lavatrice",                  
-         ] | random }}
+           {{ [
+           "Ho notato che in Salone fa troppo caldo. Accendo l'aria condizionata per rinfrascarre l'aria",
+           "Mamma mia che caldo, accendo l'aria condizionata",       
+           ] | random }}
 
 
+- id: scene-ac-power-off
+  alias: AC Scene Power Off - Notification
+  trigger:
+    platform: state
+    entity_id: input_select.ac_state
+    to: Power Off
+  action:
+  - service: switch.turn_off
+    entity_id: switch.air2
+  - delay:
+      seconds: 10
+  - service: switch.turn_off
+    entity_id: switch.air1
+  - delay:
+      seconds: 10
+  - service: switch.turn_off
+    entity_id: switch.air3
+  - service: notify.hassnico_bot
+    data_template:
+      message: 'AC is on Mode: {{ trigger.to_state.state }}'
+  - service: notify.hassnico_bot
+    data:
+      message: L'aria condizionata è stata Spenta (Power Off)
+  - service: notify.alexa_media
+    data:
+      target:
+      # - media_player.nicolo_s_bose_home_speaker_500
+      - media_player.nicolo_s_2nd_bose_home_speaker_500
+      data:
+        type: tts
+        message: >
+           {{ [
+           "Aria condizionata spenta",
+           "Aria condizionata spenta",       
+           ] | random }}
