@@ -41,7 +41,7 @@
       message: Qualcuno sta facendo il Caffè
   # - service: media_player.volume_set
   #   data:
-  #     entity_id: media_player.nicolo_s_bose_home_speaker_500
+  #     entity_id: media_player.nico_bose_home
   #     volume_level: 0.25
   - delay: 00:00:20
   #- service: script.cucinacoffe
@@ -49,7 +49,7 @@
   - service: notify.alexa_media
     data:
       target:
-      # - media_player.nicolo_s_bose_home_speaker_500
+      # - media_player.nico_bose_home
       - media_player.nicolo_s_2nd_bose_home_speaker_500
       data:
         type: tts
@@ -99,7 +99,7 @@
   - service: notify.alexa_media
     data:
       target:
-      # - media_player.nicolo_s_bose_home_speaker_500
+      # - media_player.nico_bose_home
       - media_player.nicolo_s_2nd_bose_home_speaker_500
       data:
         type: tts
@@ -146,7 +146,7 @@
   - service: notify.alexa_media
     data:
       target:
-      # - media_player.nicolo_s_bose_home_speaker_500
+      # - media_player.nico_bose_home
       - media_player.nicolo_s_2nd_bose_home_speaker_500
       data:
         type: tts
@@ -168,6 +168,8 @@
     platform: numeric_state
     entity_id: sensor.shelly_shem_b9ee2d_1_current_consumption
     above: 3200
+    for:       
+      minutes: 10
     # below: 25
   action:
   - service: notify.hassnico_bot
@@ -175,12 +177,12 @@
       message: Sta per scattare la corrente a casa
   - service: media_player.volume_set
     data:
-      entity_id: media_player.nicolo_s_bose_home_speaker_500
+      entity_id: media_player.nico_bose_home
       volume_level: 0.35
   - service: notify.alexa_media
     data:
       target:
-      - media_player.nicolo_s_bose_home_speaker_500
+      - media_player.nico_bose_home
       data:
         type: tts
       message: >
@@ -194,7 +196,7 @@
   initial_state: 'on'
   trigger:
     platform: template
-    value_template: "{{ state_attr('device_tracker.nico_nico', 'velocity')|int >= 50 }}"
+    value_template: "{{ state_attr('device_tracker.sm_g950f', 'velocity')|int >= 50 }}"
     for:
       seconds: 20
   action:
@@ -233,14 +235,14 @@
   action:
   - service: switch.turn_off
     data_template:
-      entity_id: ' {{ trigger.entity_id }} '
+      entity_id: '{{ trigger.entity_id }}'
   - service: notify.hassnico_bot
     data_template:
       message: '"{{ trigger.to_state.attributes.friendly_name }} just changed from
         {{ trigger.to_state.state }} to {{ trigger.from_state.state }}. Self Shutdown!"'
   # - service: media_player.volume_set
   #   data:
-  #     entity_id: media_player.nicolo_s_bose_home_speaker_500
+  #     entity_id: media_player.nico_bose_home
   #     volume_level: 0.3
   - service: notify.alexa_media
     data:
@@ -254,6 +256,25 @@
         "Risparmio Energetico Attivato da Home Assistant, la luce si è spenta",
         "La luce si è spenta",        
         ] | random }}'
+
+- id: camera-self-turn_on
+  alias: Video Camera Self Turn On
+  initial_state: 'on'
+  trigger:
+  - platform: state
+    entity_id:
+    - switch.ciabatta_rack_fritz_dect_200_1
+    to: 'off'
+    for: 00:45:00
+  action:
+  - service: switch.turn_on
+    data_template:
+      entity_id: '{{ trigger.entity_id }}'
+  - service: notify.hassnico_bot
+    data_template:
+      message: '"{{ trigger.to_state.attributes.friendly_name }} just changed from
+        {{ trigger.to_state.state }} to {{ trigger.from_state.state }}. Self Turn on!"'
+
 
 - id: midnight-routine-shutdown
   alias: Turn off Light and Nesthub at Midnight
@@ -283,9 +304,9 @@
       before: sunrise
   action:
   - service: switch.turn_on
-    entity_id: light.shelly_shsw_25_68796e_1  #luci salone 1
+    entity_id: switch.shelly_shsw_25_68796e_1  #luci salone 1
   - service: switch.turn_on
-    entity_id: light.shelly_shsw_25_68796e_2 #luci cucina 2
+    entity_id: switch.shelly_shsw_25_68796e_2 #luci cucina 2
   - service: notify.alexa_media
     data:
       target:
@@ -312,7 +333,7 @@
   condition:
     condition: state
     entity_id: group.family
-    state: home
+    state: 'home'
   action:
   - service: homeassistant.turn_on
     entity_id: switch.shelly_shsw_25_686d62_2
@@ -321,7 +342,7 @@
       message: Sunset - Lights ON at {{ states('sensor.date_time') }}
   # - service: media_player.volume_set
   #   data:
-  #     entity_id: media_player.nicolo_s_bose_home_speaker_500
+  #     entity_id: media_player.nico_bose_home
   #     volume_level: 0.3
   - delay: 00:00:02
   - service: notify.alexa_media
@@ -422,7 +443,7 @@
       message: Home Assistant Start at {{ states('sensor.date_time') }}
   # - service: media_player.volume_set
   #   data:
-  #     entity_id: media_player.nicolo_s_bose_home_speaker_500
+  #     entity_id: media_player.nico_bose_home
   #     volume_level: 0.3
   - delay: 00:00:02
   - service: notify.alexa_media
@@ -504,7 +525,7 @@
       seconds: 30
   # - service: media_player.volume_set
   #   data:
-  #     entity_id: media_player.nicolo_s_bose_home_speaker_500
+  #     entity_id: media_player.nico_bose_home
   #     volume_level: 0.35
   - delay: 00:00:02
   - service: notify.alexa_media
@@ -571,7 +592,7 @@
       seconds: 30
   # - service: media_player.volume_set
   #   data:
-  #     entity_id: media_player.nicolo_s_bose_home_speaker_500
+  #     entity_id: media_player.nico_bose_home
   #     volume_level: 0.35
   - delay: 00:00:02
   - service: notify.alexa_media
@@ -604,7 +625,7 @@
       seconds: 30
   # - service: media_player.volume_set
   #   data:
-  #     entity_id: media_player.nicolo_s_bose_home_speaker_500
+  #     entity_id: media_player.nico_bose_home
   #     volume_level: 0.35
   - delay: 00:00:02
   - service: notify.alexa_media
@@ -624,7 +645,7 @@
   initial_state: 'on'
   trigger:
     platform: zone
-    entity_id: device_tracker.nico_nico
+    entity_id: person.nico
     zone: zone.home
     event: enter
   condition:
@@ -660,7 +681,7 @@
   initial_state: 'on'
   trigger:
     platform: zone
-    entity_id: device_tracker.nico_nico
+    entity_id: device_tracker.sm_g950f
     zone: zone.home
     event: leave
   condition:
@@ -677,7 +698,7 @@
   initial_state: 'on'
   trigger:
     platform: zone
-    entity_id: device_tracker.nico_nico
+    entity_id: device_tracker.sm_g950f
     zone: zone.casetta
     event: enter
   condition:
@@ -689,18 +710,18 @@
     data:
       message: Nico is at Casetta at {{ states('sensor.date_time') }}
 
-- id: zone-nico-casetta
+- id: zone-nico-casetta2
   alias: Nico at Home 2 - Notification
   initial_state: 'on'
   trigger:
     platform: state
-    entity_id: device_tracker.nico_nico
+    entity_id: device_tracker.sm_g950f
     from: not_home
     to: home
   action:
   # - service: media_player.volume_set
   #   data:
-  #     entity_id: media_player.nicolo_s_bose_home_speaker_500
+  #     entity_id: media_player.nico_bose_home
   #     volume_level: 0.3
   - delay: 00:00:02
   - service: notify.alexa_media
@@ -736,7 +757,7 @@
   initial_state: 'on'
   trigger:
     platform: zone
-    entity_id: device_tracker.nico_nico
+    entity_id: device_tracker.sm_g950f
     zone: zone.casetta
     event: leave
   condition:
@@ -766,7 +787,7 @@
     platform: zone
     event: enter
     zone: zone.papa
-    entity_id: device_tracker.nico_nico
+    entity_id: device_tracker.sm_g950f
   action:
     service: notify.hassnico_bot
     data:
@@ -779,7 +800,7 @@
     platform: zone
     event: leave
     zone: zone.papa
-    entity_id: device_tracker.nico_nico
+    entity_id: device_tracker.sm_g950f
   action:
     service: notify.hassnico_bot
     data:
@@ -792,7 +813,7 @@
     platform: zone
     event: enter
     zone: zone.work
-    entity_id: device_tracker.nico_nico
+    entity_id: device_tracker.sm_g950f
   condition:
     condition: time
     after: 07:00:00
@@ -815,7 +836,7 @@
     platform: zone
     event: enter
     zone: zone.tigre
-    entity_id: device_tracker.nico_nico
+    entity_id: device_tracker.sm_g950f
   condition:
     condition: time
     after: 07:00:00
@@ -838,7 +859,7 @@
     platform: zone
     event: leave
     zone: zone.work
-    entity_id: device_tracker.nico_nico
+    entity_id: device_tracker.sm_g950f
   condition:
     condition: time
     after: 07:00:00
@@ -861,7 +882,7 @@
     platform: zone
     event: leave
     zone: zone.tigre
-    entity_id: device_tracker.nico_nico
+    entity_id: device_tracker.sm_g950f
   condition:
     condition: time
     after: 07:00:00
@@ -910,7 +931,7 @@
         }}
   # - service: media_player.volume_set
   #   data:
-  #     entity_id: media_player.nicolo_s_bose_home_speaker_500
+  #     entity_id: media_player.nico_bose_home
   #     volume_level: 0.3
   - service: notify.alexa_media
     data:
@@ -937,7 +958,7 @@
       message: PC Restart at {{ states('sensor.date_time') }}
   # - service: media_player.volume_set
   #   data:
-  #     entity_id: media_player.nicolo_s_bose_home_speaker_500
+  #     entity_id: media_player.nico_bose_home
   #     volume_level: 0.3
   - service: script.alexascriptpcrestart
 
@@ -954,7 +975,7 @@
       message: PC Shutdown at {{ states('sensor.date_time') }}
   # - service: media_player.volume_set
   #   data:
-  #     entity_id: media_player.nicolo_s_bose_home_speaker_500
+  #     entity_id: media_player.nico_bose_home
   #     volume_level: 0.3
   - service: script.alexascriptpcoff
 
@@ -1946,7 +1967,7 @@
         type: tts
       message: '{{ [ "Sono felice di rivedervi", "Bentornati a casa.", ] | random
         }}'
-  - service: rest_command.ss_home_on
+  # - service: rest_command.ss_home_on
   - service: notify.hassnico_bot
     data:
       message: >
@@ -1955,6 +1976,7 @@
        "Un Membro della gang è tornato a casa",
        "Un Membro della famiglia è tornato a casa",
         ] | random }}'
+  - service: script.shutters_open_all
 
 - id: family-going-out
   alias: Family Going Out
@@ -1973,7 +1995,7 @@
         type: tts
       message: '{{ [ "Mi Dispiace che ve ne andate", "Spero di rivedervi presto",
         ] | random }}'
-  - service: rest_command.ss_home_off
+  # - service: rest_command.ss_home_off
   - service: notify.hassnico_bot
     data:
       message: >
@@ -1981,10 +2003,15 @@
         "Qualcuno è uscito da casa",
         "Qualcuno è uscito da casa",
         ] | random }}'
+  - service: input_select.select_option
+    data:
+      entity_id: input_select.ac_state
+      option: Power Off
   - service: cover.set_cover_position
     data:
       entity_id: cover.shelly_shsw_25_e6704f
       position: 22
+  # - service: script.shutters_close_all
   - service: switch.turn_off
     data:
       entity_id: group.lights
@@ -2026,99 +2053,95 @@
 #       value2: '{{ trigger.event.data.entity_id.split('_')[1] }} is '
 #       value3: '{{ trigger.event.data.to_state.state }}'
 
-- alias: Trigger alarm while armed away
+- alias: 'Trigger alarm while armed away'
   trigger:
-  - platform: state
-    entity_id: sensor.pir1
-    to: active
-  - platform: state
-    entity_id: sensor.pir2
-    to: active
-  - platform: state
-    entity_id: sensor.door
-    to: open
-  - platform: state
-    entity_id: sensor.window
-    to: open
+    - platform: state
+      entity_id: sensor.pir1
+      to: 'active'
+    - platform: state
+      entity_id: sensor.pir2
+      to: 'active'
+    - platform: state
+      entity_id: sensor.door
+      to: 'open'
+    - platform: state
+      entity_id: sensor.window
+      to: 'open'
   condition:
-  - condition: state
-    entity_id: alarm_control_panel.ha_alarm
-    state: armed_away
+    - condition: state
+      entity_id: alarm_control_panel.ha_alarm
+      state: armed_away
   action:
-  - service: alarm_control_panel.alarm_trigger
+    service: alarm_control_panel.alarm_trigger
     entity_id: alarm_control_panel.ha_alarm
   id: 7c7986eba7f94410b400ad0045ccbdfd
 
-- alias: Send notification when alarm triggered
+- alias: 'Send notification when alarm triggered'
   trigger:
-  - platform: state
-    entity_id: alarm_control_panel.ha_alarm
-    to: triggered
+    - platform: state
+      entity_id: alarm_control_panel.ha_alarm
+      to: 'triggered'
   action:
-  - service: notify.hassnico_bot
-    data:
-      message: ALARM! The alarm has been triggered
+    - service: notify.hassnico_bot
+      data:
+        message: "ALARM! The alarm has been triggered"
   id: e3c9600df6f343e4ad010a7f900b49ab
 
-- alias: Disarm alarm when door unlocked by keypad
+- alias: 'Disarm alarm when door unlocked by keypad'
   trigger:
-  - platform: state
-    entity_id: sensor.front_door_lock_alarm_type
-    to: '19'
+    - platform: state
+      entity_id: sensor.front_door_lock_alarm_type
+      to: '19'
+      # many z-wave locks use Alarm Type 19 for 'Unlocked by Keypad'
   action:
-  - service: alarm_control_panel.alarm_disarm
-    entity_id: alarm_control_panel.house_alarm
+    - service: alarm_control_panel.alarm_disarm
+      entity_id: alarm_control_panel.house_alarm
   id: 57977b7dd37745728b3c4152539729ac
 
-- alias: Send notification when alarm is Disarmed
-  initial_state: 'on'
+- alias: 'Send notification when alarm is Disarmed'
   trigger:
-  - platform: state
-    entity_id: alarm_control_panel.home_alarm
-    to: disarmed
+    - platform: state
+      entity_id: alarm_control_panel.home_alarm
+      to: 'disarmed'
   action:
-  - service: notify.hassnico_bot
-    data:
-      message: ALARM! The alarm is Disarmed at {{ states('sensor.date_time') }}
+    - service: notify.hassnico_bot
+      data_template:
+        message: "ALARM! The alarm is Disarmed at {{ states('sensor.date_time') }}"
   id: 00f3f26d34f44c50abbd18593c3bf3c3
 
-- alias: Send notification when alarm is in pending status
-  initial_state: 'on'
+- alias: 'Send notification when alarm is in pending status'
   trigger:
-  - platform: state
-    entity_id: alarm_control_panel.home_alarm
-    to: pending
+    - platform: state
+      entity_id: alarm_control_panel.home_alarm
+      to: 'pending'
   action:
-  - service: notify.hassnico_bot
-    data:
-      message: ALARM! The alarm is in pending status at {{ states('sensor.date_time')
-        }}
+    - service: notify.hassnico_bot
+      data_template:
+        message: "ALARM! The alarm is in pending status at {{ states('sensor.date_time') }}"
   id: 1e98346fd2a54596bf1dfbf642589a30
 
-- alias: Send notification when alarm is Armed in Away mode
-  initial_state: 'on'
+- alias: 'Send notification when alarm is Armed in Away mode'
   trigger:
-  - platform: state
-    entity_id: alarm_control_panel.home_alarm
-    to: armed_away
+    - platform: state
+      entity_id: alarm_control_panel.home_alarm
+      to: 'armed_away'
   action:
-  - service: notify.hassnico_bot
-    data:
-      message: ALARM! The alarm is armed in Away mode {{ states('sensor.date_time')
-        }}
+    - service: notify.hassnico_bot
+      data_template:
+        message: "ALARM! The alarm is armed in Away mode {{ states('sensor.date_time') }}"
   id: 838cf4d3b1c843e1a04b9faada033e85
 
-- alias: Send notification when alarm is Armed in Home mode
-  initial_state: 'on'
+- alias: 'Send notification when alarm is Armed in Home mode'
   trigger:
-  - platform: state
-    entity_id: alarm_control_panel.home_alarm
-    to: armed_home
+    - platform: state
+      entity_id: alarm_control_panel.home_alarm
+      to: 'armed_home'
   action:
-  - service: notify.hassnico_bot
-    data:
-      message: ALARM! The alarm is armed in Home mode {{ states('sensor.date_time')
-        }}
+    - service: notify.hassnico_bot
+      data_template:
+        # Using multi-line notation allows for easier quoting
+        message: >
+          ALARM! The alarm is armed in Home mode {{ states('sensor.date_time') }}
   id: d624aa68bbde45bcaa2c11c7a6ef40ed
 
 - alias: Weekly Backup Friday at 3 AM
@@ -2229,7 +2252,7 @@
   initial_state: 'on'
   trigger:
   - platform: numeric_state
-    entity_id: sensor.nico
+    entity_id: sensor.birthday_nico
     above: 0
     below: 2
   action:
@@ -2256,7 +2279,7 @@
   initial_state: 'on'
   trigger:
   - platform: numeric_state
-    entity_id: sensor.nico
+    entity_id: sensor.birthday_nico
     below: 1
   - platform: time_pattern
     hours: 08
@@ -2270,7 +2293,7 @@
     - condition: sun
       after: sunrise
     - condition: numeric_state
-      entity_id: sensor.nico
+      entity_id: sensor.birthday_nico
       below: 1
   action:
   - service: notify.hassnico_bot
@@ -2283,7 +2306,7 @@
   initial_state: 'on'
   trigger:
   - platform: numeric_state
-    entity_id: sensor.maria
+    entity_id: sensor.birthday_mascia
     above: 0
     below: 2
   action:
@@ -2317,7 +2340,7 @@
     - condition: sun
       after: sunrise
     - condition: numeric_state
-      entity_id: sensor.maria
+      entity_id: sensor.birthday_mascia
       below: 1
   action:
   - service: notify.hassnico_bot
@@ -2370,7 +2393,7 @@
   action:
     # - service: media_player.volume_set
     #   data:
-    #     entity_id: media_player.nicolo_s_bose_home_speaker_500
+    #     entity_id: media_player.nico_bose_home
     #     volume_level: 0.1
     - service: input_select.select_option
       data:
@@ -2396,7 +2419,7 @@
   action:
     # - service: media_player.volume_set
     #   data:
-    #     entity_id: media_player.nicolo_s_bose_home_speaker_500
+    #     entity_id: media_player.nico_bose_home
     #     volume_level: 0.2
     - service: input_select.select_option
       data:
@@ -2422,7 +2445,7 @@
   action:
     # - service: media_player.volume_set
     #   data:
-    #     entity_id: media_player.nicolo_s_bose_home_speaker_500
+    #     entity_id: media_player.nico_bose_home
     #     volume_level: 0.3
     - service: input_select.select_option
       data:
@@ -2438,7 +2461,7 @@
   action:
   - service: media_player.volume_set
     data:
-      entity_id: media_player.nicolo_s_bose_home_speaker_500
+      entity_id: media_player.nico_bose_home
       volume_level: 0.1
   - service: media_player.volume_set
     data:
@@ -2462,7 +2485,7 @@
   action:
   - service: media_player.volume_set
     data:
-      entity_id: media_player.nicolo_s_bose_home_speaker_500
+      entity_id: media_player.nico_bose_home
       volume_level: 0.2
   - service: media_player.volume_set
     data:
@@ -2485,7 +2508,7 @@
   action:
   - service: media_player.volume_set
     data:
-      entity_id: media_player.nicolo_s_bose_home_speaker_500
+      entity_id: media_player.nico_bose_home
       volume_level: 0.3
   - service: media_player.volume_set
     data:
@@ -2513,7 +2536,7 @@
   action:
     - service: script.cast_on_kitchen
 
-- id: cast-to-hub
+- id: cast-to-hub2
   alias: Cast to Hub
   trigger: 
     - platform: state
@@ -2545,6 +2568,22 @@
 
 # ### AC Power Off Routine and Self Shutdown
 
+- id: ac-state-shutdown
+  alias: AC state Shutdown
+  initial_state: 'on'
+  trigger:
+  - platform: state
+    entity_id:
+    - switch.air
+    - switch.air2
+    - switch.air3
+    to: 'off'
+  action:
+  - service: input_select.select_option
+    data:
+      entity_id: input_select.ac_state
+      option: Power Off
+
 - id: ac-self-shutdown
   alias: AC Self Shutdown
   initial_state: 'on'
@@ -2554,12 +2593,12 @@
     - switch.air
     - switch.air2
     to: 'on'
-    for: 02:00:00
+    for: 03:00:00
   - platform: state
     entity_id:
     - switch.air3
     to: 'on'
-    for: 00:45:00
+    for: 03:00:00
   action:
   - service: input_select.select_option
     data:
@@ -2570,7 +2609,9 @@
       entity_id: ' {{ trigger.entity_id }} '
   - service: notify.hassnico_bot
     data_template:
-      message: "{{ trigger.to_state.attributes.friendly_name }} just changed from {{ trigger.to_state.state }} to {{ trigger.from_state.state }} - AC Self shutdown Notify"
+      #message: "{{ trigger.to_state.attributes.friendly_name }} just changed from {{ trigger.to_state.state }} to {{ trigger.from_state.state }} - AC Self Shutdown Notify"
+      message: '"Self Shutdown Notify - {{ trigger.to_state.attributes.friendly_name }} just changed from
+        {{ trigger.to_state.state }} to {{ trigger.from_state.state }}."'
   - delay: 00:00:03
   - service: notify.alexa_media
     data:
@@ -2597,7 +2638,7 @@
   - delay:
       seconds: 10
   - service: switch.turn_off
-    entity_id: switch.air1
+    entity_id: switch.air
   - delay:
       seconds: 10
   - service: switch.turn_off
@@ -2607,26 +2648,26 @@
       message: 'AC is on Mode: {{ trigger.to_state.state }}'
   - service: notify.hassnico_bot
     data:
-      message: L'aria condizionata è stata Spenta (Power Off)
-  - service: notify.alexa_media
-    data:
-      target:
-      # - media_player.nicolo_s_bose_home_speaker_500
-      - media_player.nicolo_s_2nd_bose_home_speaker_500
-      data:
-        type: tts
-        message: >
-           {{ [
-           "Aria condizionata spenta",
-           "Aria condizionata spenta",
-           ] | random }}
+      message: L'aria condizionata è stata Spenta (Power Off Mode)
+  # - service: notify.alexa_media
+  #   data:
+  #     target:
+  #     # - media_player.nico_bose_home
+  #     - media_player.nicolo_s_2nd_bose_home_speaker_500
+  #     data:
+  #       type: tts
+  #     message: >
+  #      {{ [
+  #      "Ho spento l'aria condizionata",
+  #      "L'aria condizionata è stata spenta",
+  #      ] | random }}
 
-- id: ac-status-change-to--off
+- id: ac-status-change-to-off
   alias: AC Status Change to OFF
   trigger:
     platform: state
     entity_id:
-    - switch.air1
+    - switch.air
     - switch.air2
     - switch.air3
     to: 'off'
@@ -2635,7 +2676,10 @@
     data:
       entity_id: input_select.ac_state
       option: Power Off
-
+  - service: notify.hassnico_bot
+    data_template:
+      message: '"Status Change Notify - {{ trigger.to_state.attributes.friendly_name }} just changed from
+        {{ trigger.to_state.state }} to {{ trigger.from_state.state }}."'
 
 #### AC Spring Routine ###
 
@@ -2643,9 +2687,14 @@
   alias: AC Spring High temperature - Notification
   initial_state: 'on'
   trigger:
-    platform: numeric_state
-    entity_id: 'sensor.termosifone_cucina_temperature'
-    above: 26
+    - platform: numeric_state
+      entity_id: sensor.termosifone_cucina_temperature
+      above: 23
+    # - platform: time
+    #   at: "09:00:00"
+    - platform: time_pattern
+    # You can also match on interval. This will match every 30 minutes
+      minutes: "/15"
   condition:
     # - condition: template
     #   value_template: "{{ is_state('sensor.season', 'spring') }}"
@@ -2658,8 +2707,11 @@
     - condition: state
       entity_id: group.family
       state: home
+    - condition: numeric_state
+      entity_id: sensor.indice_thom_salone
+      above: 23
     - condition: time
-      after: 09:00:00
+      after: '08:00:00'
       before: '22:00:00'
       weekday:
       - mon
@@ -2679,31 +2731,54 @@
   alias: AC Spring low temperature - Notification
   initial_state: 'on'
   trigger:
-    platform: numeric_state
-    entity_id: 'sensor.termosifone_cucina_temperature'
-    below: 25
+    - platform: numeric_state
+      entity_id: sensor.indice_thom_salone
+      below: 21
+    # - platform: time
+    #   at: "09:00:00"
+    - platform: time_pattern
+    # You can also match on interval. This will match every 30 minutes
+      minutes: "/30"
   condition:
-    - condition: template
-      value_template: "{{ is_state('sensor.season', 'spring') }}"
-    - condition: state
-      entity_id: group.family
-      state: home
-    - condition: time
-      after: 09:00:00
-      before: '22:00:00'
-      weekday:
-      - mon
-      - tue
-      - wed
-      - thu
-      - fri
-      - sat
-      - sun
+    condition: and
+    conditions:
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.ac_mode
+          state: 'Manual'
+      - condition: and
+        conditions:
+        - condition: template
+          value_template: "{{ is_state('sensor.season', 'spring') }}"
+        - condition: numeric_state
+          entity_id: 'sensor.shelly_shem_b9ee2d_1_current_consumption'
+          below: 2000
+        - condition: state
+          entity_id: group.family
+          state: home
+        - condition: numeric_state
+          entity_id: sensor.indice_thom_salone
+          above: 23
+        - condition: time
+          after: '08:00:00'
+          before: '22:00:00'
+          weekday:
+          - mon
+          - tue
+          - wed
+          - thu
+          - fri
+          - sat
+          - sun
   action:
   - service: input_select.select_option
     data:
       entity_id: input_select.ac_state
       option: Power Off
+  - service: notify.hassnico_bot
+    data:
+      message: E' Stata raggiunta la soglia di benessere dell'indicatore Thom (Spring Mode)
 
 
 - id: scene-ac-spring
@@ -2725,73 +2800,139 @@
   - service: notify.hassnico_bot
     data:
       message: L'aria condizionata è stata attiva in Salotto (Spring Mode)
+  - service: notify.hassnico_bot
+    data:
+      message: La temperatura ha superato il limite prefissato di 27 gradi (Spring Mode)
   - service: notify.alexa_media
     data:
       target:
-      # - media_player.nicolo_s_bose_home_speaker_500
+      # - media_player.nico_bose_home
       - media_player.nicolo_s_2nd_bose_home_speaker_500
       data:
         type: tts
-        message: >
-           {{ [
-           "Ho notato che in Salone fa troppo caldo. Accendo l'aria condizionata per rinfrascarre l'aria",
-           "Mamma mia che caldo, accendo l'aria condizionata",       
-           ] | random }}
+      message: >
+       {{ [
+       "Ho notato che in Salone fa troppo caldo. Accendo l'aria condizionata per rinfrascarre l'aria",
+       "Mamma mia che caldo, accendo l'aria condizionata",       
+       ] | random }}
+
 
 
 #### AC Summer Routine ###
+
+# - id: scene-summer-high-temperature-notify
+#   alias: AC Summer High temperature - Notification
+#   initial_state: 'on'
+#   trigger:
+#     - platform: numeric_state
+#       entity_id: sensor.indice_thom_salone
+#       above: 23
+#     # - platform: time
+#     #   at: "08:00:00"
+#     - platform: time_pattern
+#     # You can also match on interval. This will match every 30 minutes
+#       minutes: "/30"
+#   condition:
+#     # - condition: template
+#     #   value_template: "{{ is_state('sensor.season', 'summer') }}"
+#     - condition: state
+#       entity_id: sensor.season
+#       state: 'summer'
+#     - condition: numeric_state
+#       entity_id: 'sensor.shelly_shem_b9ee2d_1_current_consumption'
+#       below: 2000
+#     - condition: state
+#       entity_id: group.family
+#       state: home
+#     - condition: numeric_state
+#       entity_id: sensor.indice_thom_salone
+#       above: 23
+#     - condition: time
+#       after: '08:00:00'
+#       before: '22:00:00'
+#       weekday:
+#       - mon
+#       - tue
+#       - wed
+#       - thu
+#       - fri
+#       - sat
+#       - sun
+#   action:
+#   - service: input_select.select_option
+#     data:
+#       entity_id: input_select.ac_state
+#       option: Summer
 
 - id: scene-summer-high-temperature-notify
   alias: AC Summer High temperature - Notification
   initial_state: 'on'
   trigger:
-    platform: numeric_state
-    entity_id: 'sensor.termosifone_cucina_temperature'
-    above: 26
+    - platform: numeric_state
+      entity_id: sensor.indice_thom_salone
+      above: 23
+    - platform: time_pattern
+      minutes: "/5"
   condition:
-    # - condition: template
-    #   value_template: "{{ is_state('sensor.season', 'summer') }}"
-    - condition: state
-      entity_id: sensor.season
-      state: 'summer'
-    - condition: numeric_state
-      entity_id: 'sensor.shelly_shem_b9ee2d_1_current_consumption'
-      below: 2000
-    - condition: state
-      entity_id: group.family
-      state: home
-    - condition: time
-      after: 09:00:00
-      before: '22:00:00'
-      weekday:
-      - mon
-      - tue
-      - wed
-      - thu
-      - fri
-      - sat
-      - sun
+    condition: and
+    conditions:
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.ac_mode
+          state: 'Manual'
+      - condition: and
+        conditions:
+        - condition: state
+          entity_id: sensor.season
+          state: 'summer'
+        - condition: numeric_state
+          entity_id: 'sensor.shelly_shem_b9ee2d_1_current_consumption'
+          below: 2000
+        - condition: state
+          entity_id: group.family
+          state: home
+        - condition: numeric_state
+          entity_id: sensor.indice_thom_salone
+          above: 23
+        - condition: time
+          after: '06:00:00'
+          before: '22:00:00'
+          weekday:
+          - mon
+          - tue
+          - wed
+          - thu
+          - fri
+          - sat
+          - sun
   action:
   - service: input_select.select_option
     data:
       entity_id: input_select.ac_state
       option: Summer
 
+
 - id: scene-summer-low-temperature-notify
   alias: AC Summer low temperature - Notification
   initial_state: 'on'
   trigger:
-    platform: numeric_state
-    entity_id: 'sensor.termosifone_cucina_temperature'
-    below: 25
+    - platform: numeric_state
+      entity_id: 'sensor.indice_thom_salone'
+      below: 22
+    - platform: time
+      at: "08:00:00"
   condition:
     - condition: template
       value_template: "{{ is_state('sensor.season', 'summer') }}"
     - condition: state
       entity_id: group.family
       state: home
+    - condition: numeric_state
+      entity_id: 'sensor.indice_thom_salone'
+      below: 22
     - condition: time
-      after: 09:00:00
+      after: '08:00:00'
       before: '22:00:00'
       weekday:
       - mon
@@ -2806,6 +2947,9 @@
     data:
       entity_id: input_select.ac_state
       option: Power Off
+  - service: notify.hassnico_bot
+    data:
+      message: E' Stata raggiunta la soglia di benessere dell'indicatore Thom (Summer Mode)
 
 
 - id: scene-ac-summer
@@ -2813,29 +2957,29 @@
   trigger:
     platform: state
     entity_id: input_select.ac_state
-    to: summer
+    to: Summer
   action:
   - service: switch.turn_on
-    entity_id: switch.air1
+    entity_id: switch.air2
   - delay:
       seconds: 10
   - service: switch.turn_on
-    entity_id: switch.air1
+    entity_id: switch.air2
   - service: notify.hassnico_bot
     data_template:
       message: 'AC is on summer Mode: {{ trigger.to_state.state }}'
   - service: notify.hassnico_bot
     data:
-      message: L'aria condizionata è stata attiva in Salotto (summer Mode)
-  - service: notify.alexa_media
-    data:
-      target:
-      # - media_player.nicolo_s_bose_home_speaker_500
-      - media_player.nicolo_s_2nd_bose_home_speaker_500
-      data:
-        type: tts
-        message: >
-           {{ [
-           "Ho notato che in Salone fa troppo caldo. Accendo l'aria condizionata per rinfrascarre l'aria",
-           "Mamma mia che caldo, accendo l'aria condizionata",       
-           ] | random }}
+      message: L'aria condizionata è stata attiva in Salotto (Summer Mode)
+  # - service: notify.alexa_media
+  #   data:
+  #     target:
+  #     # - media_player.nico_bose_home
+  #     - media_player.nicolo_s_2nd_bose_home_speaker_500
+  #     data:
+  #       type: tts
+  #     message: >
+  #      {{ [
+  #      "Ho notato che in Salone fa troppo caldo. Accendo l'aria condizionata per rinfrascarre l'aria",
+  #      "Che caldo, accendo l'aria condizionata",       
+  #      ] | random }}
