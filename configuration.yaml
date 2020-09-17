@@ -1,13 +1,41 @@
-###################################################
-#                                                 #
-# Home Assistant Main Configuration File          #
-#                                                 #
-###################################################
+####################################################
+#                                                  #
+#                Default Config                    #
+#                                                  #
+####################################################
+# https://www.home-assistant.io/integrations/default_config/
+# Configure a default setup of Home Assistant (frontend, api, etc)
+#default_config:
+person:
+updater:
+zone:
+zeroconf:
+system_health:
+sun:
+ssdp:
+map:
+logbook:
+config:
+history:
+logger:
+  default: info
 
+####################################################
+#                                                  #
+#                   CUSTOMIZING                    #
+#                                                  #
+####################################################
+# https://www.home-assistant.io/docs/configuration/customizing-devices/
+#https://home-assistant.io/docs/configuration/basic/
 homeassistant:
   auth_providers: 
    - type: homeassistant
-   - type: legacy_api_password
+   #- type: legacy_api_password
+   - type: trusted_networks
+     trusted_networks:
+       - 127.0.0.1
+       - ::1
+       - fd00::/8
   name: !secret name
   temperature_unit: C
   time_zone: !secret timezone
@@ -18,9 +46,107 @@ homeassistant:
   customize: !include customize.yaml
   customize_glob: !include customize_glob.yaml
   packages: !include_dir_named packages
+  whitelist_external_dirs:
+    - /config
 
-# Show links to resources in log and frontend
-#introduction:
+####################################################
+#                                                  #
+#                     HTTP                         #
+#                                                  #
+####################################################
+# https://www.home-assistant.io/integrations/http/
+http:
+  #base_url: https://nomescelto.duckdns.org:8123
+  ssl_certificate: /ssl/fullchain.pem
+  ssl_key: /ssl/privkey.pem
+  ip_ban_enabled: True
+  login_attempts_threshold: 5
+
+####################################################
+#                                                  #
+#                     TTS                          #
+#                                                  #
+####################################################
+# https://www.home-assistant.io/integrations/tts/
+# Text to speech
+tts:
+  - platform: google_translate
+
+####################################################
+#                                                  #
+#                  Groups                          #
+#                                                  #
+####################################################
+# https://www.home-assistant.io/integrations/mobile_app/
+group: !include groups.yaml
+
+####################################################
+#                                                  #
+#                  Automations                     #
+#                                                  #
+####################################################
+# https://www.home-assistant.io/integrations/automation/
+automation: !include automations.yaml
+
+####################################################
+#                                                  #
+#                  Scripts                         #
+#                                                  #
+####################################################
+# https://www.home-assistant.io/integrations/script/
+script: !include scripts.yaml
+
+####################################################
+#                                                  #
+#                   Scene                          #
+#                                                  #
+####################################################
+# https://www.home-assistant.io/integrations/scene/
+scene: !include scenes.yaml
+
+
+####################################################
+#                                                  #
+#                  Mobile APP                      #
+#                                                  #
+####################################################
+# https://www.home-assistant.io/integrations/mobile_app/
+mobile_app:
+
+####################################################
+#                  Dev Tracker                     #
+#                                                  #
+#                                                  #
+####################################################
+# https://www.home-assistant.io/integrations/device_tracker/
+device_tracker: !include device_tracker.yaml
+
+####################################################
+#                  Dev Tracker                     #
+#                   Owntracks                      #
+#                                                  #
+####################################################
+# https://www.home-assistant.io/integrations/owntracks/
+# Disable cause enabled in Integrations
+# owntracks:
+#   max_gps_accuracy: 200
+
+####################################################
+#                                                  #
+#                   Camera                         #
+#                                                  #
+####################################################
+# https://www.home-assistant.io/integrations/camera/
+camera: !include camera.yaml
+
+####################################################
+#                                                  #
+#                   MQTT                           #
+#                                                  #
+####################################################
+# https://www.home-assistant.io/integrations/mqtt/
+# Disable cause enabled from integrations
+# mqtt: !include mqtt.yaml
 
 ####################################################
 #                                                  #
@@ -28,93 +154,284 @@ homeassistant:
 #                                                  #
 ####################################################
 frontend:
+  extra_module_url:
+    - /hacsfiles/custom-sidebar/custom-sidebar.js
+  #themes: !include themes.yaml
   themes: !include_dir_merge_named themes
+
+
+####################################################
+#                                                  #
+#              Input Slider and Boolean            #
+#                                                  #
+####################################################
+
+#input_boolean: !include_dir_merge_named input_boolean
+input_select: !include_dir_merge_named input_select
+input_number: !include_dir_merge_named input_number
+
+
+
+notify: !include notify.yaml
+telegram_bot:
+   - platform: polling
+     api_key: !secret telegram_apikey
+     #trusted_networks:
+      #- 149.154.167.197/32
+      #- 149.154.167.198/31
+      #- 149.154.167.200/29
+      #- 149.154.167.208/28
+      #- 149.154.167.224/29
+      #- 149.154.167.232/31
+     allowed_chat_ids:
+       - !secret telegram_clientid
+       - !secret telegram_clientid2
+
+
+sensor: !include sensor.yaml
+
+
+####################################################
+#                                                  #
+#                   Recorder                       #
+#                                                  #
+####################################################
+
+recorder:
+   db_url: !secret dburl
+   purge_keep_days: 30   
+   commit_interval: 60
+   exclude:
+    domains:
+      #- automation
+      - weblink
+      - updater
+      - sensor
+      - binary_sensor
+      - zone
+      - sun
+      - camera
+      - media_player
+      - switch
+      - mqtt
+      - calendar
+      - frontend
+    entities:
+      - sensor.date
+      - sun.sun
+      - weather.dark_sky      
+   include:
+    entities:
+      - cover.shelly_shsw_25_e6704f
+      - switch.shelly_shsw_25_68796e_1
+      - switch.shelly_shsw_25_68796e_2
+      - switch.shelly_shsw_25_686d62_1
+      - switch.shelly_shsw_25_686d62_2
+      - switch.shelly_shsw_25_687269_1
+      - switch.shelly_shsw_25_687269_2
+      - switch.shelly_shsw_25_e5e601_1
+      - switch.shelly_shsw_25_e5e601_2
+      - switch.shelly_shplg_s_041a07
+      - switch.shelly_shplg_s_0409b4
+      - switch.air
+      - switch.air2
+      - switch.air3
+      - switch.nico_computer
+      - switch.shelly_shplg_s_7a33ff
+      - switch.fritz_box_guest_wifi
+      - switch.shelly_shplg_s_041a76
+      - switch.ciabatta_rack_fritz_dect_200_1
+      - switch.presa_rasp_pi3_fritz_dect_200_2       
+      - switch.shelly_shplg_s_04169c
+      - switch.shelly_shplg_s_5b2502
+      - sensor.shelly_shwt_1_694834_flood
+      - sensor.shelly_shwt_1_694834_temperature
+      - sensor.potenza_istantanea
+      - sensor.batteria_telefono_nico
+      - sensor.batteria_telefono_mamma
+      - sensor.processor_use
+      - sensor.shelly_flood_battery
+      - device_tracker.nico_nico
+      - device_tracker.mamma_mamma
+      - sensor.living_room_humidity
+      - sensor.living_room_temperature
+      - sensor.kitchen_humidity
+      - sensor.kitchen_temperature
+      - sensor.bedroom_humidity
+      - sensor.bedroom_temperature
+      - sensor.cpu_temp
+      - sensor.ssl_certificate_expiry
+      - sensor.shelly_shem_b9ee2d_1_current_consumption
+      - sensor.termosifone_cucina_temperature
+      - sensor.termosifone_notte_temperature 
+      - sensor.termosifone_salone_temperature
+      - sensor.termosifone_salone_humidity
+      - sensor.termosifone_notte_humidity
+      - sensor.termosifone_cucina_humidity
+      - sensor.shelly_shem_b9ee2d_1_total_consumption_attr
+      - input_datetime.start_night
+      - sensor.command_sensor
+      - sensor.energy_spent
+      - sensor.indice_thom_salone
+      - sensor.indice_thom_cucina
+      - sensor.indice_thom_camera
+
+shelly:
+  discovery: true  #add all devices (default)
+  username: !secret shellyuser
+  password: !secret shellypwd
+  sensors:
+    - all
+  attributes:
+    - all
+  cloud_auth_key: !secret shellycloudapi
+  cloud_server: !secret shellycloudserver
+
+
+####################################################
+#                                                  #
+#                     ALEXA                        #
+#                                                  #
+####################################################
+# alexa_media:
+#   accounts:
+#     - email: !secret amazonemail
+#       password: !secret amazonpwd
+#       #url: !secret amazonurl
+#       url: !secret amazonurl_it
+#       scan_interval: 30
+      #debug: true
+      #exclude_devices:
+      #- "This Device"
+      #- "nicolo's Alexa Apps"
+      #- "nicolo's bose home speaker 500"
+      #- "echo dot di nicolo"
+      #- "salotto"
+
 
 ####################################################
 #                                                  #
 #             Lovelace/CustomUpdater               #
 #                                                  #
 ####################################################
+
+#https://www.home-assistant.io/lovelace/yaml-mode/
 lovelace:
   mode: yaml
+  resources:
+    - url: /local/monster-card.js   
+      type: js 
+    - url: /local/custom-lovelace/weather-card/weather-card.js 
+      type: module 
+    - url: /local/plugins/card-tools.js
+      type: js
+    - url: /hacsfiles/plan-coordinates/plan-coordinates.js 
+      type: js   
+    - url: /hacsfiles/atomic_calendar/atomic_calendar.js     
+      type: module
+    - url: /hacsfiles/atomic-calendar-revive/atomic-calendar-revive.js     
+      type: module
+    - url: /hacsfiles/mini-media-player/mini-media-player-bundle.js
+      type: module 
+    - url: /hacsfiles/mini-graph-card/mini-graph-card-bundle.js 
+      type: module
+    - url: /hacsfiles/lovelace-slider-entity-row/slider-entity-row.js
+      type: module
+    - url: /hacsfiles/fitbit-card/fitbit-card.js
+      type: js
+    - url: /hacsfiles/secondaryinfo-entity-row/secondaryinfo-entity-row.js 
+      type: module 
+    - url: /hacsfiles/lovelace-auto-entities/auto-entities.js  
+      type: module
+    - url: /hacsfiles/lovelace-fold-entity-row/fold-entity-row.js
+      type: module
+    - url: /hacsfiles/lovelace-card-tools/card-tools.js  
+      type: module     
+    - url: /hacsfiles/unused-card/unused-card.js
+      type: module
+    - url:  /hacsfiles/shutter-cover-panel-card/shutter-cover-panel-card.js
+      type: module
+    - url: /hacsfiles/LG-WebOS-Remote-Control/lg-remote-control.js
+      type: module
+    - url: /hacsfiles/LG-Keypad/card-numeric-pad.js
+      type: module
+    - url: /hacsfiles/canvas-gauge-card/canvas-gauge-card.js
+      type: module
+    - url: /hacsfiles/custom-header/custom-header.js
+      type: module
+    - url: /hacsfiles/logbook-card/logbook-card.js
+      type: module
+    - url: /hacsfiles/username-element/username-element.js
+      type: module
+    - url: /hacsfiles/weather-card/weather-card.js
+      type: module
+    - url: /hacsfiles/custom-sidebar/custom-sidebar.js
+      type: module
+    - url: /hacsfiles/button-card/button-card.js
+      type: module
 
-wake_on_lan:
 
-google:
-  client_id: !secret google_clientid
-  client_secret: !secret google_secret
-# Enables configuration UI
-config:
-
-http:
-  api_password: !secret http_password
-  cors_allowed_origins:
-    - http://10.10.20.216:7080
-    - https://reformedreality.com
-    - http://reformedreality.com
-    - https://google.com
-    - https://home-assistant.io
-    - https://api.ai
-  ip_ban_enabled: True
-  login_attempts_threshold: 5
-  base_url: !secret base_url
-  ssl_certificate: /ssl/fullchain.pem
-  ssl_key: /ssl/privkey.pem
-
-  # Secrets are defined in the file secrets.yaml
-  # api_password: !secret http_password
-  # Uncomment this if you are using SSL/TLS, running in Docker container, etc.
-  #base_url:
-  #ssl_certificate: /ssl/fullchain.pem
-  #ssl_key: /ssl/privkey.pem
-websocket_api:
-
-system_health:
-
-owntracks:
-  max_gps_accuracy: 200
-  #mqtt_topic: "owntracks/#"
-
-shopping_list:
-
-stream:
-ffmpeg:
+switch: !include switch.yaml
+binary_sensor: !include binary_sensors.yaml
 
 ####################################################
 #                                                  #
-#                     Alarm                        #
+#                   SPEEDTEST                      #
 #                                                  #
 ####################################################
 
-alarm_control_panel:
-  - platform: manual
-    name: Home Alarm
-    code: 1234567890
-    pending_time: 30
-    delay_time: 20
-    trigger_time: 4
-    disarmed:
-      trigger_time: 0
-    armed_home:
-      pending_time: 0
-      delay_time: 0
-####################################################
-#                                                  #
-#                 Geolocation                      #
-#                                                  #
-####################################################
-zone: !include zones.yaml
-mqtt: !include mqtt.yaml
+#https://www.home-assistant.io/components/speedtestdotnet/
+speedtestdotnet:
+  server_id: 3243 # server "Telecom Italia S.p.A." Rome
+  scan_interval:
+    hours: 4
+  monitored_conditions:
+    - ping
+    - download
+    - upload
 
-###############  Earth Quake  ######################
-geo_location:
-  - platform: usgs_earthquakes_feed
-    #feed_type: 'past_day_all_earthquakes'
-    feed_type: 'past_hour_significant_earthquakes'
-    radius: 100
-    minimum_magnitude: 0.0
-    latitude: !secret latitude2
-    longitude: !secret longitude2
+####################################################
+#                                                  #
+#                    Weather                       #
+#                                                  #
+####################################################
+
+#https://www.home-assistant.io/components/weather.darksky/
+weather:
+  - platform: darksky
+    api_key: !secret darksky
+    mode: daily
+
+####################################################
+#                                                  #
+#                 Media player                     #
+#                                                  #
+####################################################
+# https://www.home-assistant.io/integrations/media_player/
+# https://www.home-assistant.io/integrations/universal/
+# https://www.home-assistant.io/integrations/androidtv/
+
+media_player: !include media_player.yaml
+
+####################################################
+#                                                  #
+#                 Shell Commands                   #
+#                                                  #
+####################################################
+# https://www.home-assistant.io/integrations/shell_command/
+
+shell_command: !include shell_commands.yaml
+
+
+####################################################
+#                    Alexa                         #
+#               Smart Home Speakers                #
+#             Powered by Haaska Skill              #
+####################################################
+#### API ALEXA ###
+api:
+ alexa:
+   smart_home:
 
 ####################################################
 #                    Alexa                         #
@@ -124,23 +441,32 @@ geo_location:
 ### URL https://github.com/mike-grant/haaska/wiki
 alexa:
   smart_home:
-    endpoint: https://api.eu.amazonalexa.com/v3/events
-    client_id: !secret alexa_client_id
-    client_secret: !secret alexa_client_secret
+    # endpoint: https://api.eu.amazonalexa.com/v3/events
+    # client_id: !secret alexa_client_id
+    # client_secret: !secret alexa_client_secret
     filter:
       include_entities:
+        #- group.all_lights
+        #- group.all
+        #- light.kitchen_white
+        #- light.living_door_rgb
+        #- light.living_sofa_rgb
+        #- light.living_window_white
+        #- light.room_nico_rgb
         - switch.air
         - switch.air2
         - switch.air3
         - switch.dsm01
-        - switch.fritz_dect_200_1
-        - switch.fritz_dect_200_2
+        #- switch.fritz_dect_200_1
+        #- switch.fritz_dect_200_2
         - switch.nico_computer
-        - sensor.miflora_1_temperature
-        - media_player.sony_bravia_tv
-        - sensor.bathroom_temperature
-        - sensor.bedroom_temperature
-        - sensor.living_room_temperature
+        #- sensor.miflora_1_temperature
+        #- media_player.sony_bravia_tv
+        #- sensor.bathroom_temperature
+        #- sensor.bedroom_temperature
+        #- sensor.living_room_temperature
+        - media_player.tv_casetta
+        #- cover.shelly_shsw_25_e6704f
       include_domains:
         #- switch
         #- light
@@ -178,8 +504,27 @@ alexa:
         - climate
         #- media_player
 
-        
     entity_config:
+      #light.kitchen_white:
+        #name: Luce Cucina
+        #description: La Luce in Cucina
+        #display_categories: LIGHT
+      #light.living_door_rgb:
+        #name: Luce Salone
+        #description: la luce del Salone
+        #display_categories: LIGHT 
+      #light.living_sofa_rgb:
+        #name: Luce Divano
+        #description: la Luce del divano
+        #display_categories: LIGHT
+      #light.living_window_white:
+        #name: Luce Finestra Salone
+        #description: la luce vicino la Finestra del salone
+        #display_categories: LIGHT
+      #light.room_nico_rgb:
+        #name: Luce Camera Nico
+        #description: La Luce della stanza di Nico
+        #display_categories: LIGHT
       switch.nico_computer:
         name: il PC
         description: Computer
@@ -188,314 +533,84 @@ alexa:
         name: Synology
         description: Il Nas
         display_categories: SWITCH
-      group.all_lights:
-        name: Tutte le luci
-        description: Tutte le luci
-      media_player.sony_bravia_tv:
-        name: TV Mamma
-        description: La televisione di Mamma
-        display_categories: SWITCH
+      #group.all_lights:
+        #name: Tutte le luci
+        #description: Tutte le luci
+      #group.all:
+        #name: Tutto
+        #description: Tutto
+        #display_categories: SWITCH
+      media_player.tv_casetta:
+        name: la TV
+        description: il televisore
+        #display_categories: SWITCH
+      #media_player.sony_bravia_tv:
+        #name: TV Mamma
+        #description: La televisione di Mamma
+        #display_categories: SWITCH
       switch.air:
-        name: Aria Calda
-        description: l'aria calda
-        display_categories: SWITCH
-      switch.air2:
         name: Aria Fredda
         description: l'aria fredda
         display_categories: SWITCH
-      switch.air3:
-        name: Deumidificatore
+      switch.air2:
+        name: Deumidificatore 
         description: il deumidificatore
         display_categories: SWITCH
-
-
-# Checks for available updates
-# Note: This component will send some information about your system to
-# the developers to assist with development of Home Assistant.
-# For more information, please see:
-# https://home-assistant.io/blog/2016/10/25/explaining-the-updater/
-updater:
-  include_used_components: true
-  # Optional, allows Home Assistant developers to focus on popular components.
-  # include_used_components: true
-
-# Discover some devices automatically
-discovery:
-hassio:
-shelly:
-  discovery: true  #add all devices (default)
-  username: !secret shellyuser
-  password: !secret shellypwd
-  additional_information: true
-# Allows you to issue voice commands from the frontend in enabled browsers
-conversation:
-
-map:
-
-# Track the sun
-sun:
-
-# Text to speech
-tts:
-  - platform: google_translate
-    service_name: google_say
-    cache: true
-    cache_dir: /tmp/tts
-    time_memory: 300
-    language: 'it'
-    base_url: https://yourdynamicdns:8123
-
-
-speedtestdotnet:
-  server_id: 123
-  scan_interval:
-    hours: 4
-  monitored_conditions:
-    - ping
-    - download
-    - upload
-
-# Cloud
-cloud:
-light: !include light.yaml
-camera: !include camera.yaml
-weblink: !include weblink.yaml
-group: !include groups.yaml
-automation: !include automations.yaml
-#automation old: !include_dir_merge_list automation
-
-script: !include scripts.yaml
-shell_command: !include shell_commands.yaml
-device_tracker: !include device_tracker.yaml
-sensor: !include sensor.yaml
-cover: !include cover.yaml
-media_player: !include media_player.yaml
-switch: !include switch.yaml
-notify: !include notify.yaml
-binary_sensor: !include binary_sensors.yaml
-
-alexa_media:
-  accounts:
-    - email: !secret amazonemail
-      password: !secret amazonpwd
-      #url: !secret amazonurl
-      url: !secret amazonurl_it
-      scan_interval: 30
-telegram_bot:
-  platform: polling
-  api_key: !secret telegram_apikey
-  allowed_chat_ids:
-    - !secret telegram_clientid
-    - !secret telegram_clientid2
-
-####################################################
-#                                                  #
-#                   Recorder                       #
-#                                                  #
-####################################################
-
-recorder:
-   db_url: !secret dburl
-   purge_keep_days: 7
-   purge_interval: 1
-   exclude:
-    domains:
-      - automation
-      - weblink
-      - updater
-      - sensor
-      - switch
-      - mqtt
-    entities:
-      - sensor.date
-      - sun.sun
-   include:
-    entities:
-      - cover.shelly_shsw_25_e6704f
-      - switch.shelly_shsw_25_68796e_1
-      - switch.shelly_shsw_25_68796e_2
-      - switch.shelly_shsw_25_686d62_1
-      - switch.shelly_shsw_25_686d62_2
-      - switch.shelly_shsw_25_687269_1
-      - switch.shelly_shsw_25_687269_2
-      - switch.shelly_shsw_25_e5e601_1
-      - switch.shelly_shsw_25_e5e601_2
-      - switch.shelly_shplg_s_041a07
-      - switch.shelly_shplg_s_0409b4
-      - switch.air
-      - switch.air2
-      - switch.air3
-      - switch.nico_computer
-      - switch.shelly_shplg_s_7a33ff
-      - switch.fritz_box_guest_wifi
-      - switch.shelly_shplg_s_041a76
-      - switch.ciabatta_rack_fritz_dect_200_1
-      - switch.presa_rasp_pi3_fritz_dect_200_2       
-      - switch.shelly_shplg_s_04169c
-      - switch.shelly_shplg_s_5b2502
-      - sensor.shelly_shwt_1_694834_flood
-      - sensor.shelly_shwt_1_694834_temperature
-      - sensor.potenza_istantanea
-      - sensor.living_room_heating
-      - sensor.living_room_humidity
-      - sensor.living_room_power
-      - sensor.living_room_temperature
-      - sensor.mamma_battery
-      - sensor.nico_battery
-      - sensor.processor_use
-      - sensor.shelly_flood_battery
-
-####################################################
-#                                                  #
-#                   History                        #
-#                                                  #
-####################################################
-# Enables support for tracking state changes over time
-history:
-  #exclude:
-    #domains:
-      #- automation
-      #- weblink
-      #- updater
-    #entities:
-      #- sensor.date
-  #include:
-    #domains:
-      #- sensor
-      #- switch
-      #- media_player
-      #- light
-
-####################################################
-#                                                  #
-#                   LogBook                        #
-#                                                  #
-####################################################
-
-# View all events in a logbook
-logbook:
-logger:
-  default: warn
-####################################################
-#                                                  #
-#                   Database                       #
-#                                                  #
-####################################################
-
-influxdb:
-  host: 1.1.1.1
-  port: 8086
-  database: home_assistant   
-  username: !secret influxdb_user
-  password: !secret influxdb_pwd
-  #max_retries: 3
-  #default_measurement: state
-
-
-###################################################
-#                                                 #
-#                   IFTTT                         #
-#                                                 #
-###################################################
-
-ifttt:
-  key: !secret ifttt_key
-
-
-###################################################
-#                                                 #
-#                 Smart Home                      #
-#                                                 #
-###################################################
-
-tado:
-  username: !secret tado_user
-  password: !secret tado_pwd
-
-fritzbox:
-  devices:
-    - host: fritz.box
-      username: !secret fritz_user
-      password: !secret fritz_pwd 
-
-fritzbox_tools:
-  host: 1.1.1.1
-  username: !secret fritz_user
-  password: !secret fritz_pwd
-
-####################################################
-#                                                  #
-#              Input Slider and Boolean            #
-#                                                  #
-####################################################
-
-#input_boolean: !include_dir_merge_named input_boolean
-input_select: !include_dir_merge_named input_select
-input_number: !include_dir_merge_named input_number
-
-####################################################
-#                                                  #
-#               Panel Iframe                       #
-#                                                  #
-####################################################
+      switch.air3:
+        name: Aria calda
+        description: l'aria calda
+        display_categories: SWITCH
+      # switch.presa_pc_fritz_dect_200_1:
+      #   name: Ciabatta Rack
+      #   description: La Ciabatta Rack
+      #   display_categories: SWITCH
+      # switch.presa_rasp_pi3_fritz_dect_200_2:
+      #   name: Presa Raspberry
+      #   description: La presa del raspberry
+      #   display_categories: SWITCH
+      #cover.shelly_shsw_25_e6704f:
+        #name: Serranda Salone
+        #description: la serranda del salone
+        #display_categories: SWITCH
 
 
 ####################################################
 #                                                  #
-#               Panel Custom                       #
+#                    Wake on LAN                   #
 #                                                  #
 ####################################################
+# https://www.home-assistant.io/integrations/wake_on_lan/
 
+wake_on_lan:
 
 ####################################################
 #                                                  #
-#             Restfull commands                    #
-#                                                  #
+#                      Google                      #
+#                     Calendar                     #
 ####################################################
+# https://www.home-assistant.io/integrations/calendar.google/
 
-rest_command:
-  google_backup:
-    url: 'http://x.x.x.x:8055/gb/doBackup'
-    timeout: '300'
-  ss_cookie:
-    url: !secret ss_cookie
-    method: get
-    verify_ssl: false
-  ss_preset_home:
-    url: !secret ss_preset_home
-    method: get
-    verify_ssl: false
-  ss_preset_living:
-    url: !secret ss_preset_living
-    method: get
-    verify_ssl: false
-  ss_preset_bedroom:
-    url: !secret ss_preset_bedroom
-    method: get
-    verify_ssl: false
-  ss_preset_rack:
-    url: !secret ss_preset_rack
-    method: get
-    verify_ssl: false
-  ss_home_on:
-    url: !secret ss_home_on
-    method: get
-    verify_ssl: false
-  ss_home_off:
-    url: !secret ss_home_off
-    method: get
-    verify_ssl: false
+google:
+  client_id: !secret google_clientid
+  client_secret: !secret google_secret
 
 
 ####################################################
 #                                                  #
-#                    Weather                       #
-#                                                  #
+#                      Alarm                       #
+#                      Panel                       #
 ####################################################
+# https://www.home-assistant.io/integrations/manual/
 
-weather:
-  # - platform: openweathermap
-  #   api_key: !secret openweathermap
-  - platform: darksky
-    api_key: !secret darksky
-    mode: daily
+alarm_control_panel:
+  - platform: manual
+    name: Home Alarm
+    code: '1234'
+    arming_time: 30
+    delay_time: 20
+    trigger_time: 4
+    disarmed:
+      trigger_time: 0
+    armed_home:
+      arming_time: 0
+      delay_time: 0
